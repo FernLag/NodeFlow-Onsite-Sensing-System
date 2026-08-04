@@ -1,10 +1,9 @@
 # Watermark.py
 # Sensor: Irrometer Watermark (200SS)
 
-air_val = 600  # Air value: raw reading in open air  # min: 0  max: 1023
-water_val = 0  # Water value: raw reading submerged in water  # min: 0  max: 200
+water_val = 0  # Water value: raw reading submerged in water  # min: 0  max: 239
 Resistance = 0  # Resistance  # min: 0  max: 200
-air_val_max = 200  #   # min: 0  max: 200
+air_val_max = 239  #   # min: 0  max: 239
 
 # Supported outputs:
 #   - Raw value (Resistance)  # equation: Rx*(Vs-A1)/A1

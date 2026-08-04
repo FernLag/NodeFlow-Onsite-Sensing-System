@@ -8,14 +8,14 @@ wp = 0.1  # Wilting point:  When plants take up all the available water for a gi
 k = 0.5  # k: calibration scaling factor and it is determined by searching for an optimal match between the gravimetric and simulated soil moisture and minimisation of error.  # min: 0  max: 1
 air_val_min = 0  # Air value: raw reading in open air  # min: 0  max: 0
 air_val_max = 600  # Air value: raw reading in open air  # min: 0  max: 1023
-a = 520  #   # min: 0  max: 1023
-b = 330  #   # min: 0  max: 1023
+a = 450  #   # min: 0  max: 1023
+b = 350  #   # min: 0  max: 1023
 shallow = 15  #   # min: 0  max: 200
 deep = 40  #   # min: 0  max: 200
 threshold = 400  #   # min: 0  max: 1023
 
 # Supported outputs:
-#   - Raw Value (bits)  # inputs: air_val_min
+#   - Raw Value (ADC)  # inputs: air_val_min
 #   - Raw Value (%)  # inputs: air_val_max, water_val  # equation: (X-min)/(max-min)*100
 #   - Thresholds  # inputs: a, b  # equation: x > a → 'Too a' x > b → 'v ab' → 'good'
 #   - Wetting Front  # inputs: shallow, deep, threshold

@@ -4,8 +4,8 @@ const SENSOR_TYPES = {
     tip: "Direct sensor reading (digital or analog output)",
     outputs: [
       {
-        value: "Raw Value (bits)",
-        display: "Raw Sensor Value (bits)",
+        value: "Raw Value (ADC)",
+        display: "Raw Sensor Value (ADC)",
         tip: "Direct sensor reading (digital or analog output)",
       },
       {
@@ -66,8 +66,7 @@ const SENSOR_TYPES = {
       {
         name: "fc",
         display: "Field Capacity",
-        label:
-          "Field capacity: The amount of water that remains in the soil after all the excess water at saturation has been drained.",
+        label: "Field capacity: The amount of water that remains in the soil after all the excess water at saturation has been drained.",
         value: "0.3",
         min: "0",
         max: "1",
@@ -76,8 +75,7 @@ const SENSOR_TYPES = {
       {
         name: "wp",
         display: "Wilting point",
-        label:
-          "Wilting point:  When plants take up all the available water for a given soil and it dries out to the point where it cannot supply any water to keep plants from dying",
+        label: "Wilting point:  When plants take up all the available water for a given soil and it dries out to the point where it cannot supply any water to keep plants from dying",
         value: "0.1",
         min: "0",
         max: "1",
@@ -86,8 +84,7 @@ const SENSOR_TYPES = {
       {
         name: "k",
         display: "k",
-        label:
-          "k: calibration scaling factor and it is determined by searching for an optimal match between the gravimetric and simulated soil moisture and minimisation of error.",
+        label: "k: calibration scaling factor and it is determined by searching for an optimal match between the gravimetric and simulated soil moisture and minimisation of error.",
         value: "0.5",
         min: "0",
         max: "1",
@@ -115,7 +112,7 @@ const SENSOR_TYPES = {
         name: "a",
         display: "Upper threshold",
         label: "",
-        value: "520",
+        value: "450",
         min: "0",
         max: "1023",
         units: "ADC",
@@ -124,7 +121,7 @@ const SENSOR_TYPES = {
         name: "b",
         display: "Lower threshold",
         label: "",
-        value: "330",
+        value: "350",
         min: "0",
         max: "1023",
         units: "ADC",
@@ -180,21 +177,12 @@ const SENSOR_TYPES = {
     ],
     params: [
       {
-        name: "air_val",
-        display: "Air value",
-        label: "Air value: raw reading in open air",
-        value: "600",
-        min: "0",
-        max: "1023",
-        units: "kΩ",
-      },
-      {
         name: "water_val",
         display: "Water value",
         label: "Water value: raw reading submerged in water",
         value: "0",
         min: "0",
-        max: "200",
+        max: "239",
         units: "kΩ",
       },
       {
@@ -210,16 +198,15 @@ const SENSOR_TYPES = {
         name: "air_val_max",
         display: "Air value (max)",
         label: "",
-        value: "200",
+        value: "239",
         min: "0",
-        max: "200",
-        units: "kΩ",
+        max: "239",
+        units: "kPa",
       },
     ],
   },
   Watermark_Temperature: {
-    label:
-      "Irrometer Watermark (200SS) combined with Irrometer Soil Temperature Sensor (200TS)",
+    label: "Irrometer Watermark (200SS) combined with Irrometer Soil Temperature Sensor (200TS)",
     tip: "This sensor measures electrical resistance inside a granular matrix to determine soil water tension. With this option, you are reading the resistance value (kΩ).",
     outputs: [
       {
@@ -253,10 +240,10 @@ const SENSOR_TYPES = {
         name: "air_val_max",
         display: "Air value (max)",
         label: "",
-        value: "200",
+        value: "239",
         min: "0",
-        max: "200",
-        units: "kΩ",
+        max: "239",
+        units: "kPa",
       },
       {
         name: "water_val",
@@ -264,8 +251,8 @@ const SENSOR_TYPES = {
         label: "",
         value: "0",
         min: "0",
-        max: "200",
-        units: "kΩ",
+        max: "239",
+        units: "kPa",
       },
     ],
   },
@@ -398,9 +385,9 @@ const SURVEY_QUESTIONS = [
 
 const OUTPUT_PARAMS = {
   DF_robot: {
-    "Raw Value (bits)": ["air_val_min"],
+    "Raw Value (ADC)": ["air_val_min"],
     "Raw Value (%)": ["air_val_max", "water_val"],
-    Thresholds: ["a", "b"],
+    "Thresholds": ["a", "b"],
     "Wetting Front": ["shallow", "deep", "threshold"],
     "1-2-3 point calibrations": ["a", "b"],
     "Rate of Change of Soil Water Status": [],
@@ -415,7 +402,7 @@ const OUTPUT_PARAMS = {
   Watermark_Temperature: {
     "Raw value (Resistance)": [],
     "Raw Value (%)": ["abs(air_val_max)", "water_val"],
-    Tension: [],
+    "Tension": [],
     "Raw value (Temperature, in °F)": [],
     "Raw value (Temperature, in °C)": [],
   },
@@ -423,9 +410,9 @@ const OUTPUT_PARAMS = {
 
 const OUTPUT_VIZ = {
   DF_robot: {
-    "Raw Value (bits)": ["none", "raw_lcd"],
+    "Raw Value (ADC)": ["none", "raw_lcd"],
     "Raw Value (%)": ["none", "bar", "transformed_lcd"],
-    Thresholds: ["none", "state_lcd"],
+    "Thresholds": ["none", "state_lcd"],
     "Wetting Front": ["none", "front_lcd"],
     "1-2-3 point calibrations": ["none", "bar", "transformed_lcd"],
     "Rate of Change of Soil Water Status": ["none", "state_lcd"],
@@ -440,7 +427,7 @@ const OUTPUT_VIZ = {
   Watermark_Temperature: {
     "Raw value (Resistance)": ["none", "raw_lcd"],
     "Raw Value (%)": ["none", "state_lcd", "bar", "transformed_lcd"],
-    Tension: ["none", "kpa_lcd"],
+    "Tension": ["none", "kpa_lcd"],
     "Raw value (Temperature, in °F)": ["none", "temp_lcd"],
     "Raw value (Temperature, in °C)": ["none", "temp_lcd"],
   },
@@ -476,39 +463,43 @@ const int   deepDepth_{idx}    = {deep};
   }`,
     },
     Watermark: {
-      constants: `/* Sensor {idx}: Watermark on port {port} */
-const float Rx_{idx}    = 10000.0;   /* series resistor (Ω), fixed on the NodeFlow board */
-const float Vs_{idx}    = 5.0;       /* Uno R3 supply voltage */
+      constants: `/* Sensor {idx}: Watermark via 200SS-VA3 adapter on port {port}
+   The adapter outputs 0-2.8 V proportional to tension: kPa = Volts / 0.0117.
+   It performs sensor excitation, the calibration equation and (when a 200TS
+   is fitted) temperature compensation internally. */
+const float Vref_{idx}    = 5.0;      /* Arduino ADC reference */
+const float VA3_SCALE_{idx} = 0.0117; /* volts per kPa, from the VA-3 datasheet */
+const float dry_kPa_{idx} = {air_val_max};   /* tension treated as 0 %  */
+const float wet_kPa_{idx} = {water_val};     /* tension treated as 100 % */
 `,
-      read: `  int   sensorValue_{idx} = analogRead({readPin});
-  /* The 10k series resistor pulls this node up to Vs when the sensor is
-     open circuit, and a short pulls it to 0. Neither is a real reading. */
-  bool  connected_{idx} = sensorValue_{idx} > 8 && sensorValue_{idx} < 1015;
-  float volts_{idx} = (sensorValue_{idx} / 1023.0) * Vs_{idx};   /* analog measurement, in volts */
-  float R_{idx}  = (volts_{idx} > 0.01f)
-                   ? (Rx_{idx} * (Vs_{idx} - volts_{idx}) / volts_{idx}) / 1000.0f
-                   : 999.0f;   /* resistance in kilo-ohms */`,
+      read: `  int   sensorValue_{idx} = readSettled({readPin});
+  /* The VA-3 actively drives this pin, so the float test detects a missing
+     adapter. Note 0 V is also a legitimate reading (fully saturated soil). */
+  bool  connected_{idx} = sensorValue_{idx} < VA3_MAX_COUNTS;   /* passive: VA-3 never nears 5 V */
+  float volts_{idx} = (sensorValue_{idx} / 1023.0) * Vref_{idx};
+  float kPa_{idx}   = volts_{idx} / VA3_SCALE_{idx};   /* soil water tension */`,
     },
     Watermark_Temperature: {
-      constants: `/* Sensor {idx}: Watermark_Temperature on port {port} */
-const float Rx_{idx} = 10000.0;   /* series resistor (Ω), fixed on the NodeFlow board */
-const float Vs_{idx} = 5.0;       /* Uno R3 supply voltage */
+      constants: `/* Sensor {idx}: Watermark + 200TS temperature, both via the 200SS-VA3.
+   Watermark channel on {port}, shared temperature channel on {partnerPort}.
+   The adapter compensates the tension internally; the temperature channel is
+   read here only so it can be displayed. */
+const float Vref_{idx}      = 5.0;
+const float VA3_SCALE_{idx} = 0.0117;   /* volts per kPa */
+const float dry_kPa_{idx}   = {air_val_max};
+const float wet_kPa_{idx}   = {water_val};
 `,
-      read: `  /* This block covers TWO probes: the Watermark on {port} and the Irrometer
-     soil temperature sensor on {partnerPort}. */
-  int   sensorValue_{idx} = analogRead({readPin});
-  /* The 10k series resistor pulls this node up to Vs when the sensor is
-     open circuit, and a short pulls it to 0. Neither is a real reading. */
-  bool  connected_{idx} = sensorValue_{idx} > 8 && sensorValue_{idx} < 1015;
-  float volts_{idx} = (sensorValue_{idx} / 1023.0) * Vs_{idx};   /* analog measurement, in volts */
-  float R_{idx}  = (volts_{idx} > 0.01f)
-                   ? (Rx_{idx} * (Vs_{idx} - volts_{idx}) / volts_{idx}) / 1000.0f
-                   : 999.0f;   /* resistance in kilo-ohms */
+      read: `  /* Watermark channel on {port}; shared 200TS channel on {partnerPort} */
+  int   sensorValue_{idx} = readSettled({readPin});
+  bool  connected_{idx} = sensorValue_{idx} < VA3_MAX_COUNTS;   /* passive: VA-3 never nears 5 V */
+  float volts_{idx} = (sensorValue_{idx} / 1023.0) * Vref_{idx};
+  float kPa_{idx}   = volts_{idx} / VA3_SCALE_{idx};   /* already compensated */
 
-  int   tempRaw_{idx}   = analogRead({partnerPort});
-  float tempVolts_{idx} = (tempRaw_{idx} / 1023.0) * Vs_{idx};
-  float tempF_{idx}     = 20.0 + 48.48 * (tempVolts_{idx} - 0.49);   /* deg F */
-  float T_{idx}         = (tempF_{idx} - 32.0) / 1.8;                /* deg C, used below */`,
+  /* degF = 48.48 x (Volts - 0.490) + 20   (VA-3 temperature scaling) */
+  int   tempRaw_{idx}   = readSettled({partnerPort});
+  float tempVolts_{idx} = (tempRaw_{idx} / 1023.0) * Vref_{idx};
+  float tempF_{idx}     = 48.48 * (tempVolts_{idx} - 0.490) + 20.0;
+  float T_{idx}         = (tempF_{idx} - 32.0) / 1.8;`,
     },
   },
   outputs: {
@@ -579,21 +570,19 @@ const float Vs_{idx} = 5.0;       /* Uno R3 supply voltage */
   else                                       percent = 100;`,
     },
     Watermark: {
-      "Transformed Raw Value": `  /* (X - min)/(max - min) * 100 on resistance. air_val_max is the dry end
-     (high kilo-ohms) and maps to 0 %; water_val is the wet end and maps to 100 %. */
+      "Transformed Raw Value": `  /* Tension expressed as a wetness percentage: dry_kPa -> 0 %, wet_kPa -> 100 % */
   {
-    float wmSpan_{idx} = (float){air_val_max} - (float){water_val};
+    float wmSpan_{idx} = dry_kPa_{idx} - wet_kPa_{idx};
     percent = (wmSpan_{idx} != 0)
-      ? (int)constrain(((float){air_val_max} - R_{idx}) * 100.0 / wmSpan_{idx}, 0, 100)
+      ? (int)constrain((dry_kPa_{idx} - kPa_{idx}) * 100.0 / wmSpan_{idx}, 0, 100)
       : 0;   /* not calibrated */
   }`,
-      "Raw value (Resistance)": `  percent = (int)R_{idx};  /* resistance in kΩ */`,
-
-      Tension: `  /* kPa = (-3.213R - 4.093) / (1 - 0.009733R - 0.2892)
-     0.2892 is 0.01205 x 24, i.e. this assumes a soil temperature of 24 C.
-     Use the temperature-combined sensor for a live compensated reading. */
-  float kPa_{idx} = (-3.213f * R_{idx} - 4.093f) / (1.0f - 0.009733f * R_{idx} - 0.2892f);
+      "Raw value (Resistance)": `  /* The VA-3 outputs tension, not resistance, so the raw figure
+     available here is the adapter's own reading in kPa. */
   percent = (int)kPa_{idx};`,
+
+      Tension: `  /* kPa = Volts / 0.0117 (200SS-VA3 output scaling) */
+  percent = (int)constrain(kPa_{idx}, 0, 239);`,
     },
     Watermark_Temperature: {
       "Temperature F": `  /* deg F = 20 + 48.48 x (V - 0.49) */
@@ -603,19 +592,18 @@ const float Vs_{idx} = 5.0;       /* Uno R3 supply voltage */
   percent = (int)T_{idx};`,
 
       "Raw value (Temperature)": `  percent = (int)T_{idx};  /* temperature, directly read */`,
-      "Raw value (Resistance)": `  percent = (int)R_{idx};  /* resistance in kilo-ohms */`,
-      "Transformed Raw Value": `  /* (X - min)/(max - min) * 100 on resistance. air_val_max is the dry end
-     (high kilo-ohms) and maps to 0 %; water_val is the wet end and maps to 100 %. */
+      "Raw value (Resistance)": `  /* The VA-3 reports tension, not resistance */
+  percent = (int)kPa_{idx};`,
+      "Transformed Raw Value": `  /* Tension as a wetness percentage: dry_kPa -> 0 %, wet_kPa -> 100 % */
   {
-    float wmSpan_{idx} = (float){air_val_max} - (float){water_val};
+    float wmSpan_{idx} = dry_kPa_{idx} - wet_kPa_{idx};
     percent = (wmSpan_{idx} != 0)
-      ? (int)constrain(((float){air_val_max} - R_{idx}) * 100.0 / wmSpan_{idx}, 0, 100)
+      ? (int)constrain((dry_kPa_{idx} - kPa_{idx}) * 100.0 / wmSpan_{idx}, 0, 100)
       : 0;   /* not calibrated */
   }`,
       Temperature: `  percent = (int)T_{idx};  /* temperature, directly read */`,
-      Tension: `  /* kPa = (-3.213R - 4.093)/(1 - 0.009733R - 0.01205T) */
-  float kPa_{idx} = (-3.213f * R_{idx} - 4.093f) / (1.0f - 0.009733f * R_{idx} - 0.01205f * T_{idx});
-  percent = (int)kPa_{idx};`,
+      Tension: `  /* kPa = Volts / 0.0117, temperature-compensated inside the VA-3 */
+  percent = (int)constrain(kPa_{idx}, 0, 239);`,
     },
   },
   viz: {
@@ -677,7 +665,7 @@ void draw_progressbar(byte pct, const __FlashStringHelper *label) {
       setup: "",
       loop: `  lcd.setCursor(0, 0);
   lcd.print(F("{port}: "));
-  lcd.print(sensorValue_{idx}); lcd.print(F("            "));
+  lcd.print(percent); lcd.print(F("            "));
   lcd.setCursor(0, 1);
   lcd.print(F("                "));`,
     },
@@ -739,7 +727,7 @@ void draw_progressbar(byte pct, const __FlashStringHelper *label) {
 const int numSensors = {numBlocks};
 int currentSensor    = 0;
 
-/* ---- Is anything actually plugged into this port? ----
+/* Is anything actually plugged into this port?
    A pin with nothing attached is high impedance: it floats, and analogRead()
    still returns a number, so the sketch would happily display noise as data.
    We read the pin twice, once with the internal (~30k) pull-up engaged and
@@ -748,6 +736,40 @@ int currentSensor    = 0;
    two readings diverge. The pin is never driven as an output, so this can
    never fight a sensor that is present. */
 const int FLOAT_SWING = 200;   /* ADC counts the pin may move before we call it empty */
+
+/* Is a VA-3 channel present?
+   The adapter refreshes each channel every 5 minutes, so between updates its
+   output is a HELD value with high impedance. Engaging the Arduino pull-up
+   drags that node toward 5 V (reading "missing") and can corrupt the held
+   value until the next refresh. So: never load the pin, only read it.
+   The VA-3 never outputs above 2.8 V (~573 counts), so a pin near the 5 V
+   rail cannot be a real channel. A reading of 0 is valid: saturated soil. */
+/* The VA-3 cannot output above 2.8 V, which is 573 counts on a 5 V reference.
+   Anything meaningfully above that is an unconnected pin, not a reading, so
+   the channel is reported as missing rather than converted into a number. */
+const int VA3_MAX_COUNTS = 620;
+
+int readSettled(uint8_t pin) {
+  /* All analog pins share one ADC whose sample capacitor keeps charge from
+     the channel read just before, and the button ladder on A0 is read every
+     loop. While a button is held, A0 sits near 0 V and drags the next
+     reading down, which showed a submerged Watermark as wetter whenever a
+     button was pressed. Against the VA-3's weakly driven output a single
+     extra read is not always enough, so sample until the value stops
+     moving (or give up after a few tries and take the latest). */
+  int v = analogRead(pin);
+  for (byte i = 0; i < 6; i++) {
+    delayMicroseconds(500);
+    int w = analogRead(pin);
+    if (abs(w - v) <= 2) return w;
+    v = w;
+  }
+  return v;
+}
+
+bool va3ChannelPresent(uint8_t pin) {
+  return readSettled(pin) < VA3_MAX_COUNTS;   /* passive - no pull-up, ever */
+}
 
 bool portHasSensor(uint8_t pin) {
   /* A floating pin holds whatever charge it last saw (leakage is tiny), so a
@@ -815,7 +837,7 @@ function resolveSensorKey(name) {
   const n = String(name).toLowerCase().trim();
   const alias = SENSOR_ALIASES[n];
   if (alias) return alias;
-
+  /* Fall back to keywords so renaming or truncating the Excel label still resolves */
   if (n.includes("capacitive") || n.includes("dfrobot")) return "DF_robot";
   if (n.includes("temperature") || n.includes("combined"))
     return "Watermark_Temperature";
@@ -825,6 +847,8 @@ function resolveSensorKey(name) {
 
 const OUTPUT_ALIASES = {
   "raw value (bits)": "Raw Value",
+  "raw value (adc)": "Raw Value",
+  "raw sensor value (adc)": "Raw Value",
   "raw sensor value (bits)": "Raw Value",
   "raw value (%)": "Transformed Raw Value",
   "raw sensor value (%)": "Transformed Raw Value",
@@ -895,6 +919,18 @@ function buildIno(blocks, surveyAnswers = {}) {
     vars.tempUnit = /(^|[^a-z])f\b|in °f|fahrenheit/i.test(b.output || "")
       ? "F"
       : "C";
+    /* A temperature output reads the shared 200TS channel, not this block's
+       Watermark port, so label the display with the port it actually came
+       from. Tension still reports the Watermark port, which is correct. */
+    const outKey = resolveOutputKey(b.output);
+    const isTempReading =
+      outKey === "Temperature F" ||
+      outKey === "Temperature C" ||
+      outKey === "Temperature" ||
+      outKey === "Raw value (Temperature)";
+    const labelPort = isTempReading && b.partnerPort ? b.partnerPort : b.port;
+    vars.port = labelPort;
+
     b.params.forEach((p) => {
       vars[p.name] =
         p.value !== "" && p.value !== null && p.value !== undefined
@@ -902,7 +938,7 @@ function buildIno(blocks, surveyAnswers = {}) {
           : "0";
     });
 
-    loopBody += `  /* ---- Sensor ${idx}: ${b.sensor} on ${b.port} -> ${b.output} ---- */\n`;
+    loopBody += `  /* Sensor ${idx}: ${b.sensor} on ${b.port}, showing ${b.output} */\n`;
 
     const sensorKey = resolveSensorKey(b.sensor);
     const sensorTpl = lookupTemplate(TEMPLATES.sensors, sensorKey);
@@ -920,6 +956,8 @@ function buildIno(blocks, surveyAnswers = {}) {
       ? render(outputTpl, vars) + "\n"
       : `  percent = sensorValue_${idx};\n`;
 
+    /* Outputs that depend on a probe on ANOTHER port must also verify that
+       probe is present, or a floating partner pin feeds garbage into them. */
     const resolvedOut = resolveOutputKey(b.output);
     const needsPartnerProbe =
       resolvedOut === "Wetting Front" ||
@@ -931,16 +969,18 @@ function buildIno(blocks, surveyAnswers = {}) {
           "Raw value (Temperature)",
         ].includes(resolvedOut));
     if (needsPartnerProbe) {
-      loopBody += `  connected_${idx} = connected_${idx} && portHasSensor(${vars.partnerPort});\n`;
+      loopBody += `  connected_${idx} = connected_${idx} && va3ChannelPresent(${vars.partnerPort});\n`;
     }
 
     loopBody += `  if (connected_${idx}) {\n`;
-    loopBody += `    Serial.print(F("${b.port} (${b.output}): "));\n`;
+    loopBody += `    Serial.print(F("${labelPort} (${b.output}): "));\n`;
     loopBody += `    Serial.println(percent);\n`;
     loopBody += `  } else {\n`;
-    loopBody += `    Serial.println(F("${b.port}: no sensor detected"));\n`;
+    loopBody += `    Serial.println(F("${labelPort}: no sensor detected"));\n`;
     loopBody += `  }\n`;
 
+    /* Only the sensor currently selected by the buttons owns the LCD,
+       otherwise every block overwrites the one before it. */
     const vizTpl = lookupTemplate(TEMPLATES.viz, b.viz) || TEMPLATES.viz.none;
     const vizBody = render(vizTpl.loop, vars)
       .split("\n")
@@ -952,7 +992,7 @@ function buildIno(blocks, surveyAnswers = {}) {
       loopBody += `  if (currentSensor == ${i}) {\n`;
       loopBody += `    if (connected_${idx}) {\n${vizBody}\n    } else {\n`;
       loopBody += `      lcd.setCursor(0, 0);\n`;
-      loopBody += `      lcd.print(F("${pad(b.port + ": no sensor")}"));\n`;
+      loopBody += `      lcd.print(F("${pad(labelPort + ": no sensor")}"));\n`;
       loopBody += `      lcd.setCursor(0, 1);\n`;
       loopBody += `      lcd.print(F("${pad("check wiring")}"));\n`;
       loopBody += `    }\n  }\n\n`;
@@ -1160,7 +1200,7 @@ function addBlock() {
             Add a second sensor block for the <strong>deep</strong> sensor, then choose its port here.
           </div>
           <div class="field">
-            <select id="partner-sel-${bid}" onchange="refreshAllBlocks()"></select>
+            <select id="partner-sel-${bid}" onchange="syncTempPorts(${bid}); refreshAllBlocks()"></select>
           </div>
         </div>
       </div>
@@ -1259,6 +1299,9 @@ function refreshViz(bid) {
   updateVizTip(bid);
 }
 
+/* The Volumetric / TAW equations contain 1/k, but the sheet's in_a..in_e
+   columns are full before k. Require it in code so the field appears and the
+   value reaches the sketch. (Adding k to a free in_ column also works.) */
 function extraParamsFor(outputVal) {
   const key = resolveOutputKey(outputVal);
   if (
@@ -1272,7 +1315,8 @@ function extraParamsFor(outputVal) {
 
 function normalizeParamName(name) {
   if (!name) return "";
-
+  /* Excel writes FC/WP where the params sheet says fc/wp, and sometimes wraps a
+     name in a function call such as abs(air_val_max). Match on the bare name. */
   const inner = String(name).match(/\(([^)]*)\)/);
   const bare = inner ? inner[1] : String(name);
   return bare.trim().toLowerCase();
@@ -1313,6 +1357,7 @@ function refreshParams(bid) {
     card.style.display = anyVisible ? "" : "none";
   }
 
+  /* Show the how-to-calibrate hint only when a measured value is on screen */
   const CAL_PARAMS = ["air_val", "air_val_max", "water_val"];
   const calHint = document.getElementById(`cal-hint-${bid}`);
   if (calHint) {
@@ -1336,14 +1381,18 @@ function refreshParams(bid) {
     const sel = document.getElementById(`partner-sel-${bid}`);
 
     if (isTempCombo) {
+      /* This sensor is a pair: the Watermark on this block's port plus a
+         separate soil temperature probe that needs its own port. */
       partnerCard.style.display = "";
       if (sel) sel.style.display = "";
       if (label)
         label.innerHTML = `Soil temperature sensor port <span class="req">*</span>`;
       partnerCard.querySelector(".wetting-front-msg").innerHTML =
-        `This option uses <strong>two probes</strong>. The port above is the Watermark. ` +
-        `Select the port your <strong>Irrometer soil temperature sensor</strong> is plugged into.`;
+        `One <strong>soil temperature probe</strong> is shared by every Watermark sensor ` +
+        `(the T terminal on the VA-3 board). Select the port it is plugged into. This ` +
+        `applies to all Watermark + temperature blocks.`;
       populatePartnerPorts(bid, "temp");
+      syncTempPorts(bid);
     } else if (isWettingFront && !isDeepPartner) {
       partnerCard.style.display = "";
       if (sel) sel.style.display = "";
@@ -1365,6 +1414,29 @@ function refreshParams(bid) {
       partnerCard.style.display = "none";
     }
   }
+}
+
+/* The VA-3 board carries a single temperature probe shared by all Watermark
+   sensors, so every Watermark+temperature block must name the same port. */
+function syncTempPorts(sourceBid) {
+  const src = document.getElementById(`partner-sel-${sourceBid}`);
+  if (!src || !src.value) return;
+  document.querySelectorAll(".sensor-block").forEach((block) => {
+    const bid = block.dataset.bid;
+    if (bid === String(sourceBid)) return;
+    const st = document.getElementById(`stype-sel-${bid}`);
+    if (!st || resolveSensorKey(st.value) !== "Watermark_Temperature") return;
+    const sel = document.getElementById(`partner-sel-${bid}`);
+    if (sel && sel.value !== src.value) {
+      if (![...sel.options].some((o) => o.value === src.value)) {
+        sel.insertAdjacentHTML(
+          "beforeend",
+          `<option value="${src.value}">${src.value}</option>`,
+        );
+      }
+      sel.value = src.value;
+    }
+  });
 }
 
 function isPortUsedAsDeepPartner(port, selfBid) {
@@ -1392,24 +1464,34 @@ function populatePartnerPorts(bid, mode = "front") {
   let choices, emptyMsg;
 
   if (mode === "temp") {
-    choices = PORTS.filter(
-      (p) => /^A[1-5]$/.test(p) && !takenPorts.includes(p),
-    );
-    emptyMsg = "— no free analog port available —";
+    /* The VA-3 temperature channel is wired independently, so every analog
+       port is a candidate. It is deliberately NOT defaulted: silently picking
+       a free port made the sketch read an unconnected pin and report nonsense
+       temperatures while labelling them with that port. */
+    choices = PORTS.filter((p) => /^A[1-5]$/.test(p));
+    emptyMsg = "No analog port available";
   } else {
+    /* The deep wetting-front sensor IS its own block, so pick from those. */
     choices = takenPorts.filter((p) => p !== myPort && /^A[1-5]$/.test(p));
-    emptyMsg = "— add a second sensor block first —";
+    emptyMsg = "Add a second sensor block first";
   }
+
+  const placeholder =
+    mode === "temp" ? `<option value="">Select the port</option>` : "";
 
   sel.innerHTML =
     choices.length === 0
       ? `<option value="">${emptyMsg}</option>`
-      : choices
+      : placeholder +
+        choices
           .map(
             (p) =>
               `<option value="${p}" ${p === current ? "selected" : ""}>${p}</option>`,
           )
           .join("");
+
+  /* keep a deliberate earlier choice, otherwise leave it unselected */
+  if (mode === "temp" && !choices.includes(current)) sel.value = "";
 }
 
 function refreshAllPartnerDropdowns() {
@@ -1546,6 +1628,8 @@ function checkDuplicatePorts() {
     .filter(([, c]) => c > 1)
     .map(([p]) => p);
   const analogCount = ports.filter((p) => /^A[1-5]$/.test(p)).length;
+  /* note: the shared temperature port is not a sensor block, so it never
+     appears in this list and cannot trigger a false duplicate warning */
   const messages = [];
   if (dupes.length)
     messages.push(
@@ -1614,6 +1698,7 @@ function saveFile(filename, blocks) {
     _savedFiles[filename] = { blocks, timestamp: new Date().toISOString() };
     localStorage.setItem(FILES_KEY, JSON.stringify(_savedFiles));
   } catch (_) {}
+  renderSavedConfigs();
 }
 
 function deleteSavedFile(filename) {
@@ -1774,8 +1859,8 @@ function openFilenamePrompt() {
     ? `
     <div class="filename-section">
       <div class="filename-section-head">
-        <strong>Option 1 — Reuse a previous filename</strong>
-        <span class="filename-section-help">Click a file to auto-fill the name below. Re-downloading replaces your old file.</span>
+        <strong>Option 1: reuse a previous name</strong>
+        <span class="filename-section-help">Click to fill in the name below. Your browser will not overwrite the earlier download. It saves alongside it as name-2.ino, so delete the old one if you don't want both.</span>
       </div>
       <div class="saved-file-list">
         ${fileNames
@@ -1799,7 +1884,7 @@ function openFilenamePrompt() {
     <div class="saved-file-divider"><span>OR</span></div>
     <div class="filename-section">
       <div class="filename-section-head">
-        <strong>Option 2 — Make a new file</strong>
+        <strong>Option 2: make a new file</strong>
         <span class="filename-section-help">Type a new name to create a separate file.</span>
       </div>
     </div>`
@@ -1826,6 +1911,108 @@ function openFilenamePrompt() {
   const btn = document.getElementById("confirm-btn");
   if (cb) cb.checked = true;
   if (btn) btn.disabled = false;
+}
+
+/* Saved files keep the whole sensor configuration, not just a name, so a
+   previous setup can be reloaded into the form and adjusted. */
+function renderSavedConfigs() {
+  const wrap = document.getElementById("saved-configs");
+  if (!wrap) return;
+  const names = Object.keys(_savedFiles).sort();
+  if (names.length === 0) {
+    wrap.innerHTML = "";
+    return;
+  }
+  wrap.innerHTML = `
+    <div class="filename-section-head">
+      <strong>Load a previous configuration</strong>
+      <span class="filename-section-help">Reloads the sensors, ports and values you used for that file so you can adjust them.</span>
+    </div>
+    <div class="saved-file-list">
+      ${names
+        .map((fn) => {
+          const rec = _savedFiles[fn];
+          const n = (rec.blocks || []).length;
+          const ts = new Date(rec.timestamp).toLocaleString();
+          return `
+        <div class="saved-file-row">
+          <button type="button" class="saved-file-btn" onclick="loadSavedConfig('${fn.replace(/'/g, "\\'")}')">
+            <span class="saved-file-name">${fn}</span>
+            <span class="saved-file-meta">
+              <span class="saved-file-ts">${n} sensor${n === 1 ? "" : "s"} · ${ts}</span>
+              <span class="saved-file-action">Load →</span>
+            </span>
+          </button>
+          <button type="button" class="saved-file-del" onclick="removeSavedFile('${fn.replace(/'/g, "\\'")}'); return false;" title="Forget this configuration">✕</button>
+        </div>`;
+        })
+        .join("")}
+    </div>`;
+}
+
+function loadSavedConfig(fn) {
+  const rec = _savedFiles[fn];
+  if (!rec || !rec.blocks || rec.blocks.length === 0) return;
+  if (
+    !confirm(
+      `Load the configuration saved as "${fn}"? This replaces what is currently in the form.`,
+    )
+  )
+    return;
+
+  document.getElementById("sensors-list").innerHTML = "";
+  rec.blocks.forEach((b) => {
+    addBlock();
+    const bid = [...document.querySelectorAll(".sensor-block")].pop().dataset
+      .bid;
+
+    const stype = document.getElementById(`stype-sel-${bid}`);
+    if (stype && [...stype.options].some((o) => o.value === b.sensor)) {
+      stype.value = b.sensor;
+      onSensorChange(bid); /* repopulates outputs and params */
+    }
+    const port = document.getElementById(`port-sel-${bid}`);
+    if (port && b.port) port.value = b.port;
+
+    const out = document.getElementById(`output-sel-${bid}`);
+    if (out && [...out.options].some((o) => o.value === b.output)) {
+      out.value = b.output;
+      updateOutputTip(bid); /* refreshes params and viz lists */
+    }
+    const viz = document.getElementById(`viz-sel-${bid}`);
+    if (viz && [...viz.options].some((o) => o.value === b.viz))
+      viz.value = b.viz;
+
+    /* restore saved values into the matching parameter rows */
+    (b.params || []).forEach((p) => {
+      document.querySelectorAll(`#params-${bid} .param-row`).forEach((row) => {
+        const rid = row.dataset.rid;
+        const nameEl = document.getElementById(`pname-${rid}`);
+        if (
+          nameEl &&
+          normalizeParamName(nameEl.value) === normalizeParamName(p.name)
+        ) {
+          const valEl = document.getElementById(`pval-${rid}`);
+          if (valEl) valEl.value = p.value;
+        }
+      });
+    });
+
+    const partner = document.getElementById(`partner-sel-${bid}`);
+    if (partner && b.partnerPort) {
+      if (![...partner.options].some((o) => o.value === b.partnerPort)) {
+        partner.insertAdjacentHTML(
+          "beforeend",
+          `<option value="${b.partnerPort}">${b.partnerPort}</option>`,
+        );
+      }
+      partner.value = b.partnerPort;
+    }
+  });
+
+  checkDuplicatePorts();
+  refreshAllBlocks();
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function selectSavedFilename(fn) {

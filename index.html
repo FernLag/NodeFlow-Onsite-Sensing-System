@@ -62,6 +62,11 @@
               first so it can load. After that, you can fill out the form and
               download your code with no connection, any tracking information
               will be sent automatically the next time you're online.
+              <br /><br />
+              Clearing your browser's cache or site data for this page removes
+              the offline copy, along with your saved details and any
+              information still waiting to be sent. If that happens, just open
+              this page again while online to restore it.
             </p>
           </div>
         </div>
@@ -71,6 +76,7 @@
       </div>
 
       <div id="saved-banner" class="saved-banner"></div>
+      <div id="saved-configs" class="saved-configs"></div>
       <div id="sensors-list"></div>
       <div id="port-warning" class="port-warning"></div>
       <button class="add-block-btn" onclick="addBlock()">
@@ -164,6 +170,7 @@
           navigator.serviceWorker
             .register("sw.js")
             .then((reg) => {
+              /* When we come back online, ask the SW to flush queued submissions */
               const flush = () => {
                 if (navigator.serviceWorker.controller) {
                   navigator.serviceWorker.controller.postMessage("flush-queue");
@@ -175,6 +182,7 @@
               window.addEventListener("online", flush);
               if (navigator.onLine) flush();
 
+              /* Detect a new version waiting to activate */
               function showUpdateBar(worker) {
                 let bar = document.getElementById("update-bar");
                 if (bar) return;
@@ -206,6 +214,7 @@
             })
             .catch(() => {});
 
+          /* Reload once the new SW takes control */
           let refreshing = false;
           navigator.serviceWorker.addEventListener("controllerchange", () => {
             if (refreshing) return;
@@ -215,6 +224,7 @@
         });
       }
 
+      /* Small offline indicator */
       function updateOnlineStatus() {
         let bar = document.getElementById("offline-bar");
         if (!navigator.onLine) {
@@ -222,7 +232,7 @@
             bar = document.createElement("div");
             bar.id = "offline-bar";
             bar.textContent =
-              "You're offline, the form still works and your file will download. Tracking data will send when you reconnect.";
+              "You're offline — the form still works and your file will download. Tracking data will send when you reconnect.";
             document.body.appendChild(bar);
           }
         } else if (bar) {

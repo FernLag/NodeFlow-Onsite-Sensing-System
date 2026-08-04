@@ -1,3 +1,8 @@
+/* ============================================================
+   NodeFlow On-site Sensing System — stylesheet
+   Palette: chartreuse / olive / brown / gold / charcoal / leaf
+   ============================================================ */
+
 :root {
   --chartreuse: #d3db47;
   --olive: #7b7022;
@@ -60,6 +65,8 @@ body {
   max-width: 980px;
 }
 
+/* ---------- Header ---------- */
+
 .header {
   text-align: center;
   margin-bottom: 32px;
@@ -110,6 +117,7 @@ body {
   font-weight: 700;
 }
 
+/* Product-name treatment: NodeFlow(On-site) */
 .nf-sub {
   font-style: italic;
   font-size: 0.6em;
@@ -124,6 +132,8 @@ body {
 .block-title .nf-sub {
   font-size: 0.62em;
 }
+
+/* ---------- Info box ---------- */
 
 .info-box {
   background: var(--surface);
@@ -241,6 +251,8 @@ body {
   color: var(--olive-dark);
 }
 
+/* ---------- Saved banner ---------- */
+
 .saved-banner {
   display: none;
   background: var(--leaf-light);
@@ -267,6 +279,8 @@ body {
 .saved-banner a:hover {
   text-decoration: underline;
 }
+
+/* ---------- Sensor block ---------- */
 
 .sensor-block {
   background: var(--card);
@@ -362,6 +376,8 @@ body {
   margin: 0 0 -4px;
 }
 
+/* ---------- Section cards ---------- */
+
 .section-card {
   border: 1px solid var(--line-soft);
   border-radius: 10px;
@@ -390,6 +406,8 @@ body {
 .section-body {
   padding: 14px 16px;
 }
+
+/* ---------- Fields ---------- */
 
 .field {
   display: flex;
@@ -463,6 +481,8 @@ body {
   gap: 18px;
 }
 
+/* ---------- Parameters ---------- */
+
 .param-row {
   display: grid;
   grid-template-columns: 1.5fr 1fr;
@@ -534,6 +554,8 @@ body {
   user-select: none;
 }
 
+/* ---------- Wetting front notice ---------- */
+
 .wetting-front-msg {
   background: #fdf4dd;
   border: 1px solid #e8cf8a;
@@ -549,6 +571,8 @@ body {
 .wetting-front-msg strong {
   color: var(--brown);
 }
+
+/* ---------- Buttons ---------- */
 
 .add-block-btn {
   width: 100%;
@@ -635,6 +659,8 @@ body {
   color: var(--olive-dark);
 }
 
+/* ---------- Success + preview ---------- */
+
 .success-banner {
   margin-top: 14px;
   padding: 13px 16px;
@@ -711,6 +737,8 @@ body {
   overflow-y: auto;
 }
 
+/* ---------- Tooltip badge ---------- */
+
 .tip-badge {
   display: inline-flex;
   align-items: center;
@@ -736,6 +764,8 @@ body {
 .tip-badge:hover {
   background: var(--olive);
 }
+
+/* ---------- Survey modal ---------- */
 
 .survey-overlay {
   display: none;
@@ -902,6 +932,8 @@ body {
   box-shadow: none;
 }
 
+/* ---------- Saved files ---------- */
+
 .saved-info-note {
   margin: 12px 0 0;
   font-size: 12.5px;
@@ -1048,6 +1080,8 @@ body {
   background: var(--line);
 }
 
+/* ---------- Logos ---------- */
+
 .logo-footer,
 .logo-row {
   display: flex;
@@ -1100,6 +1134,8 @@ body {
   line-height: 1.4;
 }
 
+/* ---------- Connectivity bars ---------- */
+
 #offline-bar {
   position: fixed;
   bottom: 0;
@@ -1149,6 +1185,8 @@ body {
 #update-bar button:hover {
   background: #fcdd77;
 }
+
+/* ---------- Responsive ---------- */
 
 @media (max-width: 760px) {
   .row2,
@@ -1211,4 +1249,12 @@ body {
   .logo {
     height: 68px;
   }
+}
+
+.saved-configs:not(:empty) {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin-bottom: 18px;
 }

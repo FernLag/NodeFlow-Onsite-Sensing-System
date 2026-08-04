@@ -1,8 +1,8 @@
 # Watermark_Temperature.py
 # Sensor: Irrometer Watermark (200SS) combined with Irrometer Soil Temperature Sensor (200TS)
 
-air_val_max = 200  #   # min: 0  max: 200
-water_val = 0  #   # min: 0  max: 200
+air_val_max = 239  #   # min: 0  max: 239
+water_val = 0  #   # min: 0  max: 239
 
 # Supported outputs:
 #   - Raw value (Resistance)  # equation: Rx*(Vs-A1)/A1
