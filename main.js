@@ -757,14 +757,19 @@ int readSettled(uint8_t pin) {
      button was pressed. Against the VA-3's weakly driven output a single
      extra read is not always enough, so sample until the value stops
      moving (or give up after a few tries and take the latest). */
-  int v = analogRead(pin);
-  for (byte i = 0; i < 6; i++) {
-    delayMicroseconds(500);
-    int w = analogRead(pin);
-    if (abs(w - v) <= 2) return w;
-    v = w;
+  /* Read a few times and AVERAGE, discarding the first throwaway sample.
+     The VA-3 output is high impedance between its 5 minute refreshes, so a
+     single reading picks up ADC crosstalk and mains hum and jumps around.
+     Averaging several settled samples turns that jitter into a steady value. */
+  analogRead(pin);                 /* throwaway: let the mux/ADC cap settle */
+  delayMicroseconds(200);
+  long sum = 0;
+  const byte N = 8;
+  for (byte i = 0; i < N; i++) {
+    sum += analogRead(pin);
+    delayMicroseconds(300);
   }
-  return v;
+  return (int)(sum / N);
 }
 
 bool va3ChannelPresent(uint8_t pin) {
@@ -1464,11 +1469,11 @@ function populatePartnerPorts(bid, mode = "front") {
   let choices, emptyMsg;
 
   if (mode === "temp") {
-    /* The VA-3 temperature channel is wired independently, so every analog
-       port is a candidate. It is deliberately NOT defaulted: silently picking
-       a free port made the sketch read an unconnected pin and report nonsense
-       temperatures while labelling them with that port. */
-    choices = PORTS.filter((p) => /^A[1-5]$/.test(p));
+    /* The VA-3 temperature channel is wired independently, so any analog port
+       is a candidate EXCEPT this block's own Watermark port - one pin cannot
+       carry both the tension and the temperature signal. Not defaulted:
+       silently picking a port made the sketch read an unconnected pin. */
+    choices = PORTS.filter((p) => /^A[1-5]$/.test(p) && p !== myPort);
     emptyMsg = "No analog port available";
   } else {
     /* The deep wetting-front sensor IS its own block, so pick from those. */
@@ -1791,6 +1796,17 @@ function handleGenerate() {
   for (const b of _pendingBlocks) {
     if (
       resolveSensorKey(b.sensor) === "Watermark_Temperature" &&
+      b.partnerPort === b.port
+    ) {
+      alert(
+        "The soil temperature sensor and the Watermark cannot share the same port (" +
+          b.port +
+          "). Pick a different port for the temperature sensor.",
+      );
+      return;
+    }
+    if (
+      resolveSensorKey(b.sensor) === "Watermark_Temperature" &&
       !b.partnerPort
     ) {
       alert(
@@ -1860,7 +1876,7 @@ function openFilenamePrompt() {
     <div class="filename-section">
       <div class="filename-section-head">
         <strong>Option 1: reuse a previous name</strong>
-        <span class="filename-section-help">Click to fill in the name below. Your browser will not overwrite the earlier download. It saves alongside it as name-2.ino, so delete the old one if you don't want both.</span>
+        <span class="filename-section-help">Click to fill in the name below. Your browser will not overwrite the earlier download. Delete the old one if you don't want both or you can click the check box below to use the filename with the date and time added on.</span>
       </div>
       <div class="saved-file-list">
         ${fileNames
@@ -1896,6 +1912,10 @@ function openFilenamePrompt() {
       <label>${hasFiles ? "Name of file to generate (new or selected from above)" : "Name of file to generate"} <span class="req">*</span></label>
       <input type="text" id="sq-filename" placeholder="e.g. apples_field2 (no spaces, no .ino)" required>
       <span class="err-msg" id="sqerr-filename">Required.</span>
+      <label class="stamp-opt">
+        <input type="checkbox" id="sq-timestamp">
+        Add a date and time to the filename so it never overwrites an earlier download
+      </label>
     </div>
     <div class="field survey-field">
       <label>Comment to include in the code (optional)</label>
@@ -2064,6 +2084,10 @@ function confirmSurvey() {
     }
   });
 
+  /* Read the timestamp choice BEFORE closing the modal removes the checkbox. */
+  const stampEl = document.getElementById("sq-timestamp");
+  const wantStamp = !!(stampEl && stampEl.checked);
+
   const toSave = { ...answers };
   delete toSave.filename;
   delete toSave.ino_comment;
@@ -2075,7 +2099,25 @@ function confirmSurvey() {
     .trim()
     .replace(/\s+/g, "_")
     .replace(/\.ino$/i, "");
-  const filename = rawName ? rawName + ".ino" : _pendingFilename;
+  const base =
+    rawName || (_pendingFilename || "nodeflow").replace(/\.ino$/i, "");
+  /* Only stamp the name if the user asked for it. Browsers cannot overwrite a
+     download, so without a stamp a repeated name becomes name-1.ino; with it,
+     each file is unique and dated. The choice is left to the user. */
+  let filename = base + ".ino";
+  if (wantStamp) {
+    const d = new Date();
+    const stamp =
+      d.getFullYear() +
+      "-" +
+      String(d.getMonth() + 1).padStart(2, "0") +
+      "-" +
+      String(d.getDate()).padStart(2, "0") +
+      "_" +
+      String(d.getHours()).padStart(2, "0") +
+      String(d.getMinutes()).padStart(2, "0");
+    filename = base + "_" + stamp + ".ino";
+  }
   downloadFile(code, filename);
   saveFile(filename, _pendingBlocks);
 
