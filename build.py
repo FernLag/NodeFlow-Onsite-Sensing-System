@@ -43,10 +43,7 @@ def safe_js_key(key):
     return re.sub(r'[^a-zA-Z0-9_]', '_', key)
 
 
-# The "sensors" sheet names a sensor in full ("Irrometer Watermark (200SS)")
-# while the "params" sheet uses a short key ("Watermark"). Both are folded to
-# one canonical key so parameters attach to the right sensor, and so the key
-# matches the hand-written TEMPLATES in main.js.
+
 SENSOR_CANON = {
     "df_robot":              "DF_robot",
     "dfrobot":               "DF_robot",
@@ -60,8 +57,10 @@ def canonical_sensor(name):
         return SENSOR_CANON[n]
     if "capacitive" in n or "dfrobot" in n:
         return "DF_robot"
-    # must be tested before the plain Watermark rule, since this name contains it.
-    # "temp" rather than "temperature" so a truncated cell still resolves.
+    
+    if ("temp" in n or "200ts" in n) and "watermark" not in n and "combined" not in n:
+        return "Temperature"
+    
     if "combined" in n or "temp" in n:
         return "Watermark_Temperature"
     if "watermark" in n or "irrometer" in n:
@@ -85,9 +84,7 @@ VIZ_COL = col_index("viz", 11)
 
 sensors_raw = sheet_rows("sensors")
 
-# Resolve every column by its header name. Inserting or reordering a column in
-# the sheet then cannot silently shift the parser (a "Unit" column added after
-# full_name used to push in_a..in_e one place to the right).
+
 COL = {
     "sensor_name":  col_index("sensor_name", 0),
     "output_value": col_index("output_value", 1),
@@ -162,10 +159,7 @@ params_map = {}
 for row in params_raw:
     key       = canonical_sensor(row[0])
     p_name    = row[1]
-    # Support both 7-col (with display_name) and 6-col (without) structures
-    # col 0: sensor_key, 1: param_name, then either:
-    # 7-col: 2=display, 3=label, 4=min, 5=max, 6=default, 7=units
-    # 6-col: 2=label,   3=min,   4=max, 5=default, 6=units
+    
     if len(row) >= 8 and row[2] and not str(row[2]).replace(".", "").replace("-", "").lstrip().isdigit():
         p_display = row[2]
         p_label   = row[3]
@@ -173,6 +167,7 @@ for row in params_raw:
         p_max     = row[5]
         p_val     = row[6] if len(row) > 6 else "0"
         p_units   = row[7] if len(row) > 7 else ""
+        p_choices = row[8] if len(row) > 8 else ""
     else:
         p_display = ""
         p_label   = row[2]
@@ -180,6 +175,7 @@ for row in params_raw:
         p_max     = row[4]
         p_val     = row[5] if len(row) > 5 else "0"
         p_units   = row[6] if len(row) > 6 else ""
+        p_choices = row[7] if len(row) > 7 else ""
 
     if not key or not p_name:
         continue
@@ -193,6 +189,7 @@ for row in params_raw:
         "max":     p_max,
         "value":   str(p_val) if p_val != "" else "0",
         "units":   str(p_units) if p_units else "",
+        "choices": str(p_choices) if p_choices else "",
     })
 
 viz_raw      = sheet_rows("viz_options")
@@ -234,6 +231,8 @@ def build_sensor_types():
             lines.append(f'        min: "{jstr(p["min"])}",')
             lines.append(f'        max: "{jstr(p["max"])}",')
             lines.append(f'        units: "{jstr(p["units"])}",')
+            if p.get("choices"):
+                lines.append(f'        choices: "{jstr(p["choices"])}",')
             lines.append(f'      }},')
         lines.append('    ],')
         lines.append('  },')

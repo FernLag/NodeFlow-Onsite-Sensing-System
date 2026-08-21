@@ -4,11 +4,15 @@
 water_val = 0  # Water value: raw reading submerged in water  # min: 0  max: 239
 Resistance = 0  # Resistance  # min: 0  max: 200
 air_val_max = 239  #   # min: 0  max: 239
+soil_type = Loam  # Soil texture sets the irrigation thresholds. Choosing a type fills in the two tension values below, which you can still adjust.
+thr_low = 23  #   # min: 0  max: 239
+thr_high = 65  #   # min: 0  max: 239
 
 # Supported outputs:
 #   - Raw value (Resistance)  # equation: Rx*(Vs-A1)/A1
 #   - Raw Value (%)  # inputs: abs(air_val_max), water_val  # equation: (X-min)/(max-min)*100
 #   - Tension (kPa)
+#   - Management Thresholds  # inputs: soil_type, thr_low, thr_high
 
 
 def read(raw_value: float) -> dict:
