@@ -71,8 +71,7 @@ const SENSOR_TYPES = {
       {
         name: "fc",
         display: "Field Capacity",
-        label:
-          "Field capacity: The amount of water that remains in the soil after all the excess water at saturation has been drained.",
+        label: "Field capacity: The amount of water that remains in the soil after all the excess water at saturation has been drained.",
         value: "0.3",
         min: "0",
         max: "1",
@@ -81,8 +80,7 @@ const SENSOR_TYPES = {
       {
         name: "wp",
         display: "Wilting point",
-        label:
-          "Wilting point:  When plants take up all the available water for a given soil and it dries out to the point where it cannot supply any water to keep plants from dying",
+        label: "Wilting point:  When plants take up all the available water for a given soil and it dries out to the point where it cannot supply any water to keep plants from dying",
         value: "0.1",
         min: "0",
         max: "1",
@@ -91,8 +89,7 @@ const SENSOR_TYPES = {
       {
         name: "k",
         display: "k",
-        label:
-          "k: calibration scaling factor and it is determined by searching for an optimal match between the gravimetric and simulated soil moisture and minimisation of error.",
+        label: "k: calibration scaling factor and it is determined by searching for an optimal match between the gravimetric and simulated soil moisture and minimisation of error.",
         value: "0.5",
         min: "0",
         max: "1",
@@ -219,8 +216,7 @@ const SENSOR_TYPES = {
       {
         name: "soil_type",
         display: "Soil Type",
-        label:
-          "Soil texture sets the irrigation thresholds. Choosing a type fills in the two tension values below, which you can still adjust.",
+        label: "Soil texture sets the irrigation thresholds. Choosing a type fills in the two tension values below, which you can still adjust.",
         value: "Loam",
         min: "",
         max: "",
@@ -248,8 +244,7 @@ const SENSOR_TYPES = {
     ],
   },
   Watermark_Temperature: {
-    label:
-      "Irrometer Watermark (200SS) combined with Irrometer Soil Temperature Sensor (200TS)",
+    label: "Irrometer Watermark (200SS) combined with Irrometer Soil Temperature Sensor (200TS)",
     tip: "This sensor measures electrical resistance inside a granular matrix to determine soil water tension. With this option, you are reading the resistance value (kΩ).",
     outputs: [
       {
@@ -305,8 +300,7 @@ const SENSOR_TYPES = {
       {
         name: "soil_type",
         display: "Soil Type",
-        label:
-          "Soil texture sets the irrigation thresholds. Choosing a type fills in the two tension values below, which you can still adjust.",
+        label: "Soil texture sets the irrigation thresholds. Choosing a type fills in the two tension values below, which you can still adjust.",
         value: "Loam",
         min: "",
         max: "",
@@ -348,7 +342,8 @@ const SENSOR_TYPES = {
         tip: "You are reading soil temperature using your soil temperature sensor.",
       },
     ],
-    params: [],
+    params: [
+    ],
   },
 };
 
@@ -486,7 +481,7 @@ const OUTPUT_PARAMS = {
   DF_robot: {
     "Raw Value (ADC)": ["air_val_min"],
     "Raw Value (%)": ["air_val_max", "water_val"],
-    Thresholds: ["a", "b"],
+    "Thresholds": ["a", "b"],
     "Wetting Front": ["shallow", "deep", "threshold"],
     "1-2-3 point calibrations": ["a", "b"],
     "Rate of Change of Soil Water Status": [],
@@ -503,7 +498,7 @@ const OUTPUT_PARAMS = {
   Watermark_Temperature: {
     "Raw value (Resistance)": [],
     "Raw Value (%)": ["abs(air_val_max)", "water_val"],
-    Tension: [],
+    "Tension": [],
     "Raw value (Temperature, in °F)": [],
     "Raw value (Temperature, in °C)": [],
     "Management Thresholds": ["soil_type", "thr_low", "thr_high"],
@@ -518,7 +513,7 @@ const OUTPUT_VIZ = {
   DF_robot: {
     "Raw Value (ADC)": ["none", "raw_lcd"],
     "Raw Value (%)": ["none", "bar", "transformed_lcd"],
-    Thresholds: ["none", "state_lcd"],
+    "Thresholds": ["none", "state_lcd"],
     "Wetting Front": ["none", "front_lcd"],
     "1-2-3 point calibrations": ["none", "bar", "transformed_lcd"],
     "Rate of Change of Soil Water Status": ["none", "state_lcd"],
@@ -535,7 +530,7 @@ const OUTPUT_VIZ = {
   Watermark_Temperature: {
     "Raw value (Resistance)": ["none", "raw_lcd"],
     "Raw Value (%)": ["none", "wm_state_lcd", "bar", "transformed_lcd"],
-    Tension: ["none", "kpa_lcd"],
+    "Tension": ["none", "kpa_lcd"],
     "Raw value (Temperature, in °F)": ["none", "temp_lcd"],
     "Raw value (Temperature, in °C)": ["none", "temp_lcd"],
     "Management Thresholds": ["none", "wm_state_lcd"],
@@ -595,6 +590,8 @@ const float Vref_{idx}    = 5.0;      /* Arduino ADC reference */
 const float VA3_SCALE_{idx} = 0.0117; /* volts per kPa, from the VA-3 datasheet */
 const float dry_kPa_{idx} = {air_val_max};   /* tension treated as 0 %  */
 const float wet_kPa_{idx} = {water_val};     /* tension treated as 100 % */
+const float thr_low_{idx}  = {thr_low};      /* 10 % depletion, kPa */
+const float thr_high_{idx} = {thr_high};     /* 40 % depletion, kPa */
 `,
       read: `  int   sensorValue_{idx} = readSettled({readPin});
   /* The VA-3 actively drives this pin, so the float test detects a missing
@@ -936,12 +933,21 @@ const float BATT_CLEAR_V = 4.85;   /* must rise past this to clear the warning *
 bool battLow = false;
 
 float readSupplyVoltage() {
-  /* Measure the 1.1 V bandgap against Vcc, then invert to get Vcc. */
+  /* Measure the 1.1 V bandgap against Vcc, then invert to get Vcc.
+     This repoints the ADC multiplexer, so afterwards it is put back on a
+     normal channel and given a throwaway conversion. Without that, the next
+     sensor reading is taken while the mux is still settling and comes back
+     wildly wrong (a temperature channel would swing between its extremes). */
   ADMUX = _BV(REFS0) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
   delay(3);                       /* let the reference settle */
   ADCSRA |= _BV(ADSC);
   while (bit_is_set(ADCSRA, ADSC));
   uint16_t result = ADCL | (ADCH << 8);
+
+  analogRead(A0);                 /* restore the mux to a real channel */
+  delay(2);
+  analogRead(A0);                 /* throwaway conversion so it settles */
+
   if (result == 0) return 5.0;
   return 1125300.0 / result / 1000.0;   /* 1.1 * 1023 * 1000 / reading */
 }
@@ -1110,7 +1116,8 @@ function resolveSensorKey(name) {
   const n = String(name).toLowerCase().trim();
   const alias = SENSOR_ALIASES[n];
   if (alias) return alias;
-
+  /* Fall back to keywords so renaming or truncating the Excel label still resolves */
+  /* A standalone temperature sensor mentions temperature but no Watermark. */
   if (
     (n.includes("temperature") || n.includes("200ts")) &&
     !n.includes("watermark") &&
@@ -1125,6 +1132,9 @@ function resolveSensorKey(name) {
 }
 
 const OUTPUT_ALIASES = {
+  /* "Management thresholds" is the shared display name. Each sensor has its
+     own template under that key, so the wording differs while the option
+     reads the same in the form. */
   "management thresholds": "Management thresholds",
   "predetermined thresholds": "Management thresholds",
   "predetermined thresholds (very dry/dry/wet)": "Management thresholds",
@@ -1173,6 +1183,10 @@ function lookupTemplate(map, name) {
   return null;
 }
 
+/* Short names for the LCD. Line 1 is "PORT ABBREV value" within 16 chars. */
+/* Available water depletion thresholds by soil texture, in kPa.
+   low = 10 % depletion (wet end of the irrigation range),
+   high = 40 % depletion (irrigate by this point). */
 const SOIL_THRESHOLDS = {
   "Loamy sand": { low: 12, high: 20 },
   "Fine sandy loam": { low: 13, high: 25 },
@@ -1188,6 +1202,8 @@ const SENSOR_ABBREV = {
   Temperature: "TS200",
 };
 
+/* Watermark management thresholds use agronomic states; the capacitive probe
+   keeps the plain wet/dry wording. percent is always "higher = wetter". */
 function stateLinesFor(sensorKey) {
   if (sensorKey === "Watermark" || sensorKey === "Watermark_Temperature") {
     return `  if      (percent == 0)  lcd.print(F("Dry plant stress"));
@@ -1227,7 +1243,9 @@ function buildIno(blocks, surveyAnswers = {}) {
     vars.tempUnit = /(^|[^a-z])f\b|in °f|fahrenheit/i.test(b.output || "")
       ? "F"
       : "C";
-
+    /* A temperature output reads the shared 200TS channel, not this block's
+       Watermark port, so label the display with the port it actually came
+       from. Tension still reports the Watermark port, which is correct. */
     const sensorKey = resolveSensorKey(b.sensor);
     const outKey = resolveOutputKey(b.output);
     const isTempReading =
@@ -1237,7 +1255,7 @@ function buildIno(blocks, surveyAnswers = {}) {
       outKey === "Raw value (Temperature)";
     const labelPort = isTempReading && b.partnerPort ? b.partnerPort : b.port;
     vars.port = labelPort;
-
+    /* LCD line 1: port, short sensor name, then the value. */
     vars.label = `${labelPort} ${SENSOR_ABBREV[sensorKey] || "SENSOR"}`;
     vars.stateLines = stateLinesFor(sensorKey);
 
@@ -1265,6 +1283,8 @@ function buildIno(blocks, surveyAnswers = {}) {
       ? render(outputTpl, vars) + "\n"
       : `  percent = sensorValue_${idx};\n`;
 
+    /* Outputs that depend on a probe on ANOTHER port must also verify that
+       probe is present, or a floating partner pin feeds garbage into them. */
     const resolvedOut = resolveOutputKey(b.output);
     const needsPartnerProbe =
       resolvedOut === "Wetting Front" ||
@@ -1286,6 +1306,8 @@ function buildIno(blocks, surveyAnswers = {}) {
     loopBody += `    Serial.println(F("${labelPort}: no sensor detected"));\n`;
     loopBody += `  }\n`;
 
+    /* Only the sensor currently selected by the buttons owns the LCD,
+       otherwise every block overwrites the one before it. */
     const vizTpl = lookupTemplate(TEMPLATES.viz, b.viz) || TEMPLATES.viz.none;
     const vizBody = render(vizTpl.loop, vars)
       .split("\n")
@@ -1293,7 +1315,8 @@ function buildIno(blocks, surveyAnswers = {}) {
       .join("\n");
 
     const pad = (s) => (s + "                ").slice(0, 16);
-
+    /* A low battery matters more than the reading, so it claims line 2.
+       The reading stays on line 1 either way. */
     const battLine =
       `      if (battLow) {\n` +
       `        lcd.setCursor(0, 1);\n` +
@@ -1611,6 +1634,9 @@ function refreshViz(bid) {
   updateVizTip(bid);
 }
 
+/* The Volumetric / TAW equations contain 1/k, but the sheet's in_a..in_e
+   columns are full before k. Require it in code so the field appears and the
+   value reaches the sketch. (Adding k to a free in_ column also works.) */
 function extraParamsFor(outputVal) {
   const key = resolveOutputKey(outputVal);
   if (
@@ -1624,7 +1650,8 @@ function extraParamsFor(outputVal) {
 
 function normalizeParamName(name) {
   if (!name) return "";
-
+  /* Excel writes FC/WP where the params sheet says fc/wp, and sometimes wraps a
+     name in a function call such as abs(air_val_max). Match on the bare name. */
   const inner = String(name).match(/\(([^)]*)\)/);
   const bare = inner ? inner[1] : String(name);
   return bare.trim().toLowerCase();
@@ -1665,6 +1692,7 @@ function refreshParams(bid) {
     card.style.display = anyVisible ? "" : "none";
   }
 
+  /* Show the how-to-calibrate hint only when a measured value is on screen */
   const CAL_PARAMS = ["air_val", "air_val_max", "water_val"];
   const calHint = document.getElementById(`cal-hint-${bid}`);
   if (calHint) {
@@ -1688,6 +1716,8 @@ function refreshParams(bid) {
     const sel = document.getElementById(`partner-sel-${bid}`);
 
     if (isTempCombo) {
+      /* This sensor is a pair: the Watermark on this block's port plus a
+         separate soil temperature probe that needs its own port. */
       partnerCard.style.display = "";
       if (sel) sel.style.display = "";
       if (label)
@@ -1721,6 +1751,8 @@ function refreshParams(bid) {
   }
 }
 
+/* The VA-3 board carries a single temperature probe shared by all Watermark
+   sensors, so every Watermark+temperature block must name the same port. */
 function syncTempPorts(sourceBid) {
   const src = document.getElementById(`partner-sel-${sourceBid}`);
   if (!src || !src.value) return;
@@ -1767,9 +1799,14 @@ function populatePartnerPorts(bid, mode = "front") {
   let choices, emptyMsg;
 
   if (mode === "temp") {
+    /* The VA-3 temperature channel is wired independently, so any analog port
+       is a candidate EXCEPT this block's own Watermark port - one pin cannot
+       carry both the tension and the temperature signal. Not defaulted:
+       silently picking a port made the sketch read an unconnected pin. */
     choices = PORTS.filter((p) => /^A[1-5]$/.test(p) && p !== myPort);
     emptyMsg = "No analog port available";
   } else {
+    /* The deep wetting-front sensor IS its own block, so pick from those. */
     choices = takenPorts.filter((p) => p !== myPort && /^A[1-5]$/.test(p));
     emptyMsg = "Add a second sensor block first";
   }
@@ -1788,6 +1825,7 @@ function populatePartnerPorts(bid, mode = "front") {
           )
           .join("");
 
+  /* keep a deliberate earlier choice, otherwise leave it unselected */
   if (mode === "temp" && !choices.includes(current)) sel.value = "";
 }
 
@@ -1912,6 +1950,8 @@ function addParamRow(
   updateParamRemoveBtns(bid);
 }
 
+/* Choosing a soil texture fills in the two tension thresholds for that soil.
+   The values stay editable, so a grower can tune them to their own field. */
 function applySoilType(bid, soil) {
   const t = SOIL_THRESHOLDS[soil];
   if (!t) return;
@@ -2253,6 +2293,8 @@ function openFilenamePrompt() {
   if (btn) btn.disabled = false;
 }
 
+/* Saved files keep the whole sensor configuration, not just a name, so a
+   previous setup can be reloaded into the form and adjusted. */
 function renderSavedConfigs() {
   const wrap = document.getElementById("saved-configs");
   if (!wrap) return;
@@ -2307,7 +2349,7 @@ function loadSavedConfig(fn) {
     const stype = document.getElementById(`stype-sel-${bid}`);
     if (stype && [...stype.options].some((o) => o.value === b.sensor)) {
       stype.value = b.sensor;
-      onSensorChange(bid);
+      onSensorChange(bid); /* repopulates outputs and params */
     }
     const port = document.getElementById(`port-sel-${bid}`);
     if (port && b.port) port.value = b.port;
@@ -2315,12 +2357,13 @@ function loadSavedConfig(fn) {
     const out = document.getElementById(`output-sel-${bid}`);
     if (out && [...out.options].some((o) => o.value === b.output)) {
       out.value = b.output;
-      updateOutputTip(bid);
+      updateOutputTip(bid); /* refreshes params and viz lists */
     }
     const viz = document.getElementById(`viz-sel-${bid}`);
     if (viz && [...viz.options].some((o) => o.value === b.viz))
       viz.value = b.viz;
 
+    /* restore saved values into the matching parameter rows */
     (b.params || []).forEach((p) => {
       document.querySelectorAll(`#params-${bid} .param-row`).forEach((row) => {
         const rid = row.dataset.rid;
@@ -2401,6 +2444,7 @@ function confirmSurvey() {
     }
   });
 
+  /* Read the timestamp choice BEFORE closing the modal removes the checkbox. */
   const stampEl = document.getElementById("sq-timestamp");
   const wantStamp = !!(stampEl && stampEl.checked);
 
@@ -2417,7 +2461,9 @@ function confirmSurvey() {
     .replace(/\.ino$/i, "");
   const base =
     rawName || (_pendingFilename || "nodeflow").replace(/\.ino$/i, "");
-
+  /* Only stamp the name if the user asked for it. Browsers cannot overwrite a
+     download, so without a stamp a repeated name becomes name-1.ino; with it,
+     each file is unique and dated. The choice is left to the user. */
   let filename = base + ".ino";
   if (wantStamp) {
     const d = new Date();
