@@ -1,4 +1,4 @@
-# NodeFlow (On-site) Sensing System — code generator
+# NodeFlow (On-site) Sensing System code generator
 # Everything here is public documentation and a client-side tool.
 
 User-agent: *
