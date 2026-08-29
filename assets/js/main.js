@@ -52,8 +52,8 @@ const SENSOR_TYPES = {
       {
         name: "water_val",
         display: "Water value",
-        label: "Water value: raw reading submerged in water",
-        value: "0",
+        label: "Water value: the raw reading with the probe standing in water. Typically around 280 on a 5 V board. Measure it, do not assume it.",
+        value: "280",
         min: "0",
         max: "1023",
         units: "ADC",
@@ -80,7 +80,7 @@ const SENSOR_TYPES = {
         name: "k",
         display: "k",
         label: "k: calibration scaling factor, fitted by matching gravimetric samples to the sensor. The default spreads a typical probe across 0 to about 50 % volumetric water, but it is soil specific and should be calibrated.",
-        value: "2.2",
+        value: "6.1",
         min: "0",
         max: "10",
         units: "",
@@ -98,7 +98,7 @@ const SENSOR_TYPES = {
         name: "air_val_max",
         display: "Air value (max)",
         label: "Air value: raw reading in open air",
-        value: "600",
+        value: "590",
         min: "0",
         max: "1023",
         units: "ADC",
@@ -106,7 +106,7 @@ const SENSOR_TYPES = {
       {
         name: "a",
         display: "Upper threshold",
-        label: "",
+        label: "The upper threshold used to calculate the state of the sensor.",
         value: "450",
         min: "0",
         max: "1023",
@@ -115,7 +115,7 @@ const SENSOR_TYPES = {
       {
         name: "b",
         display: "Lower threshold",
-        label: "",
+        label: "The lower theshold used to calculate the state of the sensor.",
         value: "350",
         min: "0",
         max: "1023",
@@ -124,7 +124,7 @@ const SENSOR_TYPES = {
       {
         name: "shallow",
         display: "Shallow sensor depth",
-        label: "",
+        label: "The depth of the sensor closest to the surface.",
         value: "15",
         min: "0",
         max: "200",
@@ -133,7 +133,7 @@ const SENSOR_TYPES = {
       {
         name: "deep",
         display: "Deep sensor depth",
-        label: "",
+        label: "The depth of the sensor deepest in the soil.",
         value: "40",
         min: "0",
         max: "200",
@@ -142,7 +142,7 @@ const SENSOR_TYPES = {
       {
         name: "threshold",
         display: "Front arrival reading",
-        label: "",
+        label: "The threshold for the front arrival.",
         value: "400",
         min: "0",
         max: "1023",
@@ -183,21 +183,12 @@ const SENSOR_TYPES = {
         value: "0",
         min: "0",
         max: "239",
-        units: "kΩ",
-      },
-      {
-        name: "Resistance",
-        display: "Resistance",
-        label: "Resistance",
-        value: "0",
-        min: "0",
-        max: "200",
-        units: "kΩ",
+        units: "kPa",
       },
       {
         name: "air_val_max",
         display: "Air value (max)",
-        label: "",
+        label: "The maximum air value.",
         value: "239",
         min: "0",
         max: "239",
@@ -216,7 +207,7 @@ const SENSOR_TYPES = {
       {
         name: "thr_low",
         display: "Wet threshold (10% depletion)",
-        label: "",
+        label: "Threshold to calculate how wet the soil is at 10% depletion.",
         value: "23",
         min: "0",
         max: "239",
@@ -225,7 +216,7 @@ const SENSOR_TYPES = {
       {
         name: "thr_high",
         display: "Dry threshold (40% depletion)",
-        label: "",
+        label: "Threshold to calculate how dry the soil is at 40% depletion.",
         value: "65",
         min: "0",
         max: "239",
@@ -300,7 +291,7 @@ const SENSOR_TYPES = {
       {
         name: "air_val_max",
         display: "Air value (max)",
-        label: "",
+        label: "The maximum air value.",
         value: "239",
         min: "0",
         max: "239",
@@ -309,7 +300,7 @@ const SENSOR_TYPES = {
       {
         name: "water_val",
         display: "Water value",
-        label: "",
+        label: "The set water value.",
         value: "0",
         min: "0",
         max: "239",
@@ -328,7 +319,7 @@ const SENSOR_TYPES = {
       {
         name: "thr_low",
         display: "Wet threshold (10% depletion)",
-        label: "",
+        label: "Threshold to calculate how wet the soil is at 10% depletion.",
         value: "23",
         min: "0",
         max: "239",
@@ -337,30 +328,11 @@ const SENSOR_TYPES = {
       {
         name: "thr_high",
         display: "Dry threshold (40% depletion)",
-        label: "",
+        label: "Threshold to calculate how dry the soil is at 40% depletion.",
         value: "65",
         min: "0",
         max: "239",
         units: "kPa",
-      },
-      {
-        name: "wiring",
-        display: "Connection",
-        label: "How the sensor reaches the board. Through the 200SS-VA3 adapter, which does the excitation and calibration itself, or wired straight to the Arduino with a series resistor. Direct wiring supports one Watermark only: two bare sensors in the same soil read through each other and damage their electrodes.",
-        value: "200SS-VA3 adapter",
-        min: "",
-        max: "",
-        units: "",
-        choices: "200SS-VA3 adapter|Direct to Arduino",
-      },
-      {
-        name: "Rx",
-        display: "Series resistor",
-        label: "Series resistor between the sensor and ground, used only for direct wiring. Irrometer's reference circuit uses 10 kilohms.",
-        value: "10",
-        min: "1",
-        max: "100",
-        units: "kOhm",
       },
     ],
   },
@@ -1595,10 +1567,15 @@ function buildIno(blocks, surveyAnswers = {}) {
        The choice is a parameter rather than a separate sensor type, so the
        grower picks their sensor first and says how it is connected second. */
     const wiredDirect = isDirectWiring(b);
-    const templateKey =
-      wiredDirect && TEMPLATES.sensors[sensorKey + "_direct"]
-        ? sensorKey + "_direct"
-        : sensorKey;
+    if (wiredDirect && !TEMPLATES.sensors[sensorKey + "_direct"]) {
+      /* falling back to the adapter template here would hand someone code that
+         expects a voltage from hardware they did not wire. */
+      throw new Error(
+        `${b.sensor} has no direct-wiring template, so it can only be read ` +
+          `through the 200SS-VA3 adapter.`,
+      );
+    }
+    const templateKey = wiredDirect ? sensorKey + "_direct" : sensorKey;
     const outKey = resolveOutputKey(b.output);
     const isTempReading =
       outKey === "Temperature F" ||

@@ -32,7 +32,7 @@ from openpyxl import load_workbook
 # Paths are resolved against the repository root so the script can be run from
 # anywhere:  python3 tools/build.py
 ROOT          = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-EXCEL_NAME    = "sensor_configuration.xlsx"
+EXCEL_NAME    = "sensor_configuration_v2.xlsx"
 MAIN_JS_FILE  = os.path.join(ROOT, "assets", "js", "main.js")
 TEMPLATES_DIR = os.path.join(ROOT, "tools", "templates")
 
