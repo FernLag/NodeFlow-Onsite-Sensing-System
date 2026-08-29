@@ -1085,6 +1085,11 @@ void handleButtonPress() {
    ============================================================ */
 
 const CFG = (self.NODEFLOW_CONFIG || {});
+
+/* i18n.js defines these. The fallbacks keep the generator working on its own,
+   which is how the sketch verifier loads it. */
+const t = self.t || ((key) => key);
+const tData = self.tData || ((group, key, fallback) => fallback);
 const LIMITS = Object.assign(
   {
     minSubmitIntervalMs: 5000,
@@ -1581,14 +1586,14 @@ function initTooltips() {
 function tipBadge(text, id = "") {
   const safe = escapeHtml(text || "");
   const idAttr = id ? `id="${id}"` : "";
-  return `<button type="button" class="tip-badge" ${idAttr} data-tip="${safe}" aria-label="Explanation: ${safe}"><span aria-hidden="true">i</span></button>`;
+  return `<button type="button" class="tip-badge" ${idAttr} data-tip="${safe}" aria-label="${escapeHtml(t("tip.prefix"))} ${safe}"><span aria-hidden="true">i</span></button>`;
 }
 
 function setTip(id, text) {
   const el = document.getElementById(id);
   if (!el) return;
   el.dataset.tip = text || "";
-  el.setAttribute("aria-label", "Explanation: " + (text || ""));
+  el.setAttribute("aria-label", t("tip.prefix") + " " + (text || ""));
 }
 
 let uid = 0;
@@ -1601,9 +1606,7 @@ function addBlock() {
   const existing = document.querySelectorAll(".sensor-block").length;
   if (existing >= LIMITS.maxSensorBlocks) {
     showFormError(
-      "You have reached the limit of " +
-        LIMITS.maxSensorBlocks +
-        " sensor blocks. Remove one before adding another.",
+      t("msg.blockLimit", { n: LIMITS.maxSensorBlocks }),
     );
     return;
   }
@@ -1617,13 +1620,13 @@ function addBlock() {
   const freePort = PORTS.find((p) => !usedPorts.includes(p)) || PORTS[0];
 
   const sensorOpts = Object.entries(SENSOR_TYPES)
-    .map(([k, v]) => `<option value="${k}">${v.label}</option>`)
+    .map(([k, v]) => `<option value="${escapeHtml(k)}">${escapeHtml(tData("sensors", k, v.label))}</option>`)
     .join("");
   const outputOpts = defCfg.outputs
-    .map((o) => `<option value="${o.value}">${o.display || o.value}</option>`)
+    .map((o) => `<option value="${escapeHtml(o.value)}">${escapeHtml(tData("outputs", o.value, o.display || o.value))}</option>`)
     .join("");
   const vizOpts = VIZ_OPTIONS.map(
-    (v) => `<option value="${v.value}">${v.label}</option>`,
+    (v) => `<option value="${escapeHtml(v.value)}">${escapeHtml(tData("viz", v.value, v.label))}</option>`,
   ).join("");
 
   const block = document.createElement("div");
@@ -1632,23 +1635,18 @@ function addBlock() {
 
   block.innerHTML = `
     <div class="block-head">
-      <h3 class="block-title"><span class="sensor-num" id="bnum-${bid}"></span> Sensor-Arduino port connection specifications</h3>
-      <button class="remove-btn" type="button" onclick="removeBlock(${bid})" id="rem-${bid}">Remove</button>
+      <h3 class="block-title"><span class="sensor-num" id="bnum-${bid}"></span> ${escapeHtml(t("form.blockTitle"))}</h3>
+      <button class="remove-btn" type="button" onclick="removeBlock(${bid})" id="rem-${bid}">${escapeHtml(t("form.remove"))}</button>
     </div>
     <div class="block-body">
-      <p class="block-intro">
-        For each sensor, select the items you want from the lists below.
-        Leaving the default values will generate a default code that may not meet your requirements.
-      </p>
+      <p class="block-intro">${escapeHtml(t("form.blockIntro"))}</p>
 
-      <p class="pair-caption">
-        The sensor specified below will be plugged into the Arduino board port specified below.
-      </p>
+      <p class="pair-caption">${escapeHtml(t("form.pairCaption"))}</p>
       <div class="row2">
         <div class="field">
           <div class="field-label">
-            <label for="stype-sel-${bid}">Sensor type <span class="req" aria-hidden="true">*</span></label>
-            ${tipBadge("The sensors that can be used with the NodeFlow On-site Sensing System are listed in our written guidelines.", `stype-tip-${bid}`)}
+            <label for="stype-sel-${bid}">${escapeHtml(t("form.sensorType"))} <span class="req" aria-hidden="true">*</span></label>
+            ${tipBadge(t("tip.sensorType"), `stype-tip-${bid}`)}
           </div>
           <select id="stype-sel-${bid}" required aria-required="true" onchange="onSensorChange(${bid})">
             ${sensorOpts}
@@ -1656,35 +1654,35 @@ function addBlock() {
         </div>
         <div class="field">
           <div class="field-label">
-            <label for="port-sel-${bid}">Port <span class="req" aria-hidden="true">*</span></label>
-            ${tipBadge("The letter and number of the port are written on the left side of each port. The ports associated to the Arduino board are shown on the LCD screen.", `port-tip-${bid}`)}
+            <label for="port-sel-${bid}">${escapeHtml(t("form.port"))} <span class="req" aria-hidden="true">*</span></label>
+            ${tipBadge(t("tip.port"), `port-tip-${bid}`)}
           </div>
           <select id="port-sel-${bid}" required aria-required="true" onchange="checkDuplicatePorts(); updatePortTip(${bid})">
             ${PORTS.map((p) => `<option value="${p}" ${p === freePort ? "selected" : ""}>${p}</option>`).join("")}
           </select>
-          <span class="err-msg" id="err-port-${bid}">Required.</span>
+          <span class="err-msg" id="err-port-${bid}">${escapeHtml(t("form.required"))}</span>
         </div>
       </div>
 
       <div class="section-card">
         <div class="section-head">
-          <label class="section-label" for="output-sel-${bid}" id="output-label-${bid}">For this sensor and this port, I want to see the variable specified below on my screen: <span class="req" aria-hidden="true">*</span></label>
-          ${tipBadge("The sensor will send out a raw value that can be transformed into other variables that may be easier to understand and read on a regular basis. Please choose how you want to read your data.", `output-tip-${bid}`)}
+          <label class="section-label" for="output-sel-${bid}" id="output-label-${bid}">${escapeHtml(t("form.outputLabel"))} <span class="req" aria-hidden="true">*</span></label>
+          ${tipBadge(t("tip.output"), `output-tip-${bid}`)}
         </div>
         <div class="section-body">
           <div class="field">
             <select id="output-sel-${bid}" required aria-required="true" onchange="updateOutputTip(${bid})">
               ${outputOpts}
             </select>
-            <span class="err-msg" id="err-output-${bid}">Required.</span>
+            <span class="err-msg" id="err-output-${bid}">${escapeHtml(t("form.required"))}</span>
           </div>
         </div>
       </div>
 
       <div class="section-card">
         <div class="section-head">
-          <label class="section-label" for="viz-sel-${bid}">For this sensor and this port, I want this variable to appear as:</label>
-          ${tipBadge("You can display your variable in different ways. For example, you may want it to appear as a number, or a percentage, or a progress bar. Please select.", `viz-tip-${bid}`)}
+          <label class="section-label" for="viz-sel-${bid}">${escapeHtml(t("form.vizLabel"))}</label>
+          ${tipBadge(t("tip.viz"), `viz-tip-${bid}`)}
         </div>
         <div class="section-body">
           <div class="field">
@@ -1694,11 +1692,10 @@ function addBlock() {
       </div>
 
       <div class="section-card" id="partner-card-${bid}" style="display:none">
-        <div class="section-head"><label class="section-label" for="partner-sel-${bid}">Deep (partner) sensor port <span class="req" aria-hidden="true">*</span></label></div>
+        <div class="section-head"><label class="section-label" for="partner-sel-${bid}">${escapeHtml(t("form.partnerLabel"))} <span class="req" aria-hidden="true">*</span></label></div>
         <div class="section-body">
           <div class="wetting-front-msg">
-            Wetting front needs two sensors at different depths. This block is the <strong>shallow</strong> sensor.
-            Add a second sensor block for the <strong>deep</strong> sensor, then choose its port here.
+            ${escapeHtml(t("form.partnerHelp1"))} <strong>${escapeHtml(t("form.partnerHelpShallow"))}</strong>${escapeHtml(t("form.partnerHelp2"))} <strong>${escapeHtml(t("form.partnerHelpDeep"))}</strong> ${escapeHtml(t("form.partnerHelp3"))}
           </div>
           <div class="field">
             <select id="partner-sel-${bid}" aria-required="true" onchange="syncTempPorts(${bid}); refreshAllBlocks()"></select>
@@ -1707,15 +1704,12 @@ function addBlock() {
       </div>
 
       <div class="section-card" id="params-card-${bid}">
-        <div class="section-head"><span class="section-label">The information listed below is necessary to configure your NodeFlow<sub class="nf-sub">(On-site)</sub>. Please fill in each case to the best of your knowledge.</span>
-          ${tipBadge("In the configuration you specified in the boxes above, we need to know the value of the parameters listed below. Default values are specified but they may not be suitable for your specific situation. Please refer to the guidelines to learn how to measure these values.", `params-tip-${bid}`)}
+        <div class="section-head"><span class="section-label">${escapeHtml(t("form.paramsLabel"))}</span>
+          ${tipBadge(t("tip.params"), `params-tip-${bid}`)}
         </div>
         <div class="section-body">
           <p class="block-intro" id="cal-hint-${bid}" style="display:none">
-            <strong>Calibration values.</strong> If you don't know these numbers yet:
-            generate a code with the output "Raw Sensor Value (bits)" for this sensor first,
-            read the value shown with the probe held in open air, then with the probe
-            submerged in water, and enter those two numbers here.
+            <strong>${escapeHtml(t("form.calHintTitle"))}</strong> ${escapeHtml(t("form.calHint"))}
           </p>
           <div id="params-${bid}"></div>
         </div>
@@ -1778,7 +1772,7 @@ function updateOutputTip(bid) {
   const key = document.getElementById(`stype-sel-${bid}`).value;
   const cfg = SENSOR_TYPES[key];
   const match = cfg?.outputs.find((o) => o.value === val);
-  setTip(`output-tip-${bid}`, match?.tip || "");
+  setTip(`output-tip-${bid}`, tData("outputTips", val, match?.tip || ""));
   refreshParams(bid);
   refreshViz(bid);
 }
@@ -1797,7 +1791,10 @@ function refreshViz(bid) {
 
   const prev = sel.value;
   sel.innerHTML = VIZ_OPTIONS.filter((v) => allowed.includes(v.value))
-    .map((v) => `<option value="${v.value}">${v.label}</option>`)
+    .map(
+      (v) =>
+        `<option value="${escapeHtml(v.value)}">${escapeHtml(tData("viz", v.value, v.label))}</option>`,
+    )
     .join("");
   sel.value = allowed.includes(prev) ? prev : "none";
   updateVizTip(bid);
@@ -2020,16 +2017,23 @@ function refreshAllBlocks() {
 function updateVizTip(bid) {
   const val = document.getElementById(`viz-sel-${bid}`).value;
   const match = VIZ_OPTIONS.find((v) => v.value === val);
-  setTip(`viz-tip-${bid}`, match?.tip || "");
+  setTip(`viz-tip-${bid}`, tData("vizTips", val, match?.tip || ""));
 }
 
 function onSensorChange(bid) {
   const key = document.getElementById(`stype-sel-${bid}`).value;
   const cfg = SENSOR_TYPES[key];
   if (!cfg) return;
-  setTip(`stype-tip-${bid}`, cfg.tip || "");
+  /* The sheet's per-sensor tooltip is really the first measurement's tooltip,
+     a quirk of how the rows are laid out, so it reads as the wrong help text
+     on the sensor picker. The badge keeps the text that is actually about
+     choosing a sensor. */
+  setTip(`stype-tip-${bid}`, t("tip.sensorType"));
   document.getElementById(`output-sel-${bid}`).innerHTML = cfg.outputs
-    .map((o) => `<option value="${o.value}">${o.display || o.value}</option>`)
+    .map(
+      (o) =>
+        `<option value="${escapeHtml(o.value)}">${escapeHtml(tData("outputs", o.value, o.display || o.value))}</option>`,
+    )
     .join("");
   updateOutputTip(bid);
   const container = document.getElementById(`params-${bid}`);
@@ -2083,7 +2087,7 @@ function addParamRow(
   row.innerHTML = `
     <div class="field">
       <div class="field-label">
-        <span class="param-name-caption">Parameter</span>
+        <span class="param-name-caption">${escapeHtml(t("form.parameter"))}</span>
         ${tooltipText ? tipBadge(tooltipText) : ""}
       </div>
       <input type="text" id="pname-${rid}" value="${escapeHtml(nameVal)}" required readonly style="display:none">
@@ -2091,8 +2095,8 @@ function addParamRow(
     </div>
     <div class="field value-unit-field">
       <div class="value-unit-labels">
-        <span class="value-caption" id="pvlabel-${rid}">Value <span class="req" aria-hidden="true">*</span></span>
-        ${unitsVal ? `<span class="unit-label">Units</span>` : ""}
+        <span class="value-caption" id="pvlabel-${rid}">${escapeHtml(t("form.value"))} <span class="req" aria-hidden="true">*</span></span>
+        ${unitsVal ? `<span class="unit-label">${escapeHtml(t("form.units"))}</span>` : ""}
       </div>
       <div class="value-unit-row">
         ${
@@ -2170,11 +2174,11 @@ function checkDuplicatePorts() {
   const messages = [];
   if (dupes.length)
     messages.push(
-      `Port${dupes.length > 1 ? "s" : ""} ${dupes.join(", ")} used in more than one block. Each port must be unique.`,
+      t("msg.portsDuplicate", { s: dupes.length > 1 ? "s" : "", ports: dupes.join(", ") }),
     );
   if (analogCount >= 5)
     messages.push(
-      `All 5 analog ports (A1–A5) are in use. To add more sensors, use a digital port (D1–D14).`,
+      t("msg.portsFull"),
     );
   const warn = document.getElementById("port-warning");
   if (messages.length) {
@@ -2223,9 +2227,7 @@ function validate() {
     const first = document.getElementById(duplicated[0][1][0]);
     if (first) first.setAttribute("aria-invalid", "true");
     showFormError(
-      "Two sensor blocks are using port " +
-        duplicated[0][0] +
-        ". Each port can hold only one sensor, so give one of them a different port.",
+      t("msg.duplicatePort", { port: duplicated[0][0] }),
       first,
     );
     return false;
@@ -2247,7 +2249,7 @@ function validate() {
 
   if (firstBad) {
     showFormError(
-      "Some required values are still empty. The fields that need filling in are outlined in red.",
+      t("msg.emptyRequired"),
       firstBad,
     );
     return false;
@@ -2327,9 +2329,9 @@ function renderSavedBanner() {
   const banner = document.getElementById("saved-banner");
   if (!banner) return;
   if (_savedAnswers && _savedAnswers.name) {
-    banner.innerHTML = `Welcome back, <strong>${escapeHtml(_savedAnswers.name)}</strong>. Your info is saved.
-      <a href="#" onclick="editSavedAnswers(); return false;">Edit my info</a> ·
-      <a href="#" onclick="clearSavedAnswers(); return false;">Clear</a>`;
+    banner.innerHTML = `${escapeHtml(t("saved.welcome"))} <strong>${escapeHtml(_savedAnswers.name)}</strong>${escapeHtml(t("saved.infoSaved"))}
+      <a href="#" onclick="editSavedAnswers(); return false;">${escapeHtml(t("saved.edit"))}</a> ·
+      <a href="#" onclick="clearSavedAnswers(); return false;">${escapeHtml(t("saved.clear"))}</a>`;
     banner.classList.add("show");
   } else {
     banner.classList.remove("show");
@@ -2384,9 +2386,7 @@ function handleGenerate() {
       b.partnerPort === b.port
     ) {
       showFormError(
-        "The soil temperature sensor and the Watermark cannot share the same port (" +
-          b.port +
-          "). Pick a different port for the temperature sensor.",
+        t("msg.samePort", { port: b.port }),
       );
       return;
     }
@@ -2395,7 +2395,7 @@ function handleGenerate() {
       !b.partnerPort
     ) {
       showFormError(
-        "This sensor uses two probes. Choose the port your soil temperature sensor is plugged into.",
+        t("msg.needTempPort"),
       );
       return;
     }
@@ -2411,7 +2411,7 @@ function handleGenerate() {
       !deepPorts.includes(b.port)
     ) {
       showFormError(
-        "A wetting front reading needs a second, deeper sensor. Add another sensor block and choose its port as the deep partner.",
+        t("msg.needDeepSensor"),
       );
       return;
     }
@@ -2482,13 +2482,13 @@ function openSurvey(prefill = {}) {
       q.key === "ino_comment" ? LIMITS.maxCommentLength : LIMITS.maxTextFieldLength;
     return `
       <div class="field survey-field">
-        <label for="sq-${escapeHtml(q.key)}">${escapeHtml(q.label)} ${req}</label>
+        <label for="sq-${escapeHtml(q.key)}">${escapeHtml(tData("survey", q.key, q.label))} ${req}</label>
         <input type="${escapeHtml(q.type)}" id="sq-${escapeHtml(q.key)}"
                placeholder="${escapeHtml(q.placeholder || "")}"
                maxlength="${maxLen}" autocomplete="${q.key === "email" ? "email" : q.key === "name" ? "name" : q.key === "country" ? "country-name" : "off"}"
                value="${escapeHtml(val)}" ${q.required ? 'required aria-required="true"' : ""}
                aria-describedby="sqerr-${escapeHtml(q.key)}">
-        <span class="err-msg" id="sqerr-${escapeHtml(q.key)}">Required.</span>
+        <span class="err-msg" id="sqerr-${escapeHtml(q.key)}">${escapeHtml(t("form.required"))}</span>
       </div>`;
   }).join("");
   const cb = document.getElementById("consent-checkbox");
@@ -2508,8 +2508,8 @@ function openFilenamePrompt() {
     ? `
     <div class="filename-section">
       <div class="filename-section-head">
-        <strong>Option 1: reuse a previous name</strong>
-        <span class="filename-section-help">Click to fill in the name below. Your browser will not overwrite the earlier download. It saves alongside it as name-2.ino, so delete the old one if you don't want both.</span>
+        <strong>${escapeHtml(t("dialog.option1"))}</strong>
+        <span class="filename-section-help">${escapeHtml(t("dialog.option1Help"))}</span>
       </div>
       <div class="saved-file-list">
         ${fileNames
@@ -2520,21 +2520,21 @@ function openFilenamePrompt() {
             <button type="button" class="saved-file-btn" onclick="selectSavedFilename('${escapeJsString(fn)}')">
               <span class="saved-file-name">${escapeHtml(fn)}</span>
               <span class="saved-file-meta">
-                <span class="saved-file-ts">Last used: ${escapeHtml(ts)}</span>
-                <span class="saved-file-action" aria-hidden="true">Click to use →</span>
+                <span class="saved-file-ts">${escapeHtml(t("dialog.lastUsed"))} ${escapeHtml(ts)}</span>
+                <span class="saved-file-action" aria-hidden="true">${escapeHtml(t("dialog.clickToUse"))} →</span>
               </span>
             </button>
-            <button type="button" class="saved-file-del" onclick="removeSavedFile('${escapeJsString(fn)}'); return false;" aria-label="Forget the file name ${escapeHtml(fn)}" title="Forget this filename">✕</button>
+            <button type="button" class="saved-file-del" onclick="removeSavedFile('${escapeJsString(fn)}'); return false;" aria-label="${escapeHtml(t("saved.forgetName"))} ${escapeHtml(fn)}" title="${escapeHtml(t("saved.forgetName"))}">✕</button>
           </div>`;
           })
           .join("")}
       </div>
     </div>
-    <div class="saved-file-divider"><span>OR</span></div>
+    <div class="saved-file-divider"><span>${escapeHtml(t("dialog.or"))}</span></div>
     <div class="filename-section">
       <div class="filename-section-head">
-        <strong>Option 2: make a new file</strong>
-        <span class="filename-section-help">Type a new name to create a separate file.</span>
+        <strong>${escapeHtml(t("dialog.option2"))}</strong>
+        <span class="filename-section-help">${escapeHtml(t("dialog.option2Help"))}</span>
       </div>
     </div>`
     : "";
@@ -2542,25 +2542,25 @@ function openFilenamePrompt() {
   body.innerHTML = `
     ${fileList}
     <div class="field survey-field">
-      <label for="sq-filename">${hasFiles ? "Name of file to generate (new or selected from above)" : "Name of file to generate"} <span class="req" aria-hidden="true">*</span></label>
-      <input type="text" id="sq-filename" placeholder="e.g. apples_field2 (no spaces, no .ino)"
+      <label for="sq-filename">${escapeHtml(hasFiles ? t("dialog.filenameOrPrevious") : t("dialog.filename"))} <span class="req" aria-hidden="true">*</span></label>
+      <input type="text" id="sq-filename" placeholder="${escapeHtml(t("dialog.filenamePlaceholder"))}"
              maxlength="60" autocomplete="off" required aria-required="true"
              aria-describedby="sqerr-filename filename-help">
-      <span class="err-msg" id="sqerr-filename">Required.</span>
-      <span class="field-help" id="filename-help">Letters, numbers, dashes and underscores. Anything else is removed.</span>
+      <span class="err-msg" id="sqerr-filename">${escapeHtml(t("form.required"))}</span>
+      <span class="field-help" id="filename-help">${escapeHtml(t("dialog.filenameHelp"))}</span>
       <label class="stamp-opt">
         <input type="checkbox" id="sq-timestamp">
-        Add a date and time to the filename so it never overwrites an earlier download
+        ${escapeHtml(t("dialog.stamp"))}
       </label>
     </div>
     <div class="field survey-field">
-      <label for="sq-ino_comment">Comment to include in the code (optional)</label>
+      <label for="sq-ino_comment">${escapeHtml(t("dialog.comment"))}</label>
       <input type="text" id="sq-ino_comment" maxlength="${LIMITS.maxCommentLength}" autocomplete="off"
-             placeholder="e.g. Orchard block 2, installed June 2026">
+             placeholder="${escapeHtml(t("dialog.commentPlaceholder"))}">
     </div>
     <p class="saved-info-note">
-      Submitting as <strong>${escapeHtml(_savedAnswers.name)}</strong> (${escapeHtml(_savedAnswers.email)}).
-      <a href="#" onclick="closeSurvey(); editSavedAnswers(); return false;">Not you?</a>
+      ${escapeHtml(t("dialog.submittingAs"))} <strong>${escapeHtml(_savedAnswers.name)}</strong> (${escapeHtml(_savedAnswers.email)}).
+      <a href="#" onclick="closeSurvey(); editSavedAnswers(); return false;">${escapeHtml(t("dialog.notYou"))}</a>
     </p>`;
 
   const cb = document.getElementById("consent-checkbox");
@@ -2582,8 +2582,8 @@ function renderSavedConfigs() {
   }
   wrap.innerHTML = `
     <div class="filename-section-head">
-      <strong>Load a previous configuration</strong>
-      <span class="filename-section-help">Reloads the sensors, ports and values you used for that file so you can adjust them.</span>
+      <strong>${escapeHtml(t("saved.loadTitle"))}</strong>
+      <span class="filename-section-help">${escapeHtml(t("saved.loadHelp"))}</span>
     </div>
     <div class="saved-file-list">
       ${names
@@ -2596,11 +2596,11 @@ function renderSavedConfigs() {
           <button type="button" class="saved-file-btn" onclick="loadSavedConfig('${escapeJsString(fn)}')">
             <span class="saved-file-name">${escapeHtml(fn)}</span>
             <span class="saved-file-meta">
-              <span class="saved-file-ts">${n} sensor${n === 1 ? "" : "s"} · ${escapeHtml(ts)}</span>
-              <span class="saved-file-action" aria-hidden="true">Load →</span>
+              <span class="saved-file-ts">${n} ${escapeHtml(n === 1 ? t("saved.sensor") : t("saved.sensors"))} · ${escapeHtml(ts)}</span>
+              <span class="saved-file-action" aria-hidden="true">${escapeHtml(t("saved.load"))} →</span>
             </span>
           </button>
-          <button type="button" class="saved-file-del" onclick="removeSavedFile('${escapeJsString(fn)}'); return false;" aria-label="Forget the saved configuration ${escapeHtml(fn)}" title="Forget this configuration">✕</button>
+          <button type="button" class="saved-file-del" onclick="removeSavedFile('${escapeJsString(fn)}'); return false;" aria-label="${escapeHtml(t("saved.forgetConfig"))} ${escapeHtml(fn)}" title="${escapeHtml(t("saved.forgetConfig"))}">✕</button>
         </div>`;
         })
         .join("")}
@@ -2612,7 +2612,7 @@ function loadSavedConfig(fn) {
   if (!rec || !rec.blocks || rec.blocks.length === 0) return;
   if (
     !confirm(
-      `Load the configuration saved as "${fn}"? This replaces what is currently in the form.`,
+      t("saved.confirmLoad", { name: fn }),
     )
   )
     return;
@@ -2683,7 +2683,7 @@ function selectSavedFilename(fn) {
 function removeSavedFile(fn) {
   if (
     !confirm(
-      `Delete saved configuration "${fn}"? This only removes it from your browser.`,
+      t("saved.confirmDelete", { name: fn }),
     )
   )
     return;
@@ -2726,14 +2726,10 @@ function rateLimitCheck() {
   const stamps = recentSubmissions();
   const now = Date.now();
   if (stamps.length && now - stamps[stamps.length - 1] < LIMITS.minSubmitIntervalMs) {
-    return "That was quick. Wait a few seconds before generating another file.";
+    return t("msg.tooFast");
   }
   if (stamps.length >= LIMITS.maxSubmitsPerHour) {
-    return (
-      "You have generated " +
-      LIMITS.maxSubmitsPerHour +
-      " files in the last hour, which is the limit. Try again a little later, or get in touch if you genuinely need more."
-    );
+    return t("msg.hourlyLimit", { n: LIMITS.maxSubmitsPerHour });
   }
   return "";
 }
@@ -2808,7 +2804,7 @@ function sendSubmission(payload) {
   const body = JSON.stringify(payload);
   if (byteLength(body) > LIMITS.maxPayloadBytes) {
     showGenerateError(
-      "Your configuration is too large to record, so it was not sent. Your file downloaded normally.",
+      t("msg.tooLarge"),
     );
     return;
   }
@@ -2849,11 +2845,11 @@ function confirmSurvey() {
     if (!el) return;
     const value = el.value.trim();
     if (q.required && value === "") {
-      flag(el, true, "Required.");
+      flag(el, true, t("form.required"));
       return;
     }
     if (value && q.key === "email" && !isEmailShaped(value)) {
-      flag(el, true, "That does not look like an email address.");
+      flag(el, true, t("dialog.badEmail"));
       return;
     }
     flag(el, false, "");
@@ -2865,12 +2861,12 @@ function confirmSurvey() {
   if (fnEl) {
     const cleaned = cleanFilename(fnEl.value);
     if (fnEl.value.trim() === "") {
-      flag(fnEl, true, "Required.");
+      flag(fnEl, true, t("form.required"));
     } else if (cleaned === "") {
       flag(
         fnEl,
         true,
-        "Use letters or numbers in the name. Symbols on their own will not do.",
+        t("dialog.badFilename"),
       );
     } else {
       fnEl.value = cleaned;
@@ -2915,8 +2911,8 @@ function confirmSurvey() {
 
   const btn = document.getElementById("confirm-btn");
   const genBtn = document.getElementById("gen-btn");
-  setButtonLoading(btn, true, "Generating...");
-  setButtonLoading(genBtn, true, "Generating your code...");
+  setButtonLoading(btn, true, t("dialog.generating"));
+  setButtonLoading(genBtn, true, t("form.generating"));
 
   let code;
   try {
@@ -2925,7 +2921,7 @@ function confirmSurvey() {
     setButtonLoading(btn, false);
     setButtonLoading(genBtn, false);
     showGenerateError(
-      "Something went wrong while generating your code. Please check your entries and try again.",
+      t("msg.generateFailed"),
     );
     return;
   }
@@ -2993,8 +2989,8 @@ function copyPreview() {
   const code = document.getElementById("preview-code").textContent;
   navigator.clipboard.writeText(code).then(() => {
     const btn = document.querySelector(".copy-btn");
-    btn.textContent = "Copied!";
-    setTimeout(() => (btn.textContent = "Copy"), 1500);
+    btn.textContent = t("result.copied");
+    setTimeout(() => (btn.textContent = t("result.copy")), 1500);
   });
 }
 
@@ -3030,6 +3026,70 @@ function restoreInfoBoxState() {
     if (btn) btn.setAttribute("aria-expanded", "false");
   }
 }
+
+/* Switching language has to rebuild the sensor blocks, because their markup is
+   assembled in JavaScript rather than sitting in the page. The current
+   selections are read out first and put back afterwards, so nobody loses work
+   by changing language halfway through. */
+function rebuildForLanguage() {
+  const snapshot = [...document.querySelectorAll(".sensor-block")].map((block) => {
+    const bid = block.dataset.bid;
+    const partner = document.getElementById(`partner-sel-${bid}`);
+    return {
+      sensor: document.getElementById(`stype-sel-${bid}`).value,
+      port: document.getElementById(`port-sel-${bid}`).value,
+      output: document.getElementById(`output-sel-${bid}`).value,
+      viz: document.getElementById(`viz-sel-${bid}`).value,
+      partnerPort: partner ? partner.value : "",
+      params: [...document.querySelectorAll(`#params-${bid} .param-row`)].map((row) => ({
+        name: document.getElementById(`pname-${row.dataset.rid}`)?.value || "",
+        value: document.getElementById(`pval-${row.dataset.rid}`)?.value || "",
+      })),
+    };
+  });
+
+  document.getElementById("sensors-list").innerHTML = "";
+  snapshot.forEach((b) => {
+    addBlock();
+    const bid = [...document.querySelectorAll(".sensor-block")].pop().dataset.bid;
+
+    const stype = document.getElementById(`stype-sel-${bid}`);
+    if (stype && [...stype.options].some((o) => o.value === b.sensor)) {
+      stype.value = b.sensor;
+      onSensorChange(bid);
+    }
+    const port = document.getElementById(`port-sel-${bid}`);
+    if (port && b.port) port.value = b.port;
+
+    const out = document.getElementById(`output-sel-${bid}`);
+    if (out && [...out.options].some((o) => o.value === b.output)) {
+      out.value = b.output;
+      updateOutputTip(bid);
+    }
+    const viz = document.getElementById(`viz-sel-${bid}`);
+    if (viz && [...viz.options].some((o) => o.value === b.viz)) viz.value = b.viz;
+
+    b.params.forEach((p) => {
+      document.querySelectorAll(`#params-${bid} .param-row`).forEach((row) => {
+        const nameEl = document.getElementById(`pname-${row.dataset.rid}`);
+        if (nameEl && normalizeParamName(nameEl.value) === normalizeParamName(p.name)) {
+          const valEl = document.getElementById(`pval-${row.dataset.rid}`);
+          if (valEl) valEl.value = p.value;
+        }
+      });
+    });
+
+    const partner = document.getElementById(`partner-sel-${bid}`);
+    if (partner && b.partnerPort) partner.value = b.partnerPort;
+  });
+
+  checkDuplicatePorts();
+  refreshAllBlocks();
+  renderSavedBanner();
+  renderSavedConfigs();
+}
+
+if (self.NodeFlowI18n) self.NodeFlowI18n.init();
 
 initTooltips();
 addBlock();

@@ -11,7 +11,7 @@
 
 importScripts("assets/js/config.js");
 
-const CACHE_NAME = "nodeflow-cache-v8";
+const CACHE_NAME = "nodeflow-cache-v9";
 
 const CFG = self.NODEFLOW_CONFIG || {};
 const LIMITS = Object.assign(
@@ -31,6 +31,7 @@ const APP_SHELL = [
   "./favicon.ico",
   "./assets/css/styles.css",
   "./assets/js/config.js",
+  "./assets/js/i18n.js",
   "./assets/js/main.js",
   "./assets/js/site.js",
   "./assets/img/nodeflow-logo.png",

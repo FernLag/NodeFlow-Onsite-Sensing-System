@@ -1983,3 +1983,46 @@ body.is-offline .consent-bar {
     padding: 0;
   }
 }
+
+/* ---------- Language switch ---------- */
+
+.lang-toggle {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  z-index: 70;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--olive-dark);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-key);
+  padding: 7px 14px;
+  cursor: pointer;
+  box-shadow: 0 2px 0 var(--line);
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    transform 0.06s,
+    box-shadow 0.06s;
+}
+
+.lang-toggle:hover {
+  border-color: var(--olive);
+  background: var(--surface-alt);
+}
+
+.lang-toggle:active {
+  transform: translateY(2px);
+  box-shadow: 0 0 0 var(--line);
+}
+
+@media (max-width: 520px) {
+  .lang-toggle {
+    top: 8px;
+    right: 8px;
+    padding: 6px 11px;
+    font-size: 12px;
+  }
+}
