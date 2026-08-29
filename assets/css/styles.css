@@ -53,6 +53,11 @@
 
   --radius: 12px;
   --radius-sm: 8px;
+  /* Buttons are keys, not pills: near-square corners and a hard bottom edge
+     that compresses when pressed, after the keypad shield on the board. The
+     edge is a box-shadow so pressing costs no layout. */
+  --radius-key: 2px;
+  --key-lift: 3px;
   --shadow: 0 1px 3px rgba(35, 35, 38, 0.07);
   --shadow-lift: 0 4px 16px rgba(35, 35, 38, 0.12);
 }
@@ -333,14 +338,22 @@ body {
   color: var(--danger);
   background: var(--danger-bg);
   border: 1px solid var(--danger-line);
-  border-radius: 6px;
+  border-radius: var(--radius-key);
   padding: 5px 13px;
   cursor: pointer;
   font-family: inherit;
   white-space: nowrap;
+  box-shadow: 0 2px 0 var(--danger-line);
   transition:
     background 0.15s,
-    border-color 0.15s;
+    border-color 0.15s,
+    transform 0.06s,
+    box-shadow 0.06s;
+}
+
+.remove-btn:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 0 0 var(--danger-line);
 }
 
 .remove-btn:hover {
@@ -596,7 +609,7 @@ body {
 .add-block-btn {
   width: 100%;
   padding: 15px;
-  border-radius: var(--radius);
+  border-radius: var(--radius-key);
   border: 1.5px dashed #b4bf6e;
   background: none;
   color: var(--leaf-dark);
@@ -636,8 +649,9 @@ body {
 .gen-btn {
   width: 100%;
   padding: 18px;
-  border-radius: var(--radius);
+  border-radius: var(--radius-key);
   border: none;
+  border-top: 2px solid #3d3d44;
   background: var(--ink);
   color: var(--gold);
   font-size: 16.5px;
@@ -647,8 +661,9 @@ body {
   letter-spacing: 0.01em;
   transition:
     background 0.15s,
-    transform 0.05s;
-  box-shadow: 0 3px 10px rgba(35, 35, 38, 0.22);
+    transform 0.06s,
+    box-shadow 0.06s;
+  box-shadow: 0 var(--key-lift) 0 #0e0e11;
 }
 
 .gen-btn:hover {
@@ -656,7 +671,8 @@ body {
 }
 
 .gen-btn:active {
-  transform: translateY(1px);
+  transform: translateY(var(--key-lift));
+  box-shadow: 0 0 0 #0e0e11;
 }
 
 .cost-estimate {
@@ -732,11 +748,25 @@ body {
 .copy-btn {
   font-size: 11.5px;
   font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: var(--gold);
   background: none;
-  border: none;
+  border: 1px solid #4a4a52;
+  border-radius: var(--radius-key);
+  padding: 4px 11px;
   cursor: pointer;
   font-family: inherit;
+  box-shadow: 0 2px 0 #4a4a52;
+  transition:
+    background 0.15s,
+    transform 0.06s,
+    box-shadow 0.06s;
+}
+
+.copy-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 0 0 #4a4a52;
 }
 
 .copy-btn:hover {
@@ -772,9 +802,9 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
+  width: 17px;
+  height: 17px;
+  border-radius: var(--radius-key);
   background: var(--leaf-dark);
   color: #fff;
   font-size: 10px;
@@ -858,7 +888,7 @@ body {
   color: var(--text-soft);
   cursor: pointer;
   padding: 2px 7px;
-  border-radius: 5px;
+  border-radius: var(--radius-key);
   line-height: 1;
 }
 
@@ -933,7 +963,7 @@ body {
 
 .survey-cancel-btn {
   padding: 10px 18px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-key);
   border: 1px solid var(--line);
   background: none;
   color: var(--text-soft);
@@ -941,6 +971,16 @@ body {
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
+  box-shadow: 0 2px 0 var(--line);
+  transition:
+    background 0.15s,
+    transform 0.06s,
+    box-shadow 0.06s;
+}
+
+.survey-cancel-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 0 0 var(--line);
 }
 
 .survey-cancel-btn:hover {
@@ -950,15 +990,25 @@ body {
 
 .survey-confirm-btn {
   padding: 10px 20px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-key);
   border: none;
+  border-top: 2px solid #3d3d44;
   background: var(--ink);
   color: var(--gold);
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
   font-family: inherit;
-  box-shadow: 0 2px 6px rgba(35, 35, 38, 0.2);
+  box-shadow: 0 var(--key-lift) 0 #0e0e11;
+  transition:
+    background 0.15s,
+    transform 0.06s,
+    box-shadow 0.06s;
+}
+
+.survey-confirm-btn:active:not(:disabled) {
+  transform: translateY(var(--key-lift));
+  box-shadow: 0 0 0 #0e0e11;
 }
 
 .survey-confirm-btn:hover {
@@ -1038,7 +1088,7 @@ body {
   gap: 12px;
   padding: 10px 12px;
   border: 1.5px solid var(--line);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-key);
   background: var(--surface);
   color: var(--text);
   font-size: 13px;
@@ -1089,7 +1139,7 @@ body {
 .saved-file-del {
   width: 32px;
   border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-key);
   background: var(--surface);
   color: var(--danger);
   font-size: 13px;
@@ -1160,13 +1210,22 @@ body {
   background: var(--gold);
   color: var(--ink);
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-key);
   padding: 6px 15px;
   font-size: 13px;
   font-weight: 700;
   font-family: inherit;
   cursor: pointer;
-  transition: background 0.15s;
+  box-shadow: 0 2px 0 #c9a52f;
+  transition:
+    background 0.15s,
+    transform 0.06s,
+    box-shadow 0.06s;
+}
+
+#update-bar button:active {
+  transform: translateY(2px);
+  box-shadow: 0 0 0 #c9a52f;
 }
 
 #update-bar button:hover {
@@ -1368,33 +1427,49 @@ body {
   font-size: 14.5px;
   font-weight: 600;
   text-decoration: none;
-  border: 2px solid transparent;
-  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  border-radius: var(--radius-key);
   cursor: pointer;
   transition:
     background 0.15s,
     color 0.15s,
-    border-color 0.15s;
+    border-color 0.15s,
+    transform 0.06s,
+    box-shadow 0.06s;
+}
+
+.btn:active {
+  transform: translateY(var(--key-lift));
 }
 
 .btn-primary {
   background: var(--leaf-dark);
   color: #fff;
+  box-shadow: 0 var(--key-lift) 0 #3b4712;
 }
 
 .btn-primary:hover {
   background: #4f5f18;
 }
 
+.btn-primary:active {
+  box-shadow: 0 0 0 #3b4712;
+}
+
 .btn-quiet {
   background: transparent;
   color: var(--olive-dark);
   border-color: var(--line);
+  box-shadow: 0 var(--key-lift) 0 var(--line);
 }
 
 .btn-quiet:hover {
   border-color: var(--olive);
   background: var(--surface-alt);
+}
+
+.btn-quiet:active {
+  box-shadow: 0 0 0 var(--line);
 }
 
 /* ---------- Error and loading states ---------- */
@@ -1737,6 +1812,11 @@ body {
 .consent-bar .btn-quiet {
   color: #eceedb;
   border-color: #55564a;
+  box-shadow: 0 var(--key-lift) 0 #55564a;
+}
+
+.consent-bar .btn-quiet:active {
+  box-shadow: 0 0 0 #55564a;
 }
 
 .consent-bar .btn-quiet:hover {
@@ -1829,13 +1909,23 @@ body.is-offline .consent-bar {
     color: #fff;
     background: var(--leaf-dark);
     border: none;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-key);
     padding: 12px 18px;
     cursor: pointer;
+    box-shadow: 0 var(--key-lift) 0 #3b4712;
+    transition:
+      background 0.15s,
+      transform 0.06s,
+      box-shadow 0.06s;
   }
 
   .sticky-cta-btn:hover {
     background: #4f5f18;
+  }
+
+  .sticky-cta-btn:active {
+    transform: translateY(var(--key-lift));
+    box-shadow: 0 0 0 #3b4712;
   }
 }
 
