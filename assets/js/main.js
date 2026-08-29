@@ -559,8 +559,7 @@ const int   shallowDepth_{idx} = {shallow};
 const int   deepDepth_{idx}    = {deep};
 `,
       read: `  int sensorValue_{idx} = analogRead({readPin});
-  bool connected_{idx} = portHasSensor({readPin}) &&
-                         sensorValue_{idx} > 15 && sensorValue_{idx} < 1008;
+  bool connected_{idx} = portHasSensor({readPin}) && sensorValue_{idx} < 1015;
   /* Volumetric water content: x = -1/k * ln((V - Vwat) / (Vair - Vwat))
      Every divisor and logarithm is guarded, because a parameter this output
      does not use is emitted as 0 and would otherwise divide by zero. */
@@ -1089,6 +1088,90 @@ void handleButtonPress() {
   },
 };
 
+/* ============================================================
+   Shared helpers for the hand-written half of this file.
+   build.py never touches anything below the config blocks.
+   ============================================================ */
+
+const CFG = (self.NODEFLOW_CONFIG || {});
+const LIMITS = Object.assign(
+  {
+    minSubmitIntervalMs: 5000,
+    maxSubmitsPerHour: 20,
+    maxPayloadBytes: 64 * 1024,
+    maxTextFieldLength: 200,
+    maxCommentLength: 500,
+    maxSensorBlocks: 24,
+  },
+  CFG.limits || {},
+);
+
+/* Anything that reaches innerHTML goes through these first. Saved names and
+   file names come back out of localStorage, which the page itself wrote, but
+   a value that was typed once and stored is still untrusted on the way back
+   in: without escaping, a name containing markup would run as markup. */
+function escapeHtml(value) {
+  return String(value == null ? "" : value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+/* For values placed inside a single-quoted JavaScript string in an inline
+   handler. Escaping the HTML is not enough there: the quote and the
+   backslash have to survive the JavaScript parser as well. */
+function escapeJsString(value) {
+  return String(value == null ? "" : value)
+    .replace(/\\/g, "\\\\")
+    .replace(/'/g, "\\'")
+    .replace(/"/g, "\\\"")
+    .replace(/</g, "\\x3C")
+    .replace(/\r?\n/g, " ");
+}
+
+/* Strip control characters and clamp length. Used on every value the visitor
+   types before it is stored, rendered or sent anywhere. */
+function cleanText(value, maxLength) {
+  const limit = maxLength || LIMITS.maxTextFieldLength;
+  return String(value == null ? "" : value)
+    .replace(/[\u0000-\u001F\u007F]/g, " ")
+    .trim()
+    .slice(0, limit);
+}
+
+/* A file name has to survive a download attribute, a spreadsheet cell and an
+   Arduino sketch folder name, so it is reduced to a conservative set. */
+function cleanFilename(value) {
+  const base = cleanText(value, 80)
+    .replace(/\.ino$/i, "")
+    .replace(/[^A-Za-z0-9 _-]/g, "")
+    .replace(/\s+/g, "_")
+    .replace(/^[_.-]+/, "")
+    .slice(0, 60);
+  return base;
+}
+
+function isEmailShaped(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(value || ""));
+}
+
+/* Anything written into the sketch's header block comment. A closing comment
+   marker typed into a name or a note would end the header early and the rest
+   of it would be compiled as code, so that sequence is broken up and line
+   breaks are flattened. */
+function commentSafe(value, maxLength) {
+  return cleanText(value, maxLength || LIMITS.maxCommentLength)
+    .replace(/\*\//g, "* /")
+    .replace(/\/\*/g, "/ *")
+    .replace(/[\r\n]+/g, " ");
+}
+
+function byteLength(text) {
+  return new TextEncoder().encode(text).length;
+}
+
 function render(template, vars) {
   if (!template) return "";
   return template.replace(/\{(\w+)\}/g, (_, key) =>
@@ -1213,6 +1296,23 @@ function stateLinesFor(sensorKey) {
   return `  if      (percent == 0)  lcd.print(F("VERY DRY        "));
   else if (percent < 100) lcd.print(F("DRY             "));
   else                    lcd.print(F("WET             "));`;
+}
+
+function stripComments(code) {
+  return code
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/(^|[^:"'])\/\/[^\n]*/g, "$1")
+    .split("\n")
+    .map((line) => line.replace(/[ \t]+$/, ""))
+    .filter(
+      (line, i, arr) =>
+        !(
+          line.trim() === "" &&
+          arr[i - 1] !== undefined &&
+          arr[i - 1].trim() === ""
+        ),
+    )
+    .join("\n");
 }
 
 function buildIno(blocks, surveyAnswers = {}) {
@@ -1346,7 +1446,7 @@ function buildIno(blocks, surveyAnswers = {}) {
     (q) =>
       q.key !== "filename" && q.key !== "ino_comment" && surveyAnswers[q.key],
   )
-    .map((q) => ` *   ${q.label.padEnd(24)}: ${surveyAnswers[q.key]}`)
+    .map((q) => ` *   ${q.label.padEnd(24)}: ${commentSafe(surveyAnswers[q.key])}`)
     .join("\n");
 
   const surveySection = surveyLines
@@ -1354,7 +1454,7 @@ function buildIno(blocks, surveyAnswers = {}) {
     : "";
 
   const commentSection = surveyAnswers.ino_comment
-    ? ` * ────────────────────────────────────────────────\n *  Note: ${surveyAnswers.ino_comment}\n`
+    ? ` * ────────────────────────────────────────────────\n *  Note: ${commentSafe(surveyAnswers.ino_comment)}\n`
     : "";
 
   return `/*
@@ -1371,23 +1471,21 @@ ${[...includes].join("\n")}
 
 #define BAUD_RATE 9600
 
-/* Module variables */
 int   percent;
 float x;
 
-${globals.trimEnd()}
+${stripComments(globals).trim()}
 
-/* Calibration constants */
-${constants.trimEnd()}
+${stripComments(constants).trim()}
 
 void setup() {
   Serial.begin(BAUD_RATE);
-${setupBody}  Serial.println("Sketch ready.");
+${stripComments(setupBody)}  Serial.println("Sketch ready.");
 }
 
 void loop() {
 
-${loopBody}  delay(1000);
+${stripComments(loopBody)}  delay(1000);
 }
 `;
 }
@@ -1395,6 +1493,7 @@ ${loopBody}  delay(1000);
 function initTooltips() {
   const popup = document.createElement("div");
   popup.id = "tooltip-popup";
+  popup.setAttribute("role", "tooltip");
   popup.style.cssText = `
     position: fixed; z-index: 9999; max-width: 260px; padding: 8px 11px;
     background: #232326; color: #eef2d4; font-size: 12px;
@@ -1432,23 +1531,67 @@ function initTooltips() {
   document.addEventListener("mouseout", (e) => {
     if (!e.target.closest(".tip-badge")) popup.style.opacity = "0";
   });
+
+  /* Keyboard and screen-reader users reach the badge with Tab. The text is
+     already on the button as its accessible name; showing the bubble on focus
+     puts the same words on screen for sighted keyboard users. */
+  document.addEventListener("focusin", (e) => {
+    const badge = e.target.closest(".tip-badge");
+    if (!badge || !badge.dataset.tip) {
+      popup.style.opacity = "0";
+      return;
+    }
+    popup.textContent = badge.dataset.tip;
+    popup.style.opacity = "1";
+    const r = badge.getBoundingClientRect();
+    const pw = popup.offsetWidth;
+    const ph = popup.offsetHeight;
+    const left = Math.min(r.left, window.innerWidth - pw - 10);
+    const below = r.bottom + 8;
+    popup.style.left = Math.max(10, left) + "px";
+    popup.style.top =
+      (below + ph > window.innerHeight ? r.top - ph - 8 : below) + "px";
+  });
+
+  document.addEventListener("focusout", (e) => {
+    if (e.target.closest(".tip-badge")) popup.style.opacity = "0";
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") popup.style.opacity = "0";
+  });
 }
 
 function tipBadge(text, id = "") {
-  const safe = (text || "").replace(/"/g, "&quot;");
+  const safe = escapeHtml(text || "");
   const idAttr = id ? `id="${id}"` : "";
-  return `<span class="tip-badge" ${idAttr} data-tip="${safe}">i</span>`;
+  return `<button type="button" class="tip-badge" ${idAttr} data-tip="${safe}" aria-label="Explanation: ${safe}"><span aria-hidden="true">i</span></button>`;
 }
 
 function setTip(id, text) {
   const el = document.getElementById(id);
-  if (el) el.dataset.tip = text || "";
+  if (!el) return;
+  el.dataset.tip = text || "";
+  el.setAttribute("aria-label", "Explanation: " + (text || ""));
 }
 
 let uid = 0;
 const nextUid = () => ++uid;
 
 function addBlock() {
+  /* A ceiling on the form keeps a runaway loop or a pasted-in script from
+     building a payload big enough to matter. The board has five analog ports;
+     nobody legitimately needs more blocks than this. */
+  const existing = document.querySelectorAll(".sensor-block").length;
+  if (existing >= LIMITS.maxSensorBlocks) {
+    showFormError(
+      "You have reached the limit of " +
+        LIMITS.maxSensorBlocks +
+        " sensor blocks. Remove one before adding another.",
+    );
+    return;
+  }
+
   const bid = nextUid();
   const defKey = Object.keys(SENSOR_TYPES)[0];
   const defCfg = SENSOR_TYPES[defKey];
@@ -1473,8 +1616,8 @@ function addBlock() {
 
   block.innerHTML = `
     <div class="block-head">
-      <span class="block-title"><span class="sensor-num" id="bnum-${bid}"></span> Sensor-Arduino port connection specifications</span>
-      <button class="remove-btn" onclick="removeBlock(${bid})">Remove</button>
+      <h3 class="block-title"><span class="sensor-num" id="bnum-${bid}"></span> Sensor-Arduino port connection specifications</h3>
+      <button class="remove-btn" type="button" onclick="removeBlock(${bid})" id="rem-${bid}">Remove</button>
     </div>
     <div class="block-body">
       <p class="block-intro">
@@ -1487,14 +1630,20 @@ function addBlock() {
       </p>
       <div class="row2">
         <div class="field">
-          <label>Sensor type <span class="req">*</span> ${tipBadge("The sensors that can be used with the NodeFlow On-site Sensing System are listed in our written guidelines.", `stype-tip-${bid}`)}</label>
-          <select id="stype-sel-${bid}" required onchange="onSensorChange(${bid})">
+          <div class="field-label">
+            <label for="stype-sel-${bid}">Sensor type <span class="req" aria-hidden="true">*</span></label>
+            ${tipBadge("The sensors that can be used with the NodeFlow On-site Sensing System are listed in our written guidelines.", `stype-tip-${bid}`)}
+          </div>
+          <select id="stype-sel-${bid}" required aria-required="true" onchange="onSensorChange(${bid})">
             ${sensorOpts}
           </select>
         </div>
         <div class="field">
-          <label>Port <span class="req">*</span> ${tipBadge("The letter and number of the port are written on the left side of each port. The ports associated to the Arduino board are shown on the LCD screen.", `port-tip-${bid}`)}</label>
-          <select id="port-sel-${bid}" required onchange="checkDuplicatePorts(); updatePortTip(${bid})">
+          <div class="field-label">
+            <label for="port-sel-${bid}">Port <span class="req" aria-hidden="true">*</span></label>
+            ${tipBadge("The letter and number of the port are written on the left side of each port. The ports associated to the Arduino board are shown on the LCD screen.", `port-tip-${bid}`)}
+          </div>
+          <select id="port-sel-${bid}" required aria-required="true" onchange="checkDuplicatePorts(); updatePortTip(${bid})">
             ${PORTS.map((p) => `<option value="${p}" ${p === freePort ? "selected" : ""}>${p}</option>`).join("")}
           </select>
           <span class="err-msg" id="err-port-${bid}">Required.</span>
@@ -1503,11 +1652,12 @@ function addBlock() {
 
       <div class="section-card">
         <div class="section-head">
-          <span class="section-label">For this sensor and this port, I want to see the variable specified below on my screen: <span class="req">*</span> ${tipBadge("The sensor will send out a raw value that can be transformed into other variables that may be easier to understand and read on a regular basis. Please choose how you want to read your data.", `output-tip-${bid}`)}</span>
+          <label class="section-label" for="output-sel-${bid}" id="output-label-${bid}">For this sensor and this port, I want to see the variable specified below on my screen: <span class="req" aria-hidden="true">*</span></label>
+          ${tipBadge("The sensor will send out a raw value that can be transformed into other variables that may be easier to understand and read on a regular basis. Please choose how you want to read your data.", `output-tip-${bid}`)}
         </div>
         <div class="section-body">
           <div class="field">
-            <select id="output-sel-${bid}" required onchange="updateOutputTip(${bid})">
+            <select id="output-sel-${bid}" required aria-required="true" onchange="updateOutputTip(${bid})">
               ${outputOpts}
             </select>
             <span class="err-msg" id="err-output-${bid}">Required.</span>
@@ -1517,7 +1667,8 @@ function addBlock() {
 
       <div class="section-card">
         <div class="section-head">
-          <span class="section-label">For this sensor and this port, I want this variable to appear as: ${tipBadge("You can display your variable in different ways. For example, you may want it to appear as a number, or a percentage, or a progress bar. Please select.", `viz-tip-${bid}`)}</span>
+          <label class="section-label" for="viz-sel-${bid}">For this sensor and this port, I want this variable to appear as:</label>
+          ${tipBadge("You can display your variable in different ways. For example, you may want it to appear as a number, or a percentage, or a progress bar. Please select.", `viz-tip-${bid}`)}
         </div>
         <div class="section-body">
           <div class="field">
@@ -1527,20 +1678,22 @@ function addBlock() {
       </div>
 
       <div class="section-card" id="partner-card-${bid}" style="display:none">
-        <div class="section-head"><span class="section-label">Deep (partner) sensor port <span class="req">*</span></span></div>
+        <div class="section-head"><label class="section-label" for="partner-sel-${bid}">Deep (partner) sensor port <span class="req" aria-hidden="true">*</span></label></div>
         <div class="section-body">
           <div class="wetting-front-msg">
             Wetting front needs two sensors at different depths. This block is the <strong>shallow</strong> sensor.
             Add a second sensor block for the <strong>deep</strong> sensor, then choose its port here.
           </div>
           <div class="field">
-            <select id="partner-sel-${bid}" onchange="syncTempPorts(${bid}); refreshAllBlocks()"></select>
+            <select id="partner-sel-${bid}" aria-required="true" onchange="syncTempPorts(${bid}); refreshAllBlocks()"></select>
           </div>
         </div>
       </div>
 
       <div class="section-card" id="params-card-${bid}">
-        <div class="section-head"><span class="section-label">The information listed below is necessary to configure your NodeFlow<sub class="nf-sub">(On-site)</sub>. Please fill in each case to the best of your knowledge. ${tipBadge("In the configuration you specified in the boxes above, we need to know the value of the parameters listed below. Default values are specified but they may not be suitable for your specific situation. Please refer to the guidelines to learn how to measure these values.", `params-tip-${bid}`)}</span></div>
+        <div class="section-head"><span class="section-label">The information listed below is necessary to configure your NodeFlow<sub class="nf-sub">(On-site)</sub>. Please fill in each case to the best of your knowledge.</span>
+          ${tipBadge("In the configuration you specified in the boxes above, we need to know the value of the parameters listed below. Default values are specified but they may not be suitable for your specific situation. Please refer to the guidelines to learn how to measure these values.", `params-tip-${bid}`)}
+        </div>
         <div class="section-body">
           <p class="block-intro" id="cal-hint-${bid}" style="display:none">
             <strong>Calibration values.</strong> If you don't know these numbers yet:
@@ -1913,22 +2066,25 @@ function addParamRow(
   const shownName = displayVal || nameVal;
   row.innerHTML = `
     <div class="field">
-      <label>Parameter name <span class="req">*</span> ${tooltipText ? tipBadge(tooltipText) : ""}</label>
-      <input type="text" id="pname-${rid}" value="${nameVal}" required readonly style="display:none">
-      <div class="param-display-name">${shownName}</div>
+      <div class="field-label">
+        <span class="param-name-caption">Parameter</span>
+        ${tooltipText ? tipBadge(tooltipText) : ""}
+      </div>
+      <input type="text" id="pname-${rid}" value="${escapeHtml(nameVal)}" required readonly style="display:none">
+      <div class="param-display-name" id="plabel-${rid}">${escapeHtml(shownName)}</div>
     </div>
     <div class="field value-unit-field">
       <div class="value-unit-labels">
-        <label>Value <span class="req">*</span></label>
-        ${unitsVal ? `<label class="unit-label">Units <span class="req">*</span></label>` : ""}
+        <span class="value-caption" id="pvlabel-${rid}">Value <span class="req" aria-hidden="true">*</span></span>
+        ${unitsVal ? `<span class="unit-label">Units</span>` : ""}
       </div>
       <div class="value-unit-row">
         ${
           choices.length
-            ? `<select id="pval-${rid}" required onchange="applySoilType(${bid}, this.value)" style="flex:1">
-               ${choices.map((c) => `<option value="${c}" ${c === defaultVal ? "selected" : ""}>${c}</option>`).join("")}
+            ? `<select id="pval-${rid}" required aria-required="true" aria-labelledby="plabel-${rid} pvlabel-${rid}" onchange="applySoilType(${bid}, this.value)" style="flex:1">
+               ${choices.map((c) => `<option value="${escapeHtml(c)}" ${c === defaultVal ? "selected" : ""}>${escapeHtml(c)}</option>`).join("")}
              </select>`
-            : `<input type="number" id="pval-${rid}" value="${defaultVal}" placeholder="0" step="0.001" required
+            : `<input type="number" id="pval-${rid}" value="${escapeHtml(defaultVal)}" placeholder="0" step="0.001" required aria-required="true" aria-labelledby="plabel-${rid} pvlabel-${rid}"
                ${minVal !== "" ? `min="${minVal}"` : ""}
                ${maxVal !== "" ? `max="${maxVal}"` : ""}
                oninput="
@@ -1942,7 +2098,7 @@ function addParamRow(
                  if (dot !== -1 && this.value.length - dot - 1 > 3) this.value = this.value.slice(0, dot + 4);
                ">`
         }
-        ${unitsVal ? '<div class="unit-box">' + unitsVal + "</div>" : ""}
+        ${unitsVal ? '<div class="unit-box">' + escapeHtml(unitsVal) + "</div>" : ""}
       </div>
     </div>
   `;
@@ -2011,24 +2167,76 @@ function checkDuplicatePorts() {
   } else warn.classList.remove("show");
 }
 
+/* One visible place for every problem that stops a generation. It sits just
+   above the generate button, is announced by role="alert" in the markup, and
+   moves focus to the first field at fault. alert() used to do this job; it
+   cannot be styled, cannot be read alongside the field, and on a phone it
+   hides the form behind a system dialog. */
+function showFormError(message, focusEl) {
+  const box = document.getElementById("form-error");
+  if (box) {
+    box.textContent = message;
+    box.classList.add("show");
+    box.scrollIntoView({ block: "center", behavior: "smooth" });
+  }
+  if (focusEl && typeof focusEl.focus === "function") {
+    focusEl.focus({ preventScroll: true });
+  }
+}
+
+function clearFormError() {
+  const box = document.getElementById("form-error");
+  if (box) {
+    box.textContent = "";
+    box.classList.remove("show");
+  }
+  document
+    .querySelectorAll('[aria-invalid="true"]')
+    .forEach((el) => el.removeAttribute("aria-invalid"));
+}
+
 function validate() {
   const portMap = {};
   document.querySelectorAll("[id^='port-sel-']").forEach((el) => {
     portMap[el.value] = (portMap[el.value] || []).concat(el.id);
   });
-  if (Object.values(portMap).some((ids) => ids.length > 1)) {
-    alert("Duplicate ports detected. Each block must use a unique port.");
+  const duplicated = Object.entries(portMap).filter(
+    ([, ids]) => ids.length > 1,
+  );
+  if (duplicated.length) {
+    const first = document.getElementById(duplicated[0][1][0]);
+    if (first) first.setAttribute("aria-invalid", "true");
+    showFormError(
+      "Two sensor blocks are using port " +
+        duplicated[0][0] +
+        ". Each port can hold only one sensor, so give one of them a different port.",
+      first,
+    );
     return false;
   }
-  let valid = true;
+
+  let firstBad = null;
   document.querySelectorAll("input[required]").forEach((el) => {
     if (el.style.display === "none") return;
     if (el.offsetParent === null) return;
     const empty = !el.value || el.value.trim() === "";
     el.classList.toggle("error", empty);
-    if (empty) valid = false;
+    if (empty) {
+      el.setAttribute("aria-invalid", "true");
+      if (!firstBad) firstBad = el;
+    } else {
+      el.removeAttribute("aria-invalid");
+    }
   });
-  return valid;
+
+  if (firstBad) {
+    showFormError(
+      "Some required values are still empty. The fields that need filling in are outlined in red.",
+      firstBad,
+    );
+    return false;
+  }
+  return true;
 }
 
 function downloadFile(content, filename) {
@@ -2103,7 +2311,7 @@ function renderSavedBanner() {
   const banner = document.getElementById("saved-banner");
   if (!banner) return;
   if (_savedAnswers && _savedAnswers.name) {
-    banner.innerHTML = `Welcome back, <strong>${_savedAnswers.name}</strong>. Your info is saved.
+    banner.innerHTML = `Welcome back, <strong>${escapeHtml(_savedAnswers.name)}</strong>. Your info is saved.
       <a href="#" onclick="editSavedAnswers(); return false;">Edit my info</a> ·
       <a href="#" onclick="clearSavedAnswers(); return false;">Clear</a>`;
     banner.classList.add("show");
@@ -2120,6 +2328,7 @@ function handleGenerate() {
   document
     .querySelectorAll(".error")
     .forEach((el) => el.classList.remove("error"));
+  clearFormError();
   if (!validate()) return;
 
   _pendingBlocks = [];
@@ -2158,7 +2367,7 @@ function handleGenerate() {
       resolveSensorKey(b.sensor) === "Watermark_Temperature" &&
       b.partnerPort === b.port
     ) {
-      alert(
+      showFormError(
         "The soil temperature sensor and the Watermark cannot share the same port (" +
           b.port +
           "). Pick a different port for the temperature sensor.",
@@ -2169,8 +2378,8 @@ function handleGenerate() {
       resolveSensorKey(b.sensor) === "Watermark_Temperature" &&
       !b.partnerPort
     ) {
-      alert(
-        "This sensor uses two probes. Please select the port your soil temperature sensor is plugged into.",
+      showFormError(
+        "This sensor uses two probes. Choose the port your soil temperature sensor is plugged into.",
       );
       return;
     }
@@ -2185,8 +2394,8 @@ function handleGenerate() {
       !b.partnerPort &&
       !deepPorts.includes(b.port)
     ) {
-      alert(
-        "A Wetting Front sensor needs a second (deep) sensor block. Add another block and select its port as the deep partner.",
+      showFormError(
+        "A wetting front reading needs a second, deeper sensor. Add another sensor block and choose its port as the deep partner.",
       );
       return;
     }
@@ -2204,25 +2413,73 @@ function handleGenerate() {
   }
 }
 
+/* ---------- modal focus handling ----------------------------------
+   A dialog that does not hold focus is a trap for anyone using a keyboard or
+   a screen reader: Tab walks out of it into the page behind, which is still
+   visible and still clickable. */
+let _focusBeforeModal = null;
+
+function trapFocus(e) {
+  const overlay = document.getElementById("survey-overlay");
+  if (!overlay || !overlay.classList.contains("show")) return;
+
+  if (e.key === "Escape") {
+    e.preventDefault();
+    closeSurvey();
+    return;
+  }
+  if (e.key !== "Tab") return;
+
+  const focusable = overlay.querySelectorAll(
+    'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+  );
+  if (!focusable.length) return;
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+
+  if (e.shiftKey && document.activeElement === first) {
+    e.preventDefault();
+    last.focus();
+  } else if (!e.shiftKey && document.activeElement === last) {
+    e.preventDefault();
+    first.focus();
+  }
+}
+
+function showModal() {
+  const overlay = document.getElementById("survey-overlay");
+  if (!overlay) return;
+  _focusBeforeModal = document.activeElement;
+  overlay.classList.add("show");
+  document.addEventListener("keydown", trapFocus);
+  const target = overlay.querySelector("input, select, button");
+  if (target) target.focus();
+}
+
 function openSurvey(prefill = {}) {
   const overlay = document.getElementById("survey-overlay");
   const body = document.getElementById("survey-body");
   body.innerHTML = SURVEY_QUESTIONS.map((q) => {
-    const req = q.required ? `<span class="req">*</span>` : "";
+    const req = q.required ? `<span class="req" aria-hidden="true">*</span>` : "";
     const val = prefill[q.key] || "";
+    const maxLen =
+      q.key === "ino_comment" ? LIMITS.maxCommentLength : LIMITS.maxTextFieldLength;
     return `
       <div class="field survey-field">
-        <label>${q.label} ${req}</label>
-        <input type="${q.type}" id="sq-${q.key}" placeholder="${q.placeholder || ""}"
-               value="${val.replace(/"/g, "&quot;")}" ${q.required ? "required" : ""}>
-        <span class="err-msg" id="sqerr-${q.key}">Required.</span>
+        <label for="sq-${escapeHtml(q.key)}">${escapeHtml(q.label)} ${req}</label>
+        <input type="${escapeHtml(q.type)}" id="sq-${escapeHtml(q.key)}"
+               placeholder="${escapeHtml(q.placeholder || "")}"
+               maxlength="${maxLen}" autocomplete="${q.key === "email" ? "email" : q.key === "name" ? "name" : q.key === "country" ? "country-name" : "off"}"
+               value="${escapeHtml(val)}" ${q.required ? 'required aria-required="true"' : ""}
+               aria-describedby="sqerr-${escapeHtml(q.key)}">
+        <span class="err-msg" id="sqerr-${escapeHtml(q.key)}">Required.</span>
       </div>`;
   }).join("");
-  overlay.classList.add("show");
   const cb = document.getElementById("consent-checkbox");
   const btn = document.getElementById("confirm-btn");
   if (cb) cb.checked = false;
   if (btn) btn.disabled = true;
+  showModal();
 }
 
 function openFilenamePrompt() {
@@ -2244,14 +2501,14 @@ function openFilenamePrompt() {
             const ts = new Date(_savedFiles[fn].timestamp).toLocaleString();
             return `
           <div class="saved-file-row">
-            <button type="button" class="saved-file-btn" onclick="selectSavedFilename('${fn.replace(/'/g, "\\'")}')">
-              <span class="saved-file-name">${fn}</span>
+            <button type="button" class="saved-file-btn" onclick="selectSavedFilename('${escapeJsString(fn)}')">
+              <span class="saved-file-name">${escapeHtml(fn)}</span>
               <span class="saved-file-meta">
-                <span class="saved-file-ts">Last used: ${ts}</span>
-                <span class="saved-file-action">Click to use →</span>
+                <span class="saved-file-ts">Last used: ${escapeHtml(ts)}</span>
+                <span class="saved-file-action" aria-hidden="true">Click to use →</span>
               </span>
             </button>
-            <button type="button" class="saved-file-del" onclick="removeSavedFile('${fn.replace(/'/g, "\\'")}'); return false;" title="Forget this filename">✕</button>
+            <button type="button" class="saved-file-del" onclick="removeSavedFile('${escapeJsString(fn)}'); return false;" aria-label="Forget the file name ${escapeHtml(fn)}" title="Forget this filename">✕</button>
           </div>`;
           })
           .join("")}
@@ -2269,28 +2526,32 @@ function openFilenamePrompt() {
   body.innerHTML = `
     ${fileList}
     <div class="field survey-field">
-      <label>${hasFiles ? "Name of file to generate (new or selected from above)" : "Name of file to generate"} <span class="req">*</span></label>
-      <input type="text" id="sq-filename" placeholder="e.g. apples_field2 (no spaces, no .ino)" required>
+      <label for="sq-filename">${hasFiles ? "Name of file to generate (new or selected from above)" : "Name of file to generate"} <span class="req" aria-hidden="true">*</span></label>
+      <input type="text" id="sq-filename" placeholder="e.g. apples_field2 (no spaces, no .ino)"
+             maxlength="60" autocomplete="off" required aria-required="true"
+             aria-describedby="sqerr-filename filename-help">
       <span class="err-msg" id="sqerr-filename">Required.</span>
+      <span class="field-help" id="filename-help">Letters, numbers, dashes and underscores. Anything else is removed.</span>
       <label class="stamp-opt">
         <input type="checkbox" id="sq-timestamp">
         Add a date and time to the filename so it never overwrites an earlier download
       </label>
     </div>
     <div class="field survey-field">
-      <label>Comment to include in the code (optional)</label>
-      <input type="text" id="sq-ino_comment" placeholder="e.g. Orchard block 2, installed June 2026">
+      <label for="sq-ino_comment">Comment to include in the code (optional)</label>
+      <input type="text" id="sq-ino_comment" maxlength="${LIMITS.maxCommentLength}" autocomplete="off"
+             placeholder="e.g. Orchard block 2, installed June 2026">
     </div>
     <p class="saved-info-note">
-      Submitting as <strong>${_savedAnswers.name}</strong> (${_savedAnswers.email}).
+      Submitting as <strong>${escapeHtml(_savedAnswers.name)}</strong> (${escapeHtml(_savedAnswers.email)}).
       <a href="#" onclick="closeSurvey(); editSavedAnswers(); return false;">Not you?</a>
     </p>`;
 
-  overlay.classList.add("show");
   const cb = document.getElementById("consent-checkbox");
   const btn = document.getElementById("confirm-btn");
   if (cb) cb.checked = true;
   if (btn) btn.disabled = false;
+  showModal();
 }
 
 /* Saved files keep the whole sensor configuration, not just a name, so a
@@ -2316,14 +2577,14 @@ function renderSavedConfigs() {
           const ts = new Date(rec.timestamp).toLocaleString();
           return `
         <div class="saved-file-row">
-          <button type="button" class="saved-file-btn" onclick="loadSavedConfig('${fn.replace(/'/g, "\\'")}')">
-            <span class="saved-file-name">${fn}</span>
+          <button type="button" class="saved-file-btn" onclick="loadSavedConfig('${escapeJsString(fn)}')">
+            <span class="saved-file-name">${escapeHtml(fn)}</span>
             <span class="saved-file-meta">
-              <span class="saved-file-ts">${n} sensor${n === 1 ? "" : "s"} · ${ts}</span>
-              <span class="saved-file-action">Load →</span>
+              <span class="saved-file-ts">${n} sensor${n === 1 ? "" : "s"} · ${escapeHtml(ts)}</span>
+              <span class="saved-file-action" aria-hidden="true">Load →</span>
             </span>
           </button>
-          <button type="button" class="saved-file-del" onclick="removeSavedFile('${fn.replace(/'/g, "\\'")}'); return false;" title="Forget this configuration">✕</button>
+          <button type="button" class="saved-file-del" onclick="removeSavedFile('${escapeJsString(fn)}'); return false;" aria-label="Forget the saved configuration ${escapeHtml(fn)}" title="Forget this configuration">✕</button>
         </div>`;
         })
         .join("")}
@@ -2383,7 +2644,7 @@ function loadSavedConfig(fn) {
       if (![...partner.options].some((o) => o.value === b.partnerPort)) {
         partner.insertAdjacentHTML(
           "beforeend",
-          `<option value="${b.partnerPort}">${b.partnerPort}</option>`,
+          `<option value="${escapeHtml(b.partnerPort)}">${escapeHtml(b.partnerPort)}</option>`,
         );
       }
       partner.value = b.partnerPort;
@@ -2416,29 +2677,211 @@ function removeSavedFile(fn) {
 
 function closeSurvey() {
   document.getElementById("survey-overlay").classList.remove("show");
+  document.removeEventListener("keydown", trapFocus);
+  clearGenerateError();
+  const genBtn = document.getElementById("gen-btn");
+  setButtonLoading(genBtn, false);
+  if (_focusBeforeModal && typeof _focusBeforeModal.focus === "function") {
+    _focusBeforeModal.focus();
+  }
+  _focusBeforeModal = null;
+}
+
+/* ---------- submission guards ----------------------------------------
+   The endpoint is a Google Apps Script web app: public by necessity, since
+   this is a static site with no server of its own. These checks are the
+   browser's share of the work only. The script itself must enforce the same
+   rules, because anything here can be bypassed by anyone willing to open a
+   console. See server/apps-script/Code.gs. */
+
+const RATE_KEY = "nodeflow_submits_v1";
+
+function recentSubmissions() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(RATE_KEY) || "[]");
+    const cutoff = Date.now() - 3600000;
+    return Array.isArray(raw) ? raw.filter((t) => t > cutoff) : [];
+  } catch (_) {
+    return [];
+  }
+}
+
+function rateLimitCheck() {
+  const stamps = recentSubmissions();
+  const now = Date.now();
+  if (stamps.length && now - stamps[stamps.length - 1] < LIMITS.minSubmitIntervalMs) {
+    return "That was quick. Wait a few seconds before generating another file.";
+  }
+  if (stamps.length >= LIMITS.maxSubmitsPerHour) {
+    return (
+      "You have generated " +
+      LIMITS.maxSubmitsPerHour +
+      " files in the last hour, which is the limit. Try again a little later, or get in touch if you genuinely need more."
+    );
+  }
+  return "";
+}
+
+function recordSubmission() {
+  const stamps = recentSubmissions();
+  stamps.push(Date.now());
+  try {
+    localStorage.setItem(RATE_KEY, JSON.stringify(stamps.slice(-100)));
+  } catch (_) {}
+}
+
+function setButtonLoading(btn, loading, busyText) {
+  if (!btn) return;
+  const label = btn.querySelector(".gen-btn-label");
+  if (loading) {
+    btn.dataset.idleLabel = label ? label.textContent : btn.textContent;
+    btn.disabled = true;
+    btn.classList.add("is-loading");
+    btn.setAttribute("aria-busy", "true");
+    if (label) label.textContent = busyText || "Working...";
+  } else {
+    btn.disabled = false;
+    btn.classList.remove("is-loading");
+    btn.removeAttribute("aria-busy");
+    if (label && btn.dataset.idleLabel) label.textContent = btn.dataset.idleLabel;
+  }
+}
+
+/* Everything sent to the endpoint is rebuilt here from scratch: known keys
+   only, each one cleaned and length-capped, and the whole thing refused if it
+   is somehow still oversized. */
+function buildSubmissionPayload(answers, blocks) {
+  const variables = blocks
+    .map((b, i) => {
+      const paramStr = b.params
+        .map((prm) => cleanText(prm.name, 60) + ": " + cleanText(prm.value, 40))
+        .join(", ");
+      return (
+        "Sensor " +
+        (i + 1) +
+        ": Type: " +
+        cleanText(b.sensor, 60) +
+        " | Port: " +
+        cleanText(b.port, 8) +
+        " | Output: " +
+        cleanText(b.output, 60) +
+        " | Viz: " +
+        cleanText(b.viz, 40) +
+        " | Params: " +
+        paramStr
+      );
+    })
+    .join(" || ")
+    .slice(0, 8000);
+
+  return {
+    timestamp: new Date().toISOString(),
+    name: cleanText(answers.name),
+    email: cleanText(answers.email),
+    country: cleanText(answers.country),
+    filename: cleanText(answers.filename, 80),
+    ino_comment: cleanText(answers.ino_comment, LIMITS.maxCommentLength),
+    variables,
+  };
+}
+
+function sendSubmission(payload) {
+  const endpoint = CFG.submitEndpoint;
+  if (!endpoint) return; /* nothing configured: nothing is sent */
+
+  const body = JSON.stringify(payload);
+  if (byteLength(body) > LIMITS.maxPayloadBytes) {
+    showGenerateError(
+      "Your configuration is too large to record, so it was not sent. Your file downloaded normally.",
+    );
+    return;
+  }
+
+  recordSubmission();
+  fetch(endpoint, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body,
+  }).catch(() => {});
 }
 
 function confirmSurvey() {
+  clearGenerateError();
+
   let valid = true;
+  let firstBad = null;
+
+  const flag = (el, bad, message) => {
+    const err = el ? document.getElementById(el.id.replace("sq-", "sqerr-")) : null;
+    if (el) {
+      el.classList.toggle("error", bad);
+      el.setAttribute("aria-invalid", bad ? "true" : "false");
+    }
+    if (err) {
+      if (message) err.textContent = message;
+      err.classList.toggle("show", bad);
+    }
+    if (bad) {
+      valid = false;
+      if (!firstBad) firstBad = el;
+    }
+  };
+
   SURVEY_QUESTIONS.forEach((q) => {
-    if (!q.required) return;
     const el = document.getElementById(`sq-${q.key}`);
     if (!el) return;
-    const err = document.getElementById(`sqerr-${q.key}`);
-    const empty = !el.value || el.value.trim() === "";
-    el.classList.toggle("error", empty);
-    if (err) err.classList.toggle("show", empty);
-    if (empty) valid = false;
+    const value = el.value.trim();
+    if (q.required && value === "") {
+      flag(el, true, "Required.");
+      return;
+    }
+    if (value && q.key === "email" && !isEmailShaped(value)) {
+      flag(el, true, "That does not look like an email address.");
+      return;
+    }
+    flag(el, false, "");
   });
-  if (!valid) return;
+
+  /* The filename field only exists on the short repeat-visitor dialog, so it
+     is checked on its own rather than through SURVEY_QUESTIONS. */
+  const fnEl = document.getElementById("sq-filename");
+  if (fnEl) {
+    const cleaned = cleanFilename(fnEl.value);
+    if (fnEl.value.trim() === "") {
+      flag(fnEl, true, "Required.");
+    } else if (cleaned === "") {
+      flag(
+        fnEl,
+        true,
+        "Use letters or numbers in the name. Symbols on their own will not do.",
+      );
+    } else {
+      fnEl.value = cleaned;
+      flag(fnEl, false, "");
+    }
+  }
+
+  if (!valid) {
+    if (firstBad) firstBad.focus();
+    return;
+  }
+
+  const blocked = rateLimitCheck();
+  if (blocked) {
+    showGenerateError(blocked);
+    return;
+  }
 
   const answers = {};
   SURVEY_QUESTIONS.forEach((q) => {
+    const cap =
+      q.key === "ino_comment" ? LIMITS.maxCommentLength : LIMITS.maxTextFieldLength;
     const el = document.getElementById(`sq-${q.key}`);
     if (el) {
-      answers[q.key] = el.value.trim();
+      answers[q.key] = cleanText(el.value, cap);
     } else if (_savedAnswers && _savedAnswers[q.key]) {
-      answers[q.key] = _savedAnswers[q.key];
+      answers[q.key] = cleanText(_savedAnswers[q.key], cap);
     } else {
       answers[q.key] = "";
     }
@@ -2454,13 +2897,25 @@ function confirmSurvey() {
   saveAnswers(toSave);
   closeSurvey();
 
-  const code = buildIno(_pendingBlocks, answers);
-  const rawName = (answers.filename || "")
-    .trim()
-    .replace(/\s+/g, "_")
-    .replace(/\.ino$/i, "");
+  const btn = document.getElementById("confirm-btn");
+  const genBtn = document.getElementById("gen-btn");
+  setButtonLoading(btn, true, "Generating...");
+  setButtonLoading(genBtn, true, "Generating your code...");
+
+  let code;
+  try {
+    code = buildIno(_pendingBlocks, answers);
+  } catch (err) {
+    setButtonLoading(btn, false);
+    setButtonLoading(genBtn, false);
+    showGenerateError(
+      "Something went wrong while generating your code. Please check your entries and try again.",
+    );
+    return;
+  }
+  const rawName = cleanFilename(answers.filename || "");
   const base =
-    rawName || (_pendingFilename || "nodeflow").replace(/\.ino$/i, "");
+    rawName || cleanFilename(_pendingFilename || "nodeflow") || "nodeflow";
   /* Only stamp the name if the user asked for it. Browsers cannot overwrite a
      download, so without a stamp a repeated name becomes name-1.ino; with it,
      each file is unique and dated. The choice is left to the user. */
@@ -2481,6 +2936,11 @@ function confirmSurvey() {
   downloadFile(code, filename);
   saveFile(filename, _pendingBlocks);
 
+  setButtonLoading(btn, false);
+  setButtonLoading(genBtn, false);
+  clearGenerateError();
+  clearFormError();
+
   document.getElementById("preview-code").textContent = code;
   document.getElementById("preview-wrap").classList.add("show");
   const sf = document.getElementById("success-filename");
@@ -2488,34 +2948,29 @@ function confirmSurvey() {
   document.getElementById("success-banner").classList.add("show");
 
   try {
-    const variables = _pendingBlocks
-      .map((b, i) => {
-        const paramStr = b.params
-          .map((p) => `${p.name}: ${p.value}`)
-          .join(", ");
-        return `Sensor ${i + 1}: Type: ${b.sensor} | Port: ${b.port} | Output: ${b.output} | Viz: ${b.viz} | Params: ${paramStr}`;
-      })
-      .join(" || ");
-
-    const payload = {
-      timestamp: new Date().toISOString(),
-      name: answers.name || "",
-      email: answers.email || "",
-      country: answers.country || "",
-      filename: answers.filename || "",
-      ino_comment: answers.ino_comment || "",
-      variables,
-    };
-
-    fetch(
-      "https://script.google.com/macros/s/AKfycbzBDJalu2LdNU2UC-ySZJlxW5dh_3Djhq73sBU4JycPbOGjfBLdSuepAJs9jiIKUH1uUw/exec",
-      {
-        method: "POST",
-        mode: "no-cors",
-        body: JSON.stringify(payload),
-      },
-    ).catch(() => {});
+    sendSubmission(buildSubmissionPayload(answers, _pendingBlocks));
   } catch (_) {}
+}
+
+function showGenerateError(msg) {
+  let box = document.getElementById("generate-error");
+  if (!box) {
+    box = document.createElement("div");
+    box.id = "generate-error";
+    box.className = "generate-error";
+    box.setAttribute("role", "alert");
+    const body = document.getElementById("survey-body");
+    if (body && body.parentNode)
+      body.parentNode.insertBefore(box, body.nextSibling);
+    else document.body.appendChild(box);
+  }
+  box.textContent = msg;
+  box.classList.add("show");
+}
+
+function clearGenerateError() {
+  const box = document.getElementById("generate-error");
+  if (box) box.classList.remove("show");
 }
 
 function copyPreview() {
