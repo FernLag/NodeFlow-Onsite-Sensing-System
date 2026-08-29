@@ -1289,8 +1289,12 @@ const SOIL_THRESHOLDS = {
   Clay: { low: 38, high: 160 },
 };
 
+/* Line 1 of the LCD is 16 characters and reads "PORT NAME VALUE", so a name
+   gets seven of them. It names what the probe measures rather than who makes
+   it: a grower knows they installed a capacitive sensor, not that the part
+   number is a DFRobot. Keep new entries to seven characters. */
 const SENSOR_ABBREV = {
-  DF_robot: "DFROBOT",
+  DF_robot: "CAPSENS",
   Watermark: "WM200SS",
   Watermark_Temperature: "WM+TEMP",
   Temperature: "TS200",

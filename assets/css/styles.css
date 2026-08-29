@@ -35,20 +35,6 @@
     "Inter", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
 
-  /* Vertical rhythm. Spacing is a scale, not a guess. */
-  --s-1: 4px;
-  --s-2: 8px;
-  --s-3: 12px;
-  --s-4: 16px;
-  --s-5: 24px;
-  --s-6: 32px;
-  --s-7: 48px;
-  --s-8: 72px;
-  --s-9: 104px;
-
-  --measure: 66ch;
-  --wrap: 1080px;
-
   --focus: #1f5f8b;
 
   --radius: 12px;
@@ -1443,17 +1429,37 @@ body {
 }
 
 .btn-primary {
-  background: var(--leaf-dark);
-  color: #fff;
-  box-shadow: 0 var(--key-lift) 0 #3b4712;
+  background: var(--ink);
+  color: var(--gold);
+  border-top: 2px solid #3d3d44;
+  box-shadow: 0 var(--key-lift) 0 #0e0e11;
 }
 
 .btn-primary:hover {
-  background: #4f5f18;
+  background: #33333a;
+  color: var(--gold);
 }
 
 .btn-primary:active {
-  box-shadow: 0 0 0 #3b4712;
+  box-shadow: 0 0 0 #0e0e11;
+}
+
+/* The consent bar is itself ink, so the key inverts there to stay visible:
+   gold face, dark legend. Same two colours either way round. */
+.consent-bar .btn-primary {
+  background: var(--gold);
+  color: var(--ink);
+  border-top-color: #fbe08a;
+  box-shadow: 0 var(--key-lift) 0 #c9a52f;
+}
+
+.consent-bar .btn-primary:hover {
+  background: #fbdd77;
+  color: var(--ink);
+}
+
+.consent-bar .btn-primary:active {
+  box-shadow: 0 0 0 #c9a52f;
 }
 
 .btn-quiet {
@@ -1630,7 +1636,7 @@ body {
   font-size: 16px;
   line-height: 1.6;
   color: var(--text-soft);
-  margin-bottom: var(--s-5);
+  margin-bottom: 24px;
 }
 
 .prose {
@@ -1668,7 +1674,7 @@ body {
   margin-bottom: 5px;
 }
 
-.prose a {
+.prose a:not(.btn) {
   color: var(--olive-dark);
   text-underline-offset: 2px;
 }
