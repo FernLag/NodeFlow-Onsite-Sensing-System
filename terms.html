@@ -29,33 +29,26 @@
   <body>
     <a class="skip-link" href="#main">Skip to the main content</a>
 
-    <header class="site-bar">
-      <a class="brand" href="index.html">
-        <img
-          src="assets/img/nodeflow-logo.png"
-          alt="NodeFlow logo: a water drop over a fan of soil layers with three sensor nodes"
-          width="40"
-          height="40"
-        />
-        <span class="brand-text">
-          <span class="brand-name">NodeFlow</span>
-          <span class="brand-sub">(On-site) Sensing System</span>
-        </span>
-      </a>
-      <nav class="site-nav" aria-label="Main">
-        <a href="index.html#how">How it works</a>
-        <a href="index.html#hardware">Supported hardware</a>
-        <a href="index.html#build" class="site-nav-cta">Build my code</a>
-      </nav>
-    </header>
-
-    <main id="main" class="page">
-      <div class="page-inner">
-        <p class="crumb"><a href="index.html">Code generator</a> <span aria-hidden="true">/</span> Terms</p>
+    <div class="container">
+      <div class="header">
+        <a href="index.html">
+          <img
+            src="assets/img/nodeflow-logo.png"
+            alt="NodeFlow (On-site) code generator, home"
+            class="header-logo"
+            width="62"
+            height="62"
+          />
+        </a>
         <h1>Terms of use</h1>
-        <p class="page-updated">Last updated: 28 August 2026</p>
+        <p class="page-subtitle">
+          NodeFlow<sub class="nf-sub">(On-site)</sub> Sensing System Code
+          Generator
+        </p>
+        <p class="page-updated">Last updated: 29 August 2026</p>
+      </div>
 
-        <div class="prose">
+      <main id="main" class="prose">
           <h2>What this site is</h2>
           <p>
             NodeFlow (On-site) is a free research and outreach tool from UC
@@ -138,59 +131,32 @@
 
           <h2>Contact</h2>
           <p class="contact-slot contact-line">Contact details coming soon.</p>
-        </div>
-
         <p class="page-back"><a href="index.html">Back to the code generator</a></p>
+      </main>
+
+      <div class="logo-row">
+        <img src="assets/img/ucanr-logo.png" alt="University of California, Agriculture and Natural Resources" class="logo" width="320" height="45" loading="lazy" />
+        <img src="assets/img/ucsc-logo.png" alt="University of California, Santa Cruz" class="logo" width="240" height="66" loading="lazy" />
       </div>
-    </main>
 
-    <footer class="site-foot">
-      <div class="foot-inner">
-        <div class="foot-brand">
-          <img src="assets/img/nodeflow-logo.png" alt="NodeFlow logo" width="34" height="34" />
-          <p>
-            <strong>NodeFlow<sub class="nf-sub">(On-site)</sub></strong><br />
-            Do-it-yourself, low-cost, open-source tools for farm-scale water
-            management.
-          </p>
-        </div>
-
-        <nav class="foot-links" aria-label="Site">
-          <h2>This site</h2>
+      <footer class="site-footer">
+        <nav aria-label="Legal and contact">
           <a href="index.html">Code generator</a>
-          <a href="index.html#how">How it works</a>
-          <a href="thank-you.html">After you download</a>
-        </nav>
-
-        <nav class="foot-links" aria-label="Legal">
-          <h2>Legal</h2>
           <a href="privacy.html">Privacy policy</a>
           <a href="terms.html">Terms of use</a>
           <a href="assets/docs/consent.pdf">Research consent form (PDF)</a>
+          <a href="thank-you.html">After you download</a>
         </nav>
-
-        <div class="foot-links foot-contact">
-          <h2>Contact</h2>
-          <p class="contact-slot">Contact details coming soon.</p>
-        </div>
-      </div>
-
-      <div class="foot-partners">
-        <img src="assets/img/ucanr-logo.png" alt="University of California, Agriculture and Natural Resources" class="partner-logo" width="320" height="45" loading="lazy" />
-        <img src="assets/img/ucsc-logo.png" alt="University of California, Santa Cruz" class="partner-logo" width="240" height="66" loading="lazy" />
-      </div>
-
-      <div class="foot-legal">
-        <p>
+        <p class="footer-legal">
           A research and outreach project of UC Agriculture and Natural
           Resources and UC Santa Cruz. The generated code is provided as is,
-          without warranty; you are responsible for checking it against your own
-          equipment before relying on it for irrigation decisions. See the
-          <a href="terms.html">terms of use</a>.
+          without warranty; check it against your own equipment before relying
+          on it for irrigation decisions.
         </p>
-        <p class="foot-copy">&copy; <span id="foot-year">2026</span> The NodeFlow project.</p>
-      </div>
-    </footer>
+        <p class="contact-slot">Contact details coming soon.</p>
+        <p class="footer-copy">&copy; <span id="foot-year">2026</span> The NodeFlow project.</p>
+      </footer>
+    </div>
 
     <div class="consent-bar" id="consent-bar" role="dialog" aria-modal="false" aria-labelledby="consent-bar-title" hidden>
       <div class="consent-bar-inner">

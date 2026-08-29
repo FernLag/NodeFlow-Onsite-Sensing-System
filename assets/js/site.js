@@ -113,23 +113,44 @@
   }
 
   /* ---------- sticky action bar (small screens) --------------------
-     Appears once the generator form has been scrolled into play, so it
-     never covers the hero's own call to action. */
+     Appears once the form itself has been reached, and stands down
+     whenever the real generate button is on screen: two buttons doing the
+     same job in view at once is just noise. */
   function initStickyCta() {
     var bar = byId("sticky-cta");
-    var build = byId("build");
-    if (!bar || !build || !("IntersectionObserver" in window)) return;
+    var form = byId("sensors-list");
+    var genBtn = byId("gen-btn");
+    if (!bar || !form || !("IntersectionObserver" in window)) return;
 
-    var seen = false;
+    var reachedForm = false;
+    var genVisible = true;
+
+    var update = function () {
+      bar.hidden = !reachedForm || genVisible;
+    };
+
     new IntersectionObserver(
       function (entries) {
         entries.forEach(function (e) {
-          if (e.isIntersecting) seen = true;
-          bar.hidden = !seen;
+          if (e.isIntersecting) reachedForm = true;
         });
+        update();
       },
-      { rootMargin: "0px 0px -40% 0px" },
-    ).observe(build);
+      { rootMargin: "0px 0px -30% 0px" },
+    ).observe(form);
+
+    if (genBtn) {
+      new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          genVisible = e.isIntersecting;
+        });
+        update();
+      }).observe(genBtn);
+    } else {
+      genVisible = false;
+    }
+
+    update();
   }
 
   /* ---------- consent checkbox in the download dialog ---------- */
