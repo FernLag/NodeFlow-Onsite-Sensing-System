@@ -1,5 +1,5 @@
 /* ============================================================
-   site.js — page furniture that is not the code generator itself:
+   site.js: page furniture that is not the code generator itself:
    service worker registration, offline notice, consent banner,
    the sticky action bar, contact details and the visit counter.
 
@@ -28,7 +28,7 @@
         return;
       }
       var who = document.createElement("span");
-      who.textContent = (CFG.contactName || "The project team") + " — ";
+      who.textContent = (CFG.contactName || "The project team") + ": ";
       var a = document.createElement("a");
       a.href = "mailto:" + email;
       a.textContent = email;

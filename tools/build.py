@@ -365,7 +365,7 @@ js = re.sub(r'const OUTPUT_VIZ = \{.*?\n\};',
 with open(MAIN_JS_FILE, "w", encoding="utf-8") as f:
     f.write(js)
 
-print(f"assets/js/main.js updated — {len(active_keys)} sensor(s), {len(active_ports)} port(s), "
+print(f"assets/js/main.js updated: {len(active_keys)} sensor(s), {len(active_ports)} port(s), "
       f"{len(active_viz)} viz option(s), {len(survey_raw)} survey question(s), "
       f"OUTPUT_PARAMS + OUTPUT_VIZ regenerated")
 

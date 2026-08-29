@@ -1,5 +1,5 @@
 /**
- * NodeFlow (On-site) — submission endpoint
+ * NodeFlow (On-site) submission endpoint
  * ---------------------------------------------------------------
  * Google Apps Script web app that writes one row per generated file
  * into the project spreadsheet.

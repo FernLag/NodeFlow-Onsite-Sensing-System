@@ -1,5 +1,5 @@
 /* ============================================================
-   NodeFlow (On-site) — site configuration
+   NodeFlow (On-site) site configuration
    ------------------------------------------------------------
    Everything here is PUBLIC. This file is served to every visitor
    and is readable by anyone. Never put an API key, token, password
@@ -28,7 +28,7 @@
        A public endpoint by necessity: this is a static site with no
        server of its own, so the address cannot be hidden. It is not a
        credential. Protect it in the Apps Script itself (origin check,
-       per-email rate limit, payload size cap) — see
+       per-email rate limit, payload size cap). See
        server/apps-script/Code.gs. */
     submitEndpoint:
       "https://script.google.com/macros/s/AKfycbzBDJalu2LdNU2UC-ySZJlxW5dh_3Djhq73sBU4JycPbOGjfBLdSuepAJs9jiIKUH1uUw/exec",
