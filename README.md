@@ -185,6 +185,18 @@ spreadsheet.
 The longer checklist, including the values to replace before a first public
 deploy, is in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md). Security notes and the
 findings from the last review are in [`docs/SECURITY.md`](docs/SECURITY.md).
+What every measurement actually computes, where each constant comes from, and
+where the spreadsheet and the code disagree, is in
+[`docs/EQUATIONS.md`](docs/EQUATIONS.md).
+
+### Languages
+
+The generator reads in English and Spanish, switched with the button at the top
+right and remembered per browser. Translations live in `assets/js/i18n.js`;
+spreadsheet text is keyed on the sensor, measurement or viz identifier rather
+than on the English wording. The Spanish has not been reviewed by a native
+speaker yet. The static pages and the text the sketch puts on the LCD are still
+English only.
 
 ## Privacy
 
