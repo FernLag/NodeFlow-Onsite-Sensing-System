@@ -32,16 +32,19 @@ These three are placeholders and must be replaced.
 
 1. Edit `data/sensor_configuration.xlsx`.
 2. `python3 tools/build.py`
-3. **Bump `CACHE_NAME` in `sw.js`** (`nodeflow-cache-v3` to `-v4`, and so on).
+3. `python3 tools/verify_sketches.py`, which compiles every sketch the form can
+   produce. Any change to the Arduino templates or to the spreadsheet can break
+   a combination you did not think to try by hand.
+4. **Bump `CACHE_NAME` in `sw.js`** (`nodeflow-cache-v5` to `-v6`, and so on).
    This is the step that breaks deployments when it is skipped. The service
    worker serves the cached copy first, so without a new cache name a returning
    visitor keeps the old page and the old generator, indefinitely, and reports
    bugs you have already fixed.
-4. Check the pages still load over a local server:
+5. Check the pages still load over a local server:
    `python3 -m http.server 8000`, then `http://localhost:8000`. The page
    detects localhost and unregisters the service worker, so you always see your
    current files while developing.
-5. Commit and push to the default branch.
+6. Commit and push to the default branch.
 
 ## When adding a page
 

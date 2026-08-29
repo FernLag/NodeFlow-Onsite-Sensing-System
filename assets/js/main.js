@@ -1172,11 +1172,22 @@ function byteLength(text) {
   return new TextEncoder().encode(text).length;
 }
 
+/* A placeholder with no matching value falls back to 0, so a grower is never
+   handed a file that will not compile. The cost of that is silence: a
+   calibration value the form forgot to collect becomes a zero in the sketch
+   and the reading is wrong rather than obviously broken. Every miss is
+   recorded here so tools/verify_sketches.py can fail on it. */
+const RENDER_MISSES = [];
+
 function render(template, vars) {
   if (!template) return "";
-  return template.replace(/\{(\w+)\}/g, (_, key) =>
-    vars[key] !== undefined ? vars[key] : "0",
-  );
+  return template.replace(/\{(\w+)\}/g, (_, key) => {
+    if (vars[key] === undefined) {
+      RENDER_MISSES.push(key);
+      return "0";
+    }
+    return vars[key];
+  });
 }
 
 const SENSOR_ALIASES = {
@@ -1396,7 +1407,17 @@ function buildIno(blocks, surveyAnswers = {}) {
           "Raw value (Temperature)",
         ].includes(resolvedOut));
     if (needsPartnerProbe) {
-      loopBody += `  connected_${idx} = connected_${idx} && va3ChannelPresent(${vars.partnerPort});\n`;
+      /* The presence test has to match the probe on the partner port. A
+         Watermark's partner hangs off the VA-3, whose output stays below
+         VA3_MAX_COUNTS whenever a probe is attached. A capacitive probe is
+         wired straight to the pin and reads HIGH in dry soil, so the VA-3
+         test would call it missing exactly when the soil is driest, which is
+         when a wetting front reading matters most. */
+      const partnerCheck =
+        sensorKey === "Watermark" || sensorKey === "Watermark_Temperature"
+          ? `va3ChannelPresent(${vars.partnerPort})`
+          : `portHasSensor(${vars.partnerPort})`;
+      loopBody += `  connected_${idx} = connected_${idx} && ${partnerCheck};\n`;
     }
 
     loopBody += `  if (connected_${idx}) {\n`;

@@ -1,5 +1,5 @@
 /* ============================================================
-   sw.js — offline shell and the queue for submissions made while
+   sw.js: offline shell and the queue for submissions made while
    the visitor had no connection.
 
    MUST stay at the repository root: a service worker can only
@@ -11,7 +11,7 @@
 
 importScripts("assets/js/config.js");
 
-const CACHE_NAME = "nodeflow-cache-v5";
+const CACHE_NAME = "nodeflow-cache-v6";
 
 const CFG = self.NODEFLOW_CONFIG || {};
 const LIMITS = Object.assign(
