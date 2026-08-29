@@ -1,7 +1,21 @@
+# The master spreadsheet is edited locally and is not versioned here.
+data/sensor_configuration.xlsx
 sensor_configuration.xlsx
+
+# Excel lock files
 ~$*.xlsx
 ~$*.xls
+
+# Python
 *.pyc
 __pycache__/
+
+# Secrets. Nothing in this repository should ever need one, but keep the
+# guard in place: see docs/SECURITY.md.
 .env
+.env.*
+*.pem
+*.key
+
+# macOS
 .DS_Store
