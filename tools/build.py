@@ -1,7 +1,10 @@
 """
-build.py — regenerates main.js config blocks from sensor_configuration.xlsx
+build.py - regenerates the config blocks in assets/js/main.js from
+data/sensor_configuration.xlsx
 
-This script rewrites these blocks in main.js based on the Excel file:
+Run it from the repository root:  python3 tools/build.py
+
+This script rewrites these blocks in assets/js/main.js based on the Excel file:
   - SENSOR_TYPES     ← sheet "sensors" + "params"
   - OUTPUT_PARAMS    ← sheet "sensors" (in_a..in_e columns)
   - OUTPUT_VIZ       ← sheet "sensors" (new "viz" column, pipe-separated viz_keys)
@@ -9,13 +12,13 @@ This script rewrites these blocks in main.js based on the Excel file:
   - VIZ_OPTIONS      ← sheet "viz_options"
   - SURVEY_QUESTIONS ← sheet "survey_questions"
 
-It does NOT touch the TEMPLATES block — that contains the actual Arduino
-code logic and must be edited by hand in main.js.
+It does NOT touch the TEMPLATES block - that contains the actual Arduino
+code logic and must be edited by hand in assets/js/main.js.
 
 IMPORTANT: For Excel edits to flow through to generated code, the output names
 in your "sensors" sheet (e.g. "TAW", "Raw value") must match keys in
 TEMPLATES.outputs (case-insensitive). If you add a new output in Excel, add a
-matching entry in TEMPLATES.outputs in main.js.
+matching entry in TEMPLATES.outputs in assets/js/main.js.
 
 Same rule applies for new sensor types (TEMPLATES.sensors) and new viz
 options (TEMPLATES.viz).
@@ -23,13 +26,33 @@ options (TEMPLATES.viz).
 
 import os
 import re
+import sys
 from openpyxl import load_workbook
 
-EXCEL_FILE    = "sensor_configuration.xlsx"
-MAIN_JS_FILE  = "main.js"
-TEMPLATES_DIR = "templates"
+# Paths are resolved against the repository root so the script can be run from
+# anywhere:  python3 tools/build.py
+ROOT          = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+EXCEL_NAME    = "sensor_configuration.xlsx"
+MAIN_JS_FILE  = os.path.join(ROOT, "assets", "js", "main.js")
+TEMPLATES_DIR = os.path.join(ROOT, "tools", "templates")
 
+
+def find_excel():
+    """The spreadsheet lives in data/. Older checkouts kept it at the root, so
+    fall back to that before giving up."""
+    for candidate in (os.path.join(ROOT, "data", EXCEL_NAME),
+                      os.path.join(ROOT, EXCEL_NAME)):
+        if os.path.isfile(candidate):
+            return candidate
+    sys.exit(
+        f"Could not find {EXCEL_NAME}.\n"
+        f"Put the master spreadsheet in {os.path.join(ROOT, 'data')} and run this again."
+    )
+
+
+EXCEL_FILE = find_excel()
 wb = load_workbook(EXCEL_FILE, data_only=True)
+print(f"reading {os.path.relpath(EXCEL_FILE, ROOT)}")
 
 def sheet_rows(sheet_name, skip=1):
     ws = wb[sheet_name]
@@ -342,7 +365,7 @@ js = re.sub(r'const OUTPUT_VIZ = \{.*?\n\};',
 with open(MAIN_JS_FILE, "w", encoding="utf-8") as f:
     f.write(js)
 
-print(f"main.js updated — {len(active_keys)} sensor(s), {len(active_ports)} port(s), "
+print(f"assets/js/main.js updated — {len(active_keys)} sensor(s), {len(active_ports)} port(s), "
       f"{len(active_viz)} viz option(s), {len(survey_raw)} survey question(s), "
       f"OUTPUT_PARAMS + OUTPUT_VIZ regenerated")
 
@@ -397,6 +420,6 @@ if __name__ == "__main__":
     path = os.path.join(TEMPLATES_DIR, f"{key}.py")
     with open(path, "w", encoding="utf-8") as f:
         f.write(code)
-    print(f"templates/{key}.py written")
+    print(f"tools/templates/{key}.py written")
 
 print("Done.")
