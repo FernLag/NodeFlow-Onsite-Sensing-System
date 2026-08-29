@@ -196,7 +196,11 @@ deploy, is in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md). Security notes and the
 findings from the last review are in [`docs/SECURITY.md`](docs/SECURITY.md).
 What every measurement actually computes, where each constant comes from, and
 where the spreadsheet and the code disagree, is in
-[`docs/EQUATIONS.md`](docs/EQUATIONS.md).
+[`docs/EQUATIONS.md`](docs/EQUATIONS.md). If you are taking this project over,
+start with [`docs/HANDOVER.md`](docs/HANDOVER.md).
+
+The grower-facing guide, from installing the Arduino IDE to readings on the
+display, is `docs/guidelines/nodeflow-user-guide.tex`.
 
 ### Languages
 

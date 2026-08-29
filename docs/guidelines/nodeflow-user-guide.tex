@@ -1,0 +1,420 @@
+% nodeflow (on-site) user guide
+% build with:  pdflatex nodeflow-user-guide.tex   (run twice for the contents)
+% no packages beyond a standard texlive install are needed.
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{parskip}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{leaf}{HTML}{64791F}
+\definecolor{olive}{HTML}{5F560F}
+\definecolor{ink}{HTML}{232326}
+\definecolor{paper}{HTML}{F3F1DF}
+\definecolor{warn}{HTML}{A33B1F}
+
+\titleformat{\section}{\Large\bfseries\color{ink}}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\large\bfseries\color{olive}}{\thesubsection}{0.6em}{}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small NodeFlow (On-site) user guide}
+\rhead{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\newtcolorbox{note}[1][]{colback=paper,colframe=leaf,boxrule=1pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,#1}
+\newtcolorbox{caution}[1][]{colback=white,colframe=warn,boxrule=1pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,#1}
+
+\newcommand{\nf}{NodeFlow\textsubscript{(On-site)}}
+\newcommand{\screen}[2]{%
+  \begin{center}\ttfamily\small
+  \fcolorbox{ink}{paper}{\parbox{7cm}{\centering #1\\#2}}
+  \end{center}}
+
+\begin{document}
+
+\begin{titlepage}
+\centering
+\vspace*{3cm}
+{\Huge\bfseries NodeFlow\textsubscript{(On-site)}\par}
+\vspace{0.6cm}
+{\Large Sensing System\par}
+\vspace{1.4cm}
+{\large A guide to building your own soil sensor code\par}
+\vspace{0.4cm}
+{\large From a blank computer to readings on the screen\par}
+\vfill
+{\normalsize A research and outreach project of\\
+UC Agriculture and Natural Resources and UC Santa Cruz\par}
+\vspace{0.6cm}
+{\small Version 1, August 2026\par}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+\section{Before you start}
+
+This guide takes you from a computer with nothing installed to a working soil
+sensor showing readings on a small screen. You do not need to know how to
+program. You will not write a single line of code.
+
+\subsection{What you need}
+
+\begin{itemize}[leftmargin=*]
+  \item An Arduino Uno R3 board.
+  \item A 16 by 2 LCD keypad shield, the display that presses onto the board.
+  \item At least one sensor. The system reads three kinds, listed in
+        section~\ref{sec:sensors}.
+  \item A USB cable that carries data, not only power. If your computer does
+        not notice the board when you plug it in, the cable is the first thing
+        to suspect.
+  \item A computer running Windows, macOS or Linux.
+\end{itemize}
+
+\subsection{How long it takes}
+
+About twenty minutes the first time, most of which is installing the Arduino
+software. After that, generating a new file and uploading it takes two or three
+minutes.
+
+\section{Installing the Arduino IDE}
+
+The Arduino IDE is the free program that copies your file onto the board. You
+install it once.
+
+\begin{enumerate}[leftmargin=*]
+  \item Open \url{https://www.arduino.cc/en/software} in a web browser.
+  \item Download the version for your operating system. On Windows choose the
+        installer rather than the app from the Microsoft Store, because the
+        installer also sets up the drivers the board needs.
+  \item Run the file you downloaded and accept the default options. On Windows
+        it will ask permission to install device drivers. Say yes to each one.
+        On macOS, drag the Arduino icon into your Applications folder.
+  \item Open the Arduino IDE once, so it can finish setting itself up.
+\end{enumerate}
+
+\begin{note}
+On macOS the first time you open it you may see a message saying the app cannot
+be checked for malicious software. Open System Settings, go to Privacy and
+Security, scroll down, and click Open Anyway.
+\end{note}
+
+\subsection{Checking the board is seen}
+
+Plug the Arduino into your computer with the USB cable. A small light on the
+board should come on.
+
+In the Arduino IDE:
+
+\begin{enumerate}[leftmargin=*]
+  \item Open the \textbf{Tools} menu.
+  \item Point at \textbf{Board} and choose \textbf{Arduino Uno}.
+  \item Point at \textbf{Port}. You should see an entry that appeared when you
+        plugged the board in. On Windows it looks like \texttt{COM3}. On macOS
+        it looks like \texttt{/dev/cu.usbmodem} followed by some numbers.
+        Choose it.
+\end{enumerate}
+
+\begin{caution}
+If no new port appears, work through these in order: try a different USB cable,
+try a different USB socket, and on Windows check that the driver installed. A
+cable that only carries power is by far the most common cause.
+\end{caution}
+
+\section{Wiring your sensors}
+
+\subsection{Which pins you can use}
+
+The display shield covers most of the board. What it leaves you is:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{A1 to A5} for sensors. Five ports.
+  \item \textbf{A0} is taken by the buttons on the shield. Do not use it.
+  \item \textbf{D2 and D3} are used when a sensor is wired without an adapter,
+        described in section~\ref{sec:direct}.
+\end{itemize}
+
+\subsection{The sensors this system reads}
+\label{sec:sensors}
+
+\subsubsection*{Capacitive soil moisture probe}
+
+A low cost probe, such as the DFRobot SEN0308, with three wires. Red goes to
+5V, black goes to GND, and the yellow signal wire goes to one of A1 to A5. It
+needs no adapter.
+
+This probe reads \emph{high in dry soil and low in wet soil}. That is a
+property of the probe, and the code takes it into account.
+
+\subsubsection*{Irrometer Watermark 200SS}
+
+Measures how hard a plant has to pull to get water out of the soil, which is
+called soil water tension and is reported in kPa. A low number means wet soil.
+A high number means dry soil.
+
+There are two ways to connect it, and they are genuinely different:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Through a 200SS-VA3 adapter.} The adapter does the difficult
+        electrical work and hands the board a simple voltage. One adapter
+        carries up to three Watermarks and one temperature probe on a single
+        port. This is the recommended way, and the way to fit more than five
+        sensors.
+  \item \textbf{Wired straight to the board.} One sensor only. See
+        section~\ref{sec:direct} before you try this.
+\end{itemize}
+
+\subsubsection*{Irrometer 200TS soil temperature sensor}
+
+Measures soil temperature. It can sit on its own, or share a 200SS-VA3 adapter
+with Watermark sensors.
+
+\subsection{Wiring a sensor without the adapter}
+\label{sec:direct}
+
+The form lets you wire a Watermark or a temperature sensor straight to the
+board. You will need a 10 kilohm resistor for each one. The sensor goes between
+a digital pin and your chosen analog pin, and the resistor goes from that same
+analog pin to a second digital pin. The code uses D2 and D3 for this.
+
+\begin{caution}
+\textbf{One sensor only.} Wet soil conducts electricity between two bare
+sensors, so each one ends up partly reading the other, and over time the metal
+inside them corrodes. This is the manufacturer's own warning. If you want more
+than one, use a 200SS-VA3 adapter.
+\end{caution}
+
+\begin{caution}
+\textbf{The combined Watermark and temperature option needs the adapter.} It
+exists because the adapter is what joins the two sensors together. The form
+does not offer direct wiring for it.
+\end{caution}
+
+\section{Using the form}
+
+Open the code generator in a web browser:
+
+\begin{center}
+\url{https://fernlag.github.io/NodeFlow-Onsite-Sensing-System/}
+\end{center}
+
+Once the page has loaded once, it keeps working without an internet connection.
+
+\begin{note}
+There is a language button in the top right corner. It switches the whole page
+between English and Spanish, and remembers your choice.
+\end{note}
+
+\subsection{One block per sensor}
+
+The page starts with one block. Each block describes one sensor plugged into
+one port. Use the \textbf{Add another} button if you have more than one sensor.
+
+For each block you answer four questions:
+
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Sensor type.} Which sensor this is.
+  \item \textbf{Port.} Which port you plugged it into.
+  \item \textbf{What you want to see on the screen.} The measurement, described
+        in section~\ref{sec:measurements}.
+  \item \textbf{How it should appear.} A number, a percentage, a bar, or words
+        describing the state.
+\end{enumerate}
+
+\subsection{The settings underneath}
+
+Below those four questions is a section of settings. It only shows the ones
+that matter for the choices you made. If you pick a measurement that needs
+nothing configured, the section disappears entirely. This is deliberate: a
+setting you should not touch is not shown.
+
+Each setting has a small \textbf{i} button beside it. Press it, or move onto it
+with the Tab key, and it explains what the number means and where to get it.
+
+\begin{caution}
+The default values are starting points, not measurements of your soil. A
+default is a guess. The two calibration values for a capacitive probe in
+particular must be measured, and section~\ref{sec:calibration} explains how.
+\end{caution}
+
+\subsection{Generating the file}
+
+Press the large \textbf{Generate} button at the bottom. A window appears asking
+for your name, country and email, and for a name for the file.
+
+This information goes to the research project. The consent form is linked in
+that window, and you have to tick the box before the button becomes available.
+Nothing is sent until you press confirm. The privacy policy on the site
+explains exactly what is recorded and how to have it removed.
+
+If you tick the date and time option, the file name gets a stamp on the end, so
+each download sits alongside the last one instead of being numbered by your
+browser.
+
+The file downloads to wherever your browser puts downloads. It ends in
+\texttt{.ino}, which is the Arduino file type.
+
+\section{Putting the file on the board}
+
+\begin{enumerate}[leftmargin=*]
+  \item Find the downloaded file and open it. The Arduino IDE starts.
+  \item The IDE offers to move the file into a folder of the same name. Say
+        yes. That is simply how Arduino files are stored.
+  \item Check \textbf{Tools} $\rightarrow$ \textbf{Board} still says Arduino
+        Uno, and \textbf{Tools} $\rightarrow$ \textbf{Port} still points at
+        your board.
+  \item Press the arrow button in the top left to upload. Lights on the board
+        flicker while it copies.
+  \item When the bar at the bottom says \textbf{Done uploading}, the display
+        starts showing readings.
+\end{enumerate}
+
+\begin{note}
+Nothing needs installing for the code to work. It uses only the display library
+that comes with the Arduino IDE.
+\end{note}
+
+\section{Reading the screen}
+
+The top line shows the port, a short sensor name, and the value.
+
+\screen{A2 WM200SS  34kPa}{OK\ \ \ irrigate}
+
+The bottom line shows whatever you chose: a bar, a percentage, or words. Press
+the \textbf{left} and \textbf{right} buttons on the shield to step through your
+sensors.
+
+The backlight switches off after five minutes without a button press, to save
+power. Any button wakes it.
+
+\subsection{Which way the numbers run}
+\label{sec:direction}
+
+This is worth reading once, because it prevents a common misunderstanding.
+
+\textbf{Every percentage runs from dry to wet.} Zero means dry. One hundred
+means wet. This is true for every percentage the system shows, without
+exception.
+
+\textbf{Tension in kPa runs the other way,} because that is what tension is.
+Zero kPa is soaking wet soil. A high number is dry soil. So that this cannot be
+confused, the second line of the display always spells out the state next to
+the number, as in the example above.
+
+\textbf{Raw readings report the sensor itself.} A capacitive probe reads high
+in dry soil, so a raw reading from it goes up as the soil dries. If you want a
+number that goes up as soil gets wetter, choose the percentage rather than the
+raw value.
+
+\section{The measurements you can choose}
+\label{sec:measurements}
+
+\begin{description}[leftmargin=1cm,style=nextline]
+  \item[Raw value] Exactly what the sensor put on the pin, with nothing done to
+        it. Useful for calibration and for checking a sensor is alive.
+  \item[Raw value as a percentage] The raw reading placed on a scale between
+        your dry and wet calibration points. Zero is dry, one hundred is wet.
+  \item[Management thresholds] Three plain states rather than a number: too
+        dry, about right, or saturated. For a Watermark you choose your soil
+        texture and the two tension thresholds fill themselves in.
+  \item[Tension in kPa] Soil water tension. Low is wet, high is dry.
+  \item[Temperature] Soil temperature, in Fahrenheit or Celsius.
+  \item[Wetting front] Whether irrigation water has reached a given depth yet.
+        Needs two probes at different depths, so it needs two blocks.
+  \item[Vertical flow rate] How fast water travelled between the two depths,
+        in centimetres per hour. Also needs two probes.
+  \item[Volumetric soil moisture] How much of the soil's volume is water,
+        as a percentage.
+  \item[Total available water] How much of the water the soil can hold is
+        actually available to a crop. Zero at the wilting point, one hundred at
+        field capacity.
+\end{description}
+
+\section{Calibrating a capacitive probe}
+\label{sec:calibration}
+
+A capacitive probe needs two numbers before a percentage means anything: what
+it reads in air, and what it reads in water. They differ between probes, so
+measure yours.
+
+\begin{enumerate}[leftmargin=*]
+  \item In the form, choose \textbf{Raw value} as the measurement for that
+        sensor, and \textbf{Raw value} as the display. Generate the file and
+        upload it.
+  \item Hold the probe in open air, away from your hand. Write down the number
+        on the screen. It will be somewhere near 590.
+  \item Stand the probe in a glass of water, up to but not past the line marked
+        on it. Write down that number. It will be somewhere near 280.
+  \item Go back to the form, choose the measurement you actually want, and put
+        your two numbers into the air value and water value boxes.
+  \item Generate the file again and upload it.
+\end{enumerate}
+
+\begin{caution}
+Do not put the probe in water past the marked line. The electronics at the top
+are not waterproof.
+\end{caution}
+
+\section{When something looks wrong}
+
+\begin{description}[leftmargin=1cm,style=nextline]
+  \item[The screen is blank, or shows a row of solid blocks]
+        Turn the small screw on the shield, which is the contrast control. A
+        new shield is often set to one extreme or the other.
+  \item[A port says No Sensor]
+        Nothing is detected on that pin. Check both ends of the wiring. If the
+        sensor goes through a 200SS-VA3 adapter, give it time: the adapter
+        updates each sensor once every five minutes, so a reading can be up to
+        five minutes old.
+  \item[The percentage seems backwards]
+        Your air and water calibration numbers are probably the wrong way
+        round. See section~\ref{sec:calibration}.
+  \item[A battery warning appears while on USB]
+        Ignore it. The battery check measures the supply against a reference
+        inside the chip, which only means something when the board is running
+        from a battery through the round barrel socket. On USB power, including
+        a USB power bank, it cannot tell.
+  \item[The numbers do not match my soil]
+        The calibration values and the soil thresholds belong to your field,
+        not to us. Change them in the form and generate the file again.
+  \item[The upload fails]
+        Check the port is still selected. Unplug the board, plug it back in,
+        select the port again and retry. If it still fails, close the Serial
+        Monitor window if you have it open, as it can hold the port.
+\end{description}
+
+\section{Working without an internet connection}
+
+The page works offline once it has been opened online at least once. Fill in
+the form and download files with no connection at all.
+
+Clearing your browser's history or site data for this page removes the offline
+copy, along with your saved details. Open the page once more while online and
+it comes back.
+
+\section{Getting help}
+
+The contact address is at the bottom of every page on the site. Tell us which
+sensor, which port, which measurement, and what the screen shows. If you can,
+include the file name you generated: it lets us find your exact configuration.
+
+\vfill
+\begin{center}
+\small The generated code is provided as is, without warranty. Before you
+irrigate on the strength of a reading, check that it matches what the soil is
+actually doing: dig, or compare it against an instrument you already trust.
+\end{center}
+
+\end{document}
