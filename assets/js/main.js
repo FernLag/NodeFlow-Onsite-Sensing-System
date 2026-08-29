@@ -1918,7 +1918,7 @@ function addBlock() {
             ${tipBadge(t("tip.port"), `port-tip-${bid}`)}
           </div>
           <select id="port-sel-${bid}" required aria-required="true" onchange="checkDuplicatePorts(); updatePortTip(${bid})">
-            ${PORTS.map((p) => `<option value="${p}" ${p === freePort ? "selected" : ""}>${p}</option>`).join("")}
+            ${PORTS.map((p) => `<option value="${escapeHtml(p)}" ${p === freePort ? "selected" : ""}>${escapeHtml(p)}</option>`).join("")}
           </select>
           <span class="err-msg" id="err-port-${bid}">${escapeHtml(t("form.required"))}</span>
         </div>
@@ -2230,7 +2230,7 @@ function syncTempPorts(sourceBid) {
       if (![...sel.options].some((o) => o.value === src.value)) {
         sel.insertAdjacentHTML(
           "beforeend",
-          `<option value="${src.value}">${src.value}</option>`,
+          `<option value="${escapeHtml(src.value)}">${escapeHtml(src.value)}</option>`,
         );
       }
       sel.value = src.value;
@@ -2268,24 +2268,26 @@ function populatePartnerPorts(bid, mode = "front") {
        carry both the tension and the temperature signal. Not defaulted:
        silently picking a port made the sketch read an unconnected pin. */
     choices = PORTS.filter((p) => /^A[1-5]$/.test(p) && p !== myPort);
-    emptyMsg = "No analog port available";
+    emptyMsg = t("form.noAnalogPort");
   } else {
     /* The deep wetting-front sensor IS its own block, so pick from those. */
     choices = takenPorts.filter((p) => p !== myPort && /^A[1-5]$/.test(p));
-    emptyMsg = "Add a second sensor block first";
+    emptyMsg = t("form.addSecondBlock");
   }
 
   const placeholder =
-    mode === "temp" ? `<option value="">Select the port</option>` : "";
+    mode === "temp"
+      ? `<option value="">${escapeHtml(t("form.selectPort"))}</option>`
+      : "";
 
   sel.innerHTML =
     choices.length === 0
-      ? `<option value="">${emptyMsg}</option>`
+      ? `<option value="">${escapeHtml(emptyMsg)}</option>`
       : placeholder +
         choices
           .map(
             (p) =>
-              `<option value="${p}" ${p === current ? "selected" : ""}>${p}</option>`,
+              `<option value="${escapeHtml(p)}" ${p === current ? "selected" : ""}>${escapeHtml(p)}</option>`,
           )
           .join("");
 

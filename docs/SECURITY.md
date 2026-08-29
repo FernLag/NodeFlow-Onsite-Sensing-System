@@ -1,6 +1,6 @@
 # Security notes and audit
 
-Last reviewed: 28 August 2026, against the state of the repository on the
+Last reviewed: 29 August 2026, against the state of the repository on the
 `site-restructure` branch.
 
 ## The shape of the thing
@@ -97,6 +97,45 @@ were reported through `alert()`, which cannot be associated with a field.
 Errors now appear in a `role="alert"` region, the offending field gets
 `aria-invalid` and focus, and dialog fields carry `aria-describedby` pointing
 at their own message.
+
+### Fixed in the 29 August review
+
+**Configuration values reached the markup unescaped (severity: low).** Port
+names from the spreadsheet, and the partner-port option built in
+`syncTempPorts`, were interpolated into HTML without escaping. Nothing a
+visitor types reaches those paths, so this was not exploitable from the
+browser, but a spreadsheet edit could have broken the markup, and the rest of
+the file already escaped everything else. They now go through `escapeHtml` like
+the rest.
+
+**Two interface strings were still hardcoded English** in the partner-port
+dropdown, which meant a Spanish user saw them untranslated. Now keyed like the
+rest. Not a security issue; found during the same sweep.
+
+### Checked and clean, 29 August
+
+- No credential-shaped assignments anywhere in the working tree or in the last
+  25 commits. The only matches are this file and `Code.gs` saying that secrets
+  do not belong here.
+- The browser reaches exactly two origins: the site itself and the Apps Script
+  endpoint. No CDN, no fonts, no analytics script, no embeds. Every page still
+  carries `default-src 'self'` with `connect-src` limited to those two.
+- No `eval`, no `new Function`, no `document.write`, and no assignment of a
+  form value straight into `innerHTML`.
+- The service worker still imports only its own config, refuses to cache
+  cross-origin responses, reduces each queued payload to seven known string
+  fields, and caps the queue at 50.
+- A tampered parameter value, of the kind you would get by editing a number
+  field in the DOM, produces a sketch the compiler rejects rather than one that
+  quietly does something else. The header comment still cannot be broken out
+  of.
+- Browser storage holds six keys, all prefixed `nodeflow_`: the saved survey
+  answers, saved configurations, the info box state, the language, the consent
+  answer and the submission timestamps used for rate limiting. Nothing else.
+- The direct-wiring code returns both excitation pins to `INPUT` when it
+  finishes, so no pin is left driving a sensor between readings. That matters
+  for the hardware as much as for the software: Irrometer's guide is explicit
+  that sustained DC destroys the electrodes.
 
 ### Open, with reasons
 

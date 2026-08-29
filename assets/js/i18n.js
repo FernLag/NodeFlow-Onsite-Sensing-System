@@ -100,6 +100,7 @@
       "form.tempProbe": "soil temperature probe",
       "form.addSecondBlock": "Add a second sensor block first",
       "form.ready": "Ready when you are",
+      "form.noAnalogPort": "No analog port available",
 
       /* ---------- tooltips on the form itself ---------- */
       "tip.sensorType":
@@ -292,6 +293,7 @@
       "form.tempProbe": "sonda de temperatura del suelo",
       "form.addSecondBlock": "Agregue primero un segundo bloque de sensor",
       "form.ready": "Cuando quiera",
+      "form.noAnalogPort": "No hay ningún puerto analógico disponible",
 
       /* ---------- tooltips on the form itself ---------- */
       "tip.sensorType":
