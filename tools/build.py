@@ -53,6 +53,23 @@ def find_excel():
 
 
 EXCEL_FILE = find_excel()
+
+
+def warn_if_open_in_excel(path):
+    """Excel keeps a ~$ lock file beside anything it has open, and it writes
+    its whole in-memory copy back when it saves or quits. That silently undoes
+    edits made to the file by anything else, which is easy to lose an hour to."""
+    lock = os.path.join(os.path.dirname(path), "~$" + os.path.basename(path))
+    if os.path.exists(lock):
+        print()
+        print("  ! " + os.path.basename(path) + " looks like it is open in Excel.")
+        print("    Excel writes its own copy back when it saves or quits, which")
+        print("    overwrites anything changed here. Quit Excel, not just the")
+        print("    window, before editing the spreadsheet from a script.")
+        print()
+
+
+warn_if_open_in_excel(EXCEL_FILE)
 wb = load_workbook(EXCEL_FILE, data_only=True)
 print(f"reading {os.path.relpath(EXCEL_FILE, ROOT)}")
 
