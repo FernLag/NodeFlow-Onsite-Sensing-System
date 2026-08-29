@@ -133,9 +133,12 @@ def cell(row, name):
     i = COL[name]
     return row[i] if i is not None and len(row) > i else ""
 
+UNFINISHED = re.compile(r"not yet implemented", re.I)
+
 active_keys = []
 sensor_meta = {}
 outputs_map = {}
+skipped_outputs = []
 
 current_key = ""
 for row in sensors_raw:
@@ -162,6 +165,16 @@ for row in sensors_raw:
             active_keys.append(current_key)
 
     if not current_key:
+        continue
+
+    # A measurement whose own tooltip says it is unfinished should not be on
+    # offer: it appears in the dropdown and generates a plausible looking
+    # number, which is worse than not being there. The sheet already states
+    # the status in prose, so that is what is honoured here rather than a
+    # second list to keep in step. Take the marker out of the tooltip and the
+    # measurement comes back.
+    if out_val and UNFINISHED.search(out_tip or ""):
+        skipped_outputs.append(f"{current_key}: {out_val}")
         continue
 
     if out_val and out_val.lower() != "for all params, col min max default":
@@ -364,6 +377,11 @@ js = re.sub(r'const OUTPUT_VIZ = \{.*?\n\};',
 
 with open(MAIN_JS_FILE, "w", encoding="utf-8") as f:
     f.write(js)
+
+if skipped_outputs:
+    print("Left out, because the tooltip says the measurement is not yet implemented:")
+    for entry in skipped_outputs:
+        print("   ", entry)
 
 print(f"assets/js/main.js updated: {len(active_keys)} sensor(s), {len(active_ports)} port(s), "
       f"{len(active_viz)} viz option(s), {len(survey_raw)} survey question(s), "

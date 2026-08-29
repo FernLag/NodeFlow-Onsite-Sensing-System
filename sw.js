@@ -11,7 +11,7 @@
 
 importScripts("assets/js/config.js");
 
-const CACHE_NAME = "nodeflow-cache-v7";
+const CACHE_NAME = "nodeflow-cache-v8";
 
 const CFG = self.NODEFLOW_CONFIG || {};
 const LIMITS = Object.assign(

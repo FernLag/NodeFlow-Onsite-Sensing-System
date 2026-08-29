@@ -24,16 +24,6 @@ const SENSOR_TYPES = {
         tip: "This variables specifies when the water has arrived at the depth at which the sensor is positioned.",
       },
       {
-        value: "1-2-3 point calibrations",
-        display: "Quick 1, 2 or 3 point calibration procedure",
-        tip: "TO ADD if relevant (not yet implemented)",
-      },
-      {
-        value: "Rate of Change of Soil Water Status",
-        display: "Rate of Change",
-        tip: "TO ADD if relevant (not yet implemented)",
-      },
-      {
         value: "Volumetric Soil Moisture",
         display: "Volumetric Soil Moisture",
         tip: "The volumetric soil moisture content, expressed here as a percentage (%), references to the volume of water reported to the volume of soil. It is calculated as θv = Vw/Vs⋅100 where Vw is  the water volume, Vs the dry soil volume.",
@@ -418,6 +408,11 @@ const VIZ_OPTIONS = [
     tip: "A more concise version of the raw sensor value",
   },
   {
+    value: "front_lcd",
+    label: "Front detected",
+    tip: "Shows front detected when the wetting front reaches the deep sensor",
+  },
+  {
     value: "temp_lcd",
     label: "Temperature",
     tip: "Displays the temperatue in celsius",
@@ -483,8 +478,6 @@ const OUTPUT_PARAMS = {
     "Raw Value (%)": ["air_val_max", "water_val"],
     "Thresholds": ["a", "b"],
     "Wetting Front": ["shallow", "deep", "threshold"],
-    "1-2-3 point calibrations": ["a", "b"],
-    "Rate of Change of Soil Water Status": [],
     "Volumetric Soil Moisture": ["air_val", "water_val", "FC", "WP"],
     "Vertical Flow Rate": ["shallow", "deep", "threshold"],
     "Total Available Water": ["air_val", "water_val", "FC", "WP"],
@@ -515,8 +508,6 @@ const OUTPUT_VIZ = {
     "Raw Value (%)": ["none", "bar", "transformed_lcd"],
     "Thresholds": ["none", "state_lcd"],
     "Wetting Front": ["none", "front_lcd"],
-    "1-2-3 point calibrations": ["none", "bar", "transformed_lcd"],
-    "Rate of Change of Soil Water Status": ["none", "state_lcd"],
     "Volumetric Soil Moisture": ["none", "bar", "transformed_lcd", "state_lcd"],
     "Vertical Flow Rate": ["none", "rate_lcd"],
     "Total Available Water": ["none", "bar", "transformed_lcd", "state_lcd"],

@@ -19,8 +19,6 @@ threshold = 400  #   # min: 0  max: 1023
 #   - Raw Value (%)  # inputs: air_val_max, water_val  # equation: (X-min)/(max-min)*100
 #   - Thresholds  # inputs: a, b  # equation: x > a → 'Too a' x > b → 'v ab' → 'good'
 #   - Wetting Front  # inputs: shallow, deep, threshold
-#   - 1-2-3 point calibrations  # inputs: a, b  # equation: soil_moisture-WP*100/(FC-WP)
-#   - Rate of Change of Soil Water Status  # equation: dV/dt = a(good or stop irrigating)
 #   - Volumetric Soil Moisture  # inputs: air_val, water_val, FC, WP  # equation: 1/k*ln(V-water_val)/(air_val-water_val)
 #   - Vertical Flow Rate  # inputs: shallow, deep, threshold
 #   - Total Available Water  # inputs: air_val, water_val, FC, WP  # equation: soil_moisture-WP*100/(FC-WP)
