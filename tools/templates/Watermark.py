@@ -1,5 +1,5 @@
 # Watermark.py
-# Sensor: Irrometer Watermark (200SS)
+# sensor: Irrometer Watermark (200SS)
 
 water_val = 0  # Water value: raw reading submerged in water  # min: 0  max: 239
 air_val_max = 239  # The maximum air value.  # min: 0  max: 239
@@ -10,7 +10,7 @@ wiring = 200SS-VA3 adapter  # How the sensor reaches the board. Through the 200S
 Rx = 10  # Series resistor between the sensor and ground, used only for direct wiring. Irrometer's reference circuit uses 10 kilohms.  # min: 1  max: 100
 soil_temp_c = 24  # Soil temperature used to compensate the Watermark calibration when wiring direct. Irrometer uses 24 C when no temperature sensor is available.  # min: -10  max: 60
 
-# Supported outputs:
+# supported outputs:
 #   - Raw value (Resistance)  # equation: Rx*(Vs-A1)/A1
 #   - Raw Value (%)  # inputs: abs(air_val_max), water_val  # equation: (X-min)/(max-min)*100
 #   - Tension (kPa)

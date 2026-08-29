@@ -1,5 +1,5 @@
 # Watermark_Temperature.py
-# Sensor: Irrometer Watermark (200SS) combined with Irrometer Soil Temperature Sensor (200TS)
+# sensor: Irrometer Watermark (200SS) combined with Irrometer Soil Temperature Sensor (200TS)
 
 air_val_max = 239  # The maximum air value.  # min: 0  max: 239
 water_val = 0  # The set water value.  # min: 0  max: 239
@@ -7,7 +7,7 @@ soil_type = Loam  # Soil texture sets the irrigation thresholds. Choosing a type
 thr_low = 23  # Threshold to calculate how wet the soil is at 10% depletion.  # min: 0  max: 239
 thr_high = 65  # Threshold to calculate how dry the soil is at 40% depletion.  # min: 0  max: 239
 
-# Supported outputs:
+# supported outputs:
 #   - Raw value (Resistance)  # equation: Rx*(Vs-A1)/A1
 #   - Raw Value (%)  # inputs: abs(air_val_max), water_val  # equation: (X-min)/(max-min)*100
 #   - Tension  # equation: Inside of the code itself for simplicity

@@ -1,5 +1,5 @@
 # DF_robot.py
-# Sensor: Soil moisture capacitive sensor (such as the DFRobot SEN0308)
+# sensor: Soil moisture capacitive sensor (such as the DFRobot SEN0308)
 
 air_val = 590  # Air value: raw reading in open air. The DFRobot probe outputs at most 2.9 V, about 593 counts on a 5 V board, so this sits just under 600.  # min: 0  max: 1023
 water_val = 280  # Water value: the raw reading with the probe standing in water. Typically around 280 on a 5 V board. Measure it, do not assume it.  # min: 0  max: 1023
@@ -14,7 +14,7 @@ shallow = 15  # The depth of the sensor closest to the surface.  # min: 0  max: 
 deep = 40  # The depth of the sensor deepest in the soil.  # min: 0  max: 200
 threshold = 400  # The threshold for the front arrival.  # min: 0  max: 1023
 
-# Supported outputs:
+# supported outputs:
 #   - Raw Value (ADC)  # inputs: air_val_min
 #   - Raw Value (%)  # inputs: air_val_max, water_val  # equation: (X-min)/(max-min)*100
 #   - Thresholds  # inputs: a, b  # equation: x > a → 'Too a' x > b → 'v ab' → 'good'
