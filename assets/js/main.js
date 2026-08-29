@@ -1,17 +1,17 @@
 const SENSOR_TYPES = {
   DF_robot: {
     label: "Soil moisture capacitive sensor (such as the DFRobot SEN0308)",
-    tip: "Direct sensor reading (digital or analog output)",
+    tip: "Direct sensor reading (Analog to Digital conversion)",
     outputs: [
       {
         value: "Raw Value (ADC)",
         display: "Raw Sensor Value (ADC)",
-        tip: "Direct sensor reading (digital or analog output)",
+        tip: "Direct sensor reading (Analog to Digital conversion)",
       },
       {
         value: "Raw Value (%)",
         display: "Raw Sensor Value (%)",
-        tip: "We will transform the raw value and express it as a percentage - 0% corresponds to the lowest possible value and 100% corresponds to the higest possible value.",
+        tip: "We will transform the raw value and express it as a percentage - 0% corresponds to the lowest possible value (dry) and 100% corresponds to the higest possible value (wet).",
       },
       {
         value: "Thresholds",
@@ -172,7 +172,7 @@ const SENSOR_TYPES = {
       {
         value: "Management Thresholds",
         display: "Management Thresholds",
-        tip: "",
+        tip: "Tells you where the soil stands between (Dry plant stressed, Irrigation range, Saturation).",
       },
     ],
     params: [
@@ -283,12 +283,12 @@ const SENSOR_TYPES = {
       {
         value: "Raw value (Temperature, in °F)",
         display: "Raw value (Temperature, in °F)",
-        tip: "You are reading soil temperature using your soil temperature sensor.",
+        tip: "You are reading soil temperature in Fahrenheit using your soil temperature sensor.",
       },
       {
         value: "Raw value (Temperature, in °C)",
         display: "Raw value (Temperature, in °C)",
-        tip: "You are reading soil temperature using your soil temperature sensor.",
+        tip: "You are reading soil temperature in Celsius using your soil temperature sensor.",
       },
       {
         value: "Management Thresholds",
@@ -366,17 +366,17 @@ const SENSOR_TYPES = {
   },
   Temperature: {
     label: "Irrometer Soil Temperature Sensor (200TS)",
-    tip: "You are reading soil temperature using your soil temperature sensor.",
+    tip: "You are reading soil temperature in Fahrenheit using your soil temperature sensor.",
     outputs: [
       {
         value: "Raw value (Temperature, in °F)",
         display: "Raw value (Temperature, in °F)",
-        tip: "You are reading soil temperature using your soil temperature sensor.",
+        tip: "You are reading soil temperature in Fahrenheit using your soil temperature sensor.",
       },
       {
         value: "Raw value (Temperature, in °C)",
         display: "Raw value (Temperature, in °C)",
-        tip: "You are reading soil temperature using your soil temperature sensor.",
+        tip: "You are reading soil temperature in Celsius using your soil temperature sensor.",
       },
     ],
     params: [
@@ -422,7 +422,7 @@ const SENSOR_TYPES = {
 };
 
 const PORT_TIPS = {
-  A1: "Analog pin A1. A0 is taken by the shield's buttons, so sensors start at A1.",
+  A1: "Analog pin A1. A0 is taken by the shield's buttons, so sensors start here.",
   A2: "Analog pin A2.",
   A3: "Analog pin A3.",
   A4: "Analog pin A4.",
@@ -1029,8 +1029,14 @@ void draw_progressbar(byte pct, const __FlashStringHelper *label) {
       loop: `  lcd.setCursor(0, 0);
   lcd.print(F("{label} "));
   lcd.print(percent); lcd.print(F(" kPa    "));
+  /* Tension runs the opposite way to every percentage on this display: 0 kPa
+     is saturated soil, a big number is dry. The figure stays in kPa because
+     that is what it is, and line 2 says which way it runs so nobody has to
+     remember. */
   lcd.setCursor(0, 1);
-  lcd.print(F("                "));`,
+  if      (kPa_{idx} >= thr_high_{idx}) lcd.print(F("DRY  stressed   "));
+  else if (kPa_{idx} >  thr_low_{idx})  lcd.print(F("OK   irrigate   "));
+  else                                  lcd.print(F("WET  saturated  "));`,
     },
   },
   buttonNav: {
@@ -2071,6 +2077,25 @@ const SENSOR_WIDE_PARAMS = [
   "therm_beta",
 ];
 
+/* These only exist because the sensor is wired straight to the board. On the
+   adapter path they are noise: the adapter owns the series resistor, does its
+   own temperature compensation, and never exposes a thermistor. Showing a
+   grower a field they must not touch is worse than not showing it. */
+const DIRECT_ONLY_PARAMS = ["Rx", "soil_temp_c", "therm_r25", "therm_beta"];
+
+/* The wiring a block is currently set to, read from the form. */
+function blockWiringValue(bid) {
+  let value = "";
+  document.querySelectorAll(`#params-${bid} .param-row`).forEach((row) => {
+    const nameEl = document.getElementById(`pname-${row.dataset.rid}`);
+    if (nameEl && normalizeParamName(nameEl.value) === "wiring") {
+      const valEl = document.getElementById(`pval-${row.dataset.rid}`);
+      if (valEl) value = valEl.value;
+    }
+  });
+  return value;
+}
+
 function extraParamsFor(outputVal) {
   const key = resolveOutputKey(outputVal);
   const extra = SENSOR_WIDE_PARAMS.slice();
@@ -2108,12 +2133,16 @@ function refreshParams(bid) {
     extraParamsFor(outputVal),
   );
 
+  const direct = /direct/i.test(blockWiringValue(bid));
+
   document.querySelectorAll(`#params-${bid} .param-row`).forEach((row) => {
     const rid = row.dataset.rid;
     const nameEl = document.getElementById(`pname-${rid}`);
     if (!nameEl) return;
     const isLocked = row.dataset.locked === "1";
-    const visible = neededHas(needed, nameEl.value) && !isLocked;
+    const directOnly = neededHas(DIRECT_ONLY_PARAMS, nameEl.value);
+    const visible =
+      neededHas(needed, nameEl.value) && !isLocked && (!directOnly || direct);
     row.style.display = visible ? "" : "none";
     const valInput = document.getElementById(`pval-${rid}`);
     if (valInput) valInput.required = visible;
@@ -2370,7 +2399,7 @@ function addParamRow(
       <div class="value-unit-row">
         ${
           choices.length
-            ? `<select id="pval-${rid}" required aria-required="true" aria-labelledby="plabel-${rid} pvlabel-${rid}" onchange="applySoilType(${bid}, this.value)" style="flex:1">
+            ? `<select id="pval-${rid}" required aria-required="true" aria-labelledby="plabel-${rid} pvlabel-${rid}" onchange="onChoiceParam(${bid}, '${escapeJsString(nameVal)}', this.value)" style="flex:1">
                ${choices.map((c) => `<option value="${escapeHtml(c)}" ${c === defaultVal ? "selected" : ""}>${escapeHtml(c)}</option>`).join("")}
              </select>`
             : `<input type="number" id="pval-${rid}" value="${escapeHtml(defaultVal)}" placeholder="0" step="0.001" required aria-required="true" aria-labelledby="plabel-${rid} pvlabel-${rid}"
@@ -2393,6 +2422,15 @@ function addParamRow(
   `;
   container.appendChild(row);
   updateParamRemoveBtns(bid);
+}
+
+/* A dropdown parameter can change which other parameters are worth showing:
+   choosing direct wiring brings out the series resistor, choosing the adapter
+   puts it away again. */
+function onChoiceParam(bid, name, value) {
+  const key = normalizeParamName(name);
+  if (key === "soil_type") applySoilType(bid, value);
+  refreshParams(bid);
 }
 
 /* Choosing a soil texture fills in the two tension thresholds for that soil.

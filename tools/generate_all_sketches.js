@@ -150,6 +150,17 @@ function configWarnings() {
   const known = new Set(api.VIZ_OPTIONS.map((v) => v.value));
   const warnings = [];
 
+  /* Only A0 to A5 are ADC channels on an Uno. analogRead of a digital pin does
+     not compile, so switching one on in the ports sheet needs a digital sensor
+     template first, not just a TRUE in a cell. */
+  api.PORTS.filter((p) => !/^A[0-5]$/.test(p)).forEach((p) => {
+    warnings.push(
+      "port " + p + " is switched on, but it is not an analog channel. The " +
+        "sketch reads sensors with analogRead, which only works on A0 to A5. " +
+        "A digital port needs a digital sensor template before it can be used.",
+    );
+  });
+
   for (const sensorKey of Object.keys(api.SENSOR_TYPES)) {
     for (const output of api.SENSOR_TYPES[sensorKey].outputs) {
       const out = output.value;

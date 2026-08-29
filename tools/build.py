@@ -233,9 +233,19 @@ for row in params_raw:
 viz_raw      = sheet_rows("viz_options")
 active_viz   = [r for r in viz_raw if r[3].upper() == "TRUE"]
 survey_raw   = sheet_rows("survey_questions")
-ports_raw    = sheet_rows("ports")
-active_ports = [r[0] for r in ports_raw if r[0]]
-port_tips    = {r[0]: r[1] for r in ports_raw if r[0]}
+ports_raw = sheet_rows("ports")
+
+def port_is_active(row):
+    """An 'active' column lets a port stay documented in the sheet while being
+    kept out of the form, the same way viz_options works. A sheet without that
+    column behaves as it always did and offers every port."""
+    if len(row) < 3 or row[2] == "":
+        return True
+    return row[2].strip().upper() == "TRUE"
+
+active_ports  = [r[0] for r in ports_raw if r[0] and port_is_active(r)]
+port_tips     = {r[0]: r[1] for r in ports_raw if r[0] and port_is_active(r)}
+skipped_ports = [r[0] for r in ports_raw if r[0] and not port_is_active(r)]
 
 
 def jstr(s):
@@ -379,6 +389,9 @@ js = re.sub(r'const OUTPUT_VIZ = \{.*?\n\};',
 
 with open(MAIN_JS_FILE, "w", encoding="utf-8") as f:
     f.write(js)
+
+if skipped_ports:
+    print("Ports switched off in the sheet:", ", ".join(skipped_ports))
 
 if skipped_outputs:
     print("Left out, because the tooltip says the measurement is not yet implemented:")

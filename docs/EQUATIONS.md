@@ -172,13 +172,46 @@ as good as those constants.
 
 ## Ports
 
-The form used to offer D1 to D14 alongside the analog pins, and the
-ports-full warning recommended them. **Every one of them generated a sketch
-that does not compile**, because `analogRead(D2)` is not valid Arduino. Beyond
-that, D4 to D10 are the LCD shield's, D0 and D1 are the serial port, and D14
-does not exist on an Uno. The list is now A1 to A5, and the warning points at
-the VA-3 adapter instead. `tools/verify_sketches.py` compiles one sketch per
-offered port so this cannot come back.
+The form used to offer D1 to D14 alongside the analog pins, and the ports-full
+warning recommended them. **Every one of them generated a sketch that does not
+compile**, because `analogRead(D2)` is not valid Arduino: only A0 to A5 are ADC
+channels on an Uno.
+
+The digital ports are still in the sheet, with an `active` column that is
+FALSE for all of them, the same pattern `viz_options` uses. Each carries a note
+saying what it is: D1 is the serial line, D4 to D10 belong to the LCD shield,
+D10 drives the backlight, D2, D3, D11, D12 and D13 are genuinely free. D14 is
+gone, because an Uno has D0 to D13 and pin 14 is A0.
+
+Switching one on is not enough to make it work. `analogRead` cannot read a
+digital pin, so a digital port needs a digital sensor template first.
+`tools/verify_sketches.py` says exactly that if it finds a non-analog port
+active, and compiles one sketch per active port so a broken one cannot ship
+quietly.
+
+## Which way the numbers run
+
+Every percentage and every three-state reading is **0 dry, 100 wet**, without
+exception:
+
+| Reading | 0 means | 100 means |
+|---|---|---|
+| Raw Value (%) capacitive | reading in open air | reading in water |
+| Raw Value (%) Watermark | tension at `dry_kPa` | tension at `wet_kPa` |
+| Thresholds, Management Thresholds | very dry, plant stressed | wet, saturated |
+| Volumetric Soil Moisture | no water in the soil volume | saturated |
+| Total Available Water | at the wilting point | at field capacity or wetter |
+
+The physical units are left as themselves, because a tension of 34 kPa is 34
+kPa and rewriting it as a percentage would be a different measurement:
+
+- **Tension in kPa** runs the other way by nature: 0 kPa is saturated, 239 kPa
+  is very dry. Rather than falsify it, line 2 of the display now names the
+  state, so the screen reads `A2 WM200SS 34 kPa` over `OK irrigate`. It used to
+  leave that line blank.
+- **Resistance, temperature and the raw ADC count** report what the sensor
+  produced. The capacitive probe reads high in air, which is a property of the
+  probe, not a choice this tool makes.
 
 ## Rows that are notes rather than formulas
 
