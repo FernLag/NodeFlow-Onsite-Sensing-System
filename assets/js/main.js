@@ -566,18 +566,22 @@ const int   deepDepth_{idx}    = {deep};
 const float Vref_{idx} = 5.0;
 `,
       read: `  int   sensorValue_{idx} = readSettled({readPin});
-  bool  connected_{idx} = sensorValue_{idx} < VA3_MAX_COUNTS;
   float tempVolts_{idx} = (sensorValue_{idx} / 1023.0) * Vref_{idx};
+  /* The VA-3 scales temperature over 0.49 to 2.8 V, so anything below that
+     floor is a missing or unwired probe rather than very cold soil. Without
+     this check an empty channel reads about -4 F and looks like data. */
+  bool  connected_{idx} = sensorValue_{idx} < VA3_MAX_COUNTS &&
+                          tempVolts_{idx} >= VA3_TEMP_MIN_VOLTS;
   float tempF_{idx}     = 48.48 * (tempVolts_{idx} - 0.490) + 20.0;
   float T_{idx}         = (tempF_{idx} - 32.0) / 1.8;`,
     },
     Watermark: {
       constants: `/* Sensor {idx}: Watermark via 200SS-VA3 adapter on port {port}
-   The adapter outputs 0-2.8 V proportional to tension: kPa = Volts / 0.0117.
+   The adapter outputs 0-2.8 V proportional to tension: kPa = Volts / 0.01176.
    It performs sensor excitation, the calibration equation and (when a 200TS
    is fitted) temperature compensation internally. */
 const float Vref_{idx}    = 5.0;      /* Arduino ADC reference */
-const float VA3_SCALE_{idx} = 0.0117; /* volts per kPa, from the VA-3 datasheet */
+const float VA3_SCALE_{idx} = 0.01176; /* volts per centibar, 200SS-VA3 datasheet */
 const float dry_kPa_{idx} = {air_val_max};   /* tension treated as 0 %  */
 const float wet_kPa_{idx} = {water_val};     /* tension treated as 100 % */
 const float thr_low_{idx}  = {thr_low};      /* 10 % depletion, kPa */
@@ -596,7 +600,7 @@ const float thr_high_{idx} = {thr_high};     /* 40 % depletion, kPa */
    The adapter compensates the tension internally; the temperature channel is
    read here only so it can be displayed. */
 const float Vref_{idx}      = 5.0;
-const float VA3_SCALE_{idx} = 0.0117;   /* volts per kPa */
+const float VA3_SCALE_{idx} = 0.01176;   /* volts per centibar, VA-3 datasheet */
 const float dry_kPa_{idx}   = {air_val_max};
 const float wet_kPa_{idx}   = {water_val};
 const float thr_low_{idx}   = {thr_low};    /* 10 % depletion, kPa */
@@ -611,6 +615,7 @@ const float thr_high_{idx}  = {thr_high};   /* 40 % depletion, kPa */
   /* degF = 48.48 x (Volts - 0.490) + 20   (VA-3 temperature scaling) */
   int   tempRaw_{idx}   = readSettled({partnerPort});
   float tempVolts_{idx} = (tempRaw_{idx} / 1023.0) * Vref_{idx};
+  bool  tempPresent_{idx} = tempVolts_{idx} >= VA3_TEMP_MIN_VOLTS;
   float tempF_{idx}     = 48.48 * (tempVolts_{idx} - 0.490) + 20.0;
   float T_{idx}         = (tempF_{idx} - 32.0) / 1.8;`,
     },
@@ -734,7 +739,7 @@ const float thr_high_{idx}  = {thr_high};   /* 40 % depletion, kPa */
      available here is the adapter's own reading in kPa. */
   percent = (int)kPa_{idx};`,
 
-      Tension: `  /* kPa = Volts / 0.0117 (200SS-VA3 output scaling) */
+      Tension: `  /* kPa = Volts / 0.01176 (200SS-VA3 output scaling, 0 to 239 kPa) */
   percent = (int)constrain(kPa_{idx}, 0, 239);`,
 
       "Management thresholds": `  /* Soil water tension against the irrigation range for this soil type.
@@ -761,7 +766,7 @@ const float thr_high_{idx}  = {thr_high};   /* 40 % depletion, kPa */
       : 0;   /* not calibrated */
   }`,
       Temperature: `  percent = (int)T_{idx};  /* temperature, directly read */`,
-      Tension: `  /* kPa = Volts / 0.0117, temperature-compensated inside the VA-3 */
+      Tension: `  /* kPa = Volts / 0.01176, temperature-compensated inside the VA-3 */
   percent = (int)constrain(kPa_{idx}, 0, 239);`,
 
       "Management thresholds": `  /* Soil water tension against the irrigation range for this soil type.
@@ -995,6 +1000,10 @@ const int FLOAT_SWING = 200;   /* ADC counts the pin may move before we call it 
    Anything meaningfully above that is an unconnected pin, not a reading, so
    the channel is reported as missing rather than converted into a number. */
 const int VA3_MAX_COUNTS = 620;
+
+/* The VA-3's temperature channel is scaled 0.49 to 2.8 V for 20 to 132 F.
+   Below 0.49 V the channel is not reporting a temperature at all. */
+const float VA3_TEMP_MIN_VOLTS = 0.45;   /* 0.49 V floor, with a little slack */
 
 int readSettled(uint8_t pin) {
   /* All analog pins share one ADC whose sample capacitor keeps charge from
@@ -1414,9 +1423,13 @@ function buildIno(blocks, surveyAnswers = {}) {
          test would call it missing exactly when the soil is driest, which is
          when a wetting front reading matters most. */
       const partnerCheck =
-        sensorKey === "Watermark" || sensorKey === "Watermark_Temperature"
-          ? `va3ChannelPresent(${vars.partnerPort})`
-          : `portHasSensor(${vars.partnerPort})`;
+        sensorKey === "Watermark_Temperature" && isTempReading
+          ? /* the temperature channel proves itself by clearing its 0.49 V
+               floor, which an empty channel never does */
+            `tempPresent_${idx}`
+          : sensorKey === "Watermark" || sensorKey === "Watermark_Temperature"
+            ? `va3ChannelPresent(${vars.partnerPort})`
+            : `portHasSensor(${vars.partnerPort})`;
       loopBody += `  connected_${idx} = connected_${idx} && ${partnerCheck};\n`;
     }
 

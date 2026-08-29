@@ -41,7 +41,7 @@ sensors go on A1 to A5.
 The VA-3 adapter carries up to three Watermarks plus one shared temperature
 probe. It outputs 0 to 2.8 V and refreshes each channel every five minutes,
 holding the previous value in between, so give it time after powering up.
-Tension is `kPa = Volts / 0.0117` and temperature is
+Tension is `kPa = Volts / 0.01176` and temperature is
 `degF = 48.48 * (V - 0.49) + 20`. The adapter never reports resistance.
 
 Measurements you can put on the screen: raw value in ADC counts, raw value as a
