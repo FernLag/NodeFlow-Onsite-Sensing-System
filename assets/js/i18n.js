@@ -1,30 +1,30 @@
-/* ============================================================
+/*
    i18n.js - English and Spanish for the code generator.
 
    HOW IT WORKS
-   Static page text carries data-i18n="key". Attributes carry
-   data-i18n-attr="placeholder:key, aria-label:key". Strings built
+   static page text carries data-i18n="key". attributes carry
+   data-i18n-attr="placeholder:key, aria-label:key". strings built
    in JavaScript call t("key").
 
-   Text that comes from the spreadsheet (sensor names, measurement
+   text that comes from the spreadsheet (sensor names, measurement
    names, tooltips, parameter labels, survey questions) is keyed on
    the stable identifier rather than on the English wording, so
    rewording a cell in Excel does not silently drop a translation.
 
    WHERE THE SPANISH SHOULD EVENTUALLY LIVE
-   In the spreadsheet, as `_es` columns next to the English ones, so
-   the people who know the agronomy own the wording. Until those
-   columns exist it lives here. The keys are the same either way, so
+   in the spreadsheet, as `_es` columns next to the English ones, so
+   the people who know the agronomy own the wording. until those
+   columns exist it lives here. the keys are the same either way, so
    moving it later is a change to build.py and not to this file's
    shape.
 
    REVIEW STATUS
-   The Spanish below is a careful first pass, not a reviewed
-   translation. The agronomic terms are the ones to check: frente de
+   the Spanish below is a careful first pass, not a reviewed
+   translation. the agronomic terms are the ones to check: frente de
    humedecimiento, tension hidrica, capacidad de campo, punto de
-   marchitez. A native-speaking agronomist should read it before this
+   marchitez. a native-speaking agronomist should read it before this
    is put in front of growers.
-   ============================================================ */
+    */
 
 (function (root) {
   "use strict";
@@ -33,7 +33,7 @@
 
   var STRINGS = {
     en: {
-      /* ---------- page chrome ---------- */
+      /*  page chrome */
       "page.title": "NodeFlow (On-site) Sensing System Code Generator",
       "page.skip": "Skip to the form",
       "lang.switch": "Español",
@@ -41,7 +41,7 @@
       "logo.alt":
         "NodeFlow logo: a water drop over a fan of soil layers with three sensor nodes",
 
-      /* ---------- summary box ---------- */
+      /*  summary box */
       "info.title": "Summary & Instructions",
       "info.p1":
         "This website allows you to generate the code the NodeFlow (On-site) Sensing System uses to read the sensors that you will plug into it, and generate the information you are interested in.",
@@ -60,7 +60,7 @@
       "info.offline2":
         "Clearing your browser's cache or site data for this page removes the offline copy, along with your saved details and any information still waiting to be sent. If that happens, just open this page again while online to restore it.",
 
-      /* ---------- form ---------- */
+      /*  form */
       "form.requiredNote": "Fields marked * are required",
       "form.noscript":
         "This generator builds your Arduino file inside the browser, so it needs JavaScript switched on. Everything still happens on your own machine: turning JavaScript on does not send your work anywhere.",
@@ -102,7 +102,7 @@
       "form.ready": "Ready when you are",
       "form.noAnalogPort": "No analog port available",
 
-      /* ---------- tooltips on the form itself ---------- */
+      /*  tooltips on the form itself */
       "tip.sensorType":
         "The sensors that can be used with the NodeFlow On-site Sensing System are listed in our written guidelines.",
       "tip.port":
@@ -115,7 +115,7 @@
         "In the configuration you specified in the boxes above, we need to know the value of the parameters listed below. Default values are specified but they may not be suitable for your specific situation. Please refer to the guidelines to learn how to measure these values.",
       "tip.prefix": "Explanation:",
 
-      /* ---------- saved information ---------- */
+      /*  saved information */
       "saved.welcome": "Welcome back,",
       "saved.infoSaved": ". Your info is saved.",
       "saved.edit": "Edit my info",
@@ -133,7 +133,7 @@
       "saved.confirmDelete":
         "Delete saved configuration \"{name}\"? This only removes it from your browser.",
 
-      /* ---------- download dialog ---------- */
+      /*  download dialog */
       "dialog.title": "Before you download",
       "dialog.close": "Cancel and close this dialog",
       "dialog.cancel": "Cancel",
@@ -166,7 +166,7 @@
       "dialog.badFilename":
         "Use letters or numbers in the name. Symbols on their own will not do.",
 
-      /* ---------- results ---------- */
+      /*  results */
       "result.downloaded": "The code has successfully downloaded as",
       "result.viewBelow": "You can visualize it below, or read",
       "result.whatNext": "what to do next",
@@ -174,7 +174,7 @@
       "result.copy": "Copy",
       "result.copied": "Copied!",
 
-      /* ---------- messages ---------- */
+      /*  messages */
       "msg.duplicatePort":
         "Two sensor blocks are using port {port}. Each port can hold only one sensor, so give one of them a different port.",
       "msg.emptyRequired":
@@ -204,7 +204,7 @@
       "msg.update": "A new version of this page is available.",
       "msg.refresh": "Refresh",
 
-      /* ---------- consent banner ---------- */
+      /*  consent banner */
       "consent.title": "Anonymous usage counting",
       "consent.body":
         "This site sets no advertising cookies and embeds no third-party trackers. We would like to count page visits so we know the tool is reaching people. It records no personal information and no cookie is stored for it. Your answer is kept in this browser only.",
@@ -212,7 +212,7 @@
       "consent.no": "No thanks",
       "consent.privacy": "Privacy policy",
 
-      /* ---------- footer ---------- */
+      /*  footer */
       "foot.privacy": "Privacy policy",
       "foot.terms": "Terms of use",
       "foot.consentForm": "Research consent form (PDF)",
@@ -225,7 +225,7 @@
     },
 
     es: {
-      /* ---------- page chrome ---------- */
+      /*  page chrome */
       "page.title": "Generador de código del sistema de sensores NodeFlow (in situ)",
       "page.skip": "Ir al formulario",
       "lang.switch": "English",
@@ -233,7 +233,7 @@
       "logo.alt":
         "Logotipo de NodeFlow: una gota de agua sobre un abanico de capas de suelo con tres nodos de sensores",
 
-      /* ---------- summary box ---------- */
+      /*  summary box */
       "info.title": "Resumen e instrucciones",
       "info.p1":
         "Este sitio web le permite generar el código que el sistema de sensores NodeFlow (in situ) utiliza para leer los sensores que usted conecte y obtener la información que le interesa.",
@@ -252,7 +252,7 @@
       "info.offline2":
         "Si borra la caché o los datos del sitio en su navegador, se elimina la copia sin conexión, junto con sus datos guardados y cualquier información pendiente de envío. Si eso ocurre, vuelva a abrir esta página con conexión para restaurarla.",
 
-      /* ---------- form ---------- */
+      /*  form */
       "form.requiredNote": "Los campos marcados con * son obligatorios",
       "form.noscript":
         "Este generador crea su archivo de Arduino dentro del navegador, así que necesita que JavaScript esté activado. Todo sigue ocurriendo en su propia computadora: activar JavaScript no envía su trabajo a ningún lado.",
@@ -295,7 +295,7 @@
       "form.ready": "Cuando quiera",
       "form.noAnalogPort": "No hay ningún puerto analógico disponible",
 
-      /* ---------- tooltips on the form itself ---------- */
+      /*  tooltips on the form itself */
       "tip.sensorType":
         "Los sensores que se pueden usar con el sistema de sensores NodeFlow (in situ) están enumerados en nuestras guías escritas.",
       "tip.port":
@@ -308,7 +308,7 @@
         "Para la configuración que indicó en los campos de arriba, necesitamos conocer el valor de los parámetros que se enumeran abajo. Se indican valores predeterminados, pero pueden no ser adecuados para su situación. Consulte las guías para aprender a medir estos valores.",
       "tip.prefix": "Explicación:",
 
-      /* ---------- saved information ---------- */
+      /*  saved information */
       "saved.welcome": "Bienvenido de nuevo,",
       "saved.infoSaved": ". Sus datos están guardados.",
       "saved.edit": "Editar mis datos",
@@ -326,7 +326,7 @@
       "saved.confirmDelete":
         "¿Eliminar la configuración guardada \"{name}\"? Esto solo la quita de su navegador.",
 
-      /* ---------- download dialog ---------- */
+      /*  download dialog */
       "dialog.title": "Antes de descargar",
       "dialog.close": "Cancelar y cerrar este cuadro de diálogo",
       "dialog.cancel": "Cancelar",
@@ -360,7 +360,7 @@
       "dialog.badFilename":
         "Use letras o números en el nombre. Los símbolos por sí solos no sirven.",
 
-      /* ---------- results ---------- */
+      /*  results */
       "result.downloaded": "El código se descargó correctamente como",
       "result.viewBelow": "Puede verlo abajo o leer",
       "result.whatNext": "qué hacer a continuación",
@@ -368,7 +368,7 @@
       "result.copy": "Copiar",
       "result.copied": "¡Copiado!",
 
-      /* ---------- messages ---------- */
+      /*  messages */
       "msg.duplicatePort":
         "Dos bloques de sensor están usando el puerto {port}. Cada puerto admite un solo sensor, así que asigne otro puerto a uno de ellos.",
       "msg.emptyRequired":
@@ -400,7 +400,7 @@
       "msg.update": "Hay una versión nueva de esta página.",
       "msg.refresh": "Actualizar",
 
-      /* ---------- consent banner ---------- */
+      /*  consent banner */
       "consent.title": "Conteo anónimo de visitas",
       "consent.body":
         "Este sitio no usa cookies publicitarias ni incorpora rastreadores de terceros. Nos gustaría contar las visitas para saber si la herramienta está llegando a la gente. No registra información personal y no se guarda ninguna cookie para ello. Su respuesta queda solo en este navegador.",
@@ -408,7 +408,7 @@
       "consent.no": "No, gracias",
       "consent.privacy": "Política de privacidad",
 
-      /* ---------- footer ---------- */
+      /*  footer */
       "foot.privacy": "Política de privacidad",
       "foot.terms": "Términos de uso",
       "foot.consentForm": "Formulario de consentimiento (PDF)",
@@ -421,12 +421,12 @@
     },
   };
 
-  /* ============================================================
-     Text that comes from the spreadsheet. Keyed on the identifier,
+  /*
+     text that comes from the spreadsheet. keyed on the identifier,
      not on the English wording, so rewording a cell does not drop
-     the translation. Anything missing falls back to the English the
+     the translation. anything missing falls back to the English the
      spreadsheet supplies, so a new row is never blank.
-     ============================================================ */
+      */
   var DATA_ES = {
     sensors: {
       DF_robot: "Sensor capacitivo de humedad del suelo (como el DFRobot SEN0308)",
@@ -542,7 +542,7 @@
     },
   };
 
-  /* ---------------------------------------------------------------- */
+  /* */
 
   var current = "en";
 
@@ -568,8 +568,10 @@
     return text;
   }
 
-  /* Spreadsheet text. `fallback` is whatever the sheet supplies, which is
-     what shows when there is no translation yet. */
+  /*
+ spreadsheet text. `fallback` is whatever the sheet supplies, which is
+     what shows when there is no translation yet.
+             */
   function tData(group, key, fallback) {
     if (current === "en") return fallback;
     var table = DATA_ES[group];

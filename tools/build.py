@@ -29,7 +29,7 @@ import re
 import sys
 from openpyxl import load_workbook
 
-# Paths are resolved against the repository root so the script can be run from
+# paths are resolved against the repository root so the script can be run from
 # anywhere:  python3 tools/build.py
 ROOT          = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EXCEL_NAME    = "sensor_configuration_v2.xlsx"
@@ -186,11 +186,11 @@ for row in sensors_raw:
     if not current_key:
         continue
 
-    # A measurement whose own tooltip says it is unfinished should not be on
+    # a measurement whose own tooltip says it is unfinished should not be on
     # offer: it appears in the dropdown and generates a plausible looking
-    # number, which is worse than not being there. The sheet already states
+    # number, which is worse than not being there. the sheet already states
     # the status in prose, so that is what is honoured here rather than a
-    # second list to keep in step. Take the marker out of the tooltip and the
+    # second list to keep in step. take the marker out of the tooltip and the
     # measurement comes back.
     if out_val and UNFINISHED.search(out_tip or ""):
         skipped_outputs.append(f"{current_key}: {out_val}")
@@ -446,11 +446,11 @@ for key in active_keys:
     p1 = params[1]["name"] if len(params) > 1 else "param_2"
 
     code = f'''# {key}.py
-# Sensor: {meta["label"]}
+# sensor: {meta["label"]}
 
 {param_block}
 
-# Supported outputs:
+# supported outputs:
 {output_block}
 
 

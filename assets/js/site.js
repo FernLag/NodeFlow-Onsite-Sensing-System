@@ -1,10 +1,10 @@
-/* ============================================================
+/*
    site.js: page furniture that is not the code generator itself:
    service worker registration, offline notice, consent banner,
    the sticky action bar, contact details and the visit counter.
 
-   Loaded on every page. main.js is only loaded on the generator.
-   ============================================================ */
+   loaded on every page. main.js is only loaded on the generator.
+    */
 
 (function () {
   "use strict";
@@ -14,9 +14,11 @@
     return document.getElementById(id);
   };
 
-  /* ---------- contact details ---------------------------------------
-     config.js ships with a sample address. Until it is replaced the
-     page says so rather than printing a mailto link that bounces. */
+  /*
+  contact details
+     config.js ships with a sample address. until it is replaced the
+     page says so rather than printing a mailto link that bounces.
+                */
   function renderContact() {
     var slots = document.querySelectorAll(".contact-slot");
     if (!slots.length) return;
@@ -38,15 +40,17 @@
     });
   }
 
-  /* ---------- footer year ---------- */
+  /*  footer year */
   function renderYear() {
     var y = byId("foot-year");
     if (y) y.textContent = String(new Date().getFullYear());
   }
 
-  /* ---------- consent + cookieless visit counting -------------------
-     Nothing is sent unless the visitor says yes AND an endpoint is
-     configured. The answer lives in localStorage, not a cookie. */
+  /*
+  consent + cookieless visit counting
+     nothing is sent unless the visitor says yes AND an endpoint is
+     configured. the answer lives in localStorage, not a cookie.
+              */
   var CONSENT_KEY = "nodeflow_consent_v1";
 
   function readConsent() {
@@ -112,10 +116,12 @@
       });
   }
 
-  /* ---------- sticky action bar (small screens) --------------------
-     Appears once the form itself has been reached, and stands down
+  /*
+  sticky action bar (small screens)
+     appears once the form itself has been reached, and stands down
      whenever the real generate button is on screen: two buttons doing the
-     same job in view at once is just noise. */
+     same job in view at once is just noise.
+              */
   function initStickyCta() {
     var bar = byId("sticky-cta");
     var form = byId("sensors-list");
@@ -153,7 +159,7 @@
     update();
   }
 
-  /* ---------- consent checkbox in the download dialog ---------- */
+  /*  consent checkbox in the download dialog */
   function initSurveyConsent() {
     var cb = byId("consent-checkbox");
     var btn = byId("confirm-btn");
@@ -163,7 +169,7 @@
     });
   }
 
-  /* ---------- offline notice ---------- */
+  /*  offline notice */
   function updateOnlineStatus() {
     var bar = byId("offline-bar");
     document.body.classList.toggle("is-offline", !navigator.onLine);
@@ -181,7 +187,7 @@
     }
   }
 
-  /* ---------- service worker ---------- */
+  /*  service worker */
   var IS_LOCAL =
     ["localhost", "127.0.0.1", "::1", ""].indexOf(location.hostname) !== -1 ||
     location.protocol === "file:";
@@ -269,7 +275,7 @@
     });
   }
 
-  /* ---------- go ---------- */
+  /*  go */
   renderContact();
   renderYear();
   initConsent();

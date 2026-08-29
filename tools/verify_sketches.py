@@ -87,7 +87,7 @@ def compile_sketch(compiler, path, workdir):
     with open(path, encoding="utf-8") as f:
         source = f.read()
 
-    # The real toolchain supplies these; the stub stands in for them.
+    # the real toolchain supplies these; the stub stands in for them.
     source = re.sub(r"^\s*#include\s*<(Arduino|LiquidCrystal)\.h>\s*$", "",
                     source, flags=re.M)
 
@@ -122,7 +122,7 @@ def main():
 
     compiler = find("g++", "clang++")
 
-    # Written outside the repository: these are throwaway build artifacts and
+    # written outside the repository: these are throwaway build artifacts and
     # there is no reason for the working tree to carry them.
     outdir = tempfile.mkdtemp(prefix="nodeflow-sketches-")
     print("Generating every sketch the form can produce...")

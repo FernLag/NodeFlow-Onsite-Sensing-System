@@ -1,17 +1,17 @@
-/* ============================================================
+/*
    sw.js: offline shell and the queue for submissions made while
    the visitor had no connection.
 
    MUST stay at the repository root: a service worker can only
    control pages at or below its own path.
 
-   Bump CACHE_NAME on every deploy. Without it, people who have
+   bump CACHE_NAME on every deploy. without it, people who have
    already visited keep the old files.
-   ============================================================ */
+    */
 
 importScripts("assets/js/config.js");
 
-const CACHE_NAME = "nodeflow-cache-v13";
+const CACHE_NAME = "nodeflow-cache-v14";
 
 const CFG = self.NODEFLOW_CONFIG || {};
 const LIMITS = Object.assign(
@@ -84,9 +84,11 @@ function deleteSubmission(id) {
   );
 }
 
-/* Only the fields the spreadsheet expects survive the trip through the queue.
-   Anything else in the body is dropped, so a malformed or padded payload
-   cannot be parked in storage and replayed later. */
+/*
+ only the fields the spreadsheet expects survive the trip through the queue.
+   anything else in the body is dropped, so a malformed or padded payload
+   cannot be parked in storage and replayed later.
+           */
 const ALLOWED_FIELDS = [
   "timestamp",
   "name",
@@ -120,8 +122,10 @@ async function queueSubmission(payload) {
   if (!clean) return;
 
   const existing = await getAllSubmissions();
-  /* A queue with no ceiling is somewhere to dump data. Drop the oldest
-     entries rather than growing without limit. */
+  /*
+ a queue with no ceiling is somewhere to dump data. drop the oldest
+     entries rather than growing without limit.
+           */
   const overflow = existing.length - (LIMITS.maxQueuedSubmissions - 1);
   for (let i = 0; i < overflow; i++) {
     await deleteSubmission(existing[i].id);
@@ -185,7 +189,7 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const { request } = event;
 
-  /* Submissions: try the network, park the body locally if it fails. */
+  /* submissions: try the network, park the body locally if it fails. */
   if (SUBMIT_ENDPOINT && request.url.startsWith(SUBMIT_ENDPOINT)) {
     event.respondWith(
       fetch(request.clone()).catch(async () => {
@@ -203,8 +207,10 @@ self.addEventListener("fetch", (event) => {
 
   if (request.method !== "GET") return;
 
-  /* Only this origin is cached. A cross-origin response is passed straight
-     through so nothing third-party is stored under our own cache. */
+  /*
+ only this origin is cached. a cross-origin response is passed straight
+     through so nothing third-party is stored under our own cache.
+               */
   if (new URL(request.url).origin !== self.location.origin) return;
 
   event.respondWith(

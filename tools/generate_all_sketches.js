@@ -1,19 +1,19 @@
 /*
  * generate_all_sketches.js
  *
- * Builds a sketch for every combination the spreadsheet allows: each sensor,
+ * builds a sketch for every combination the spreadsheet allows: each sensor,
  * each measurement that sensor offers, each display option that measurement
- * allows, and each choice of a picker parameter such as soil texture. It then
+ * allows, and each choice of a picker parameter such as soil texture. it then
  * adds the multi-sensor cases, because identifiers in a generated sketch are
  * suffixed per block and a collision only shows up when two blocks are present.
  *
- * Writes one .ino per case into the output directory and a manifest.json
+ * writes one .ino per case into the output directory and a manifest.json
  * listing them. tools/verify_sketches.py compiles what comes out.
  *
- * Run through the Python driver:  python3 tools/verify_sketches.py
- * Or directly:                    node tools/generate_all_sketches.js <outDir>
+ * run through the Python driver:  python3 tools/verify_sketches.py
+ * or directly:                    node tools/generate_all_sketches.js <outdir>
  *
- * With no directory given it writes to a fresh one under the system temp
+ * with no directory given it writes to a fresh one under the system temp
  * directory, never into the repository.
  */
 
@@ -25,11 +25,13 @@ const vm = require("vm");
 const ROOT = path.dirname(__dirname);
 const OUT = process.argv[2] || fs.mkdtempSync(path.join(os.tmpdir(), "nodeflow-sketches-"));
 
-/* ---------------------------------------------------------------- load ----
+/*
+  load ----
    main.js ends by wiring itself to a page: building a first sensor block,
-   reading localStorage, attaching tooltips. None of that can run without a
+   reading localStorage, attaching tooltips. none of that can run without a
    DOM, and none of it is needed to generate a sketch, so the file is loaded
-   up to that bootstrap and no further. */
+   up to that bootstrap and no further.
+          */
 function loadGenerator() {
   const file = path.join(ROOT, "assets", "js", "main.js");
   let src = fs.readFileSync(file, "utf8");
@@ -60,17 +62,21 @@ function loadGenerator() {
 
 const api = loadGenerator();
 
-/* ------------------------------------------------------------- helpers ---- */
+/*  helpers ---- */
 
-/* Every port the form actually offers, read from the config rather than
-   hardcoded. A port that produces a sketch the compiler rejects is exactly
-   the kind of thing a fixed list of five hides. */
+/*
+ every port the form actually offers, read from the config rather than
+   hardcoded. a port that produces a sketch the compiler rejects is exactly
+   the kind of thing a fixed list of five hides.
+             */
 const PORTS = api.PORTS.slice();
 
-/* The form does not hand every parameter to the generator: it keeps only the
-   ones the chosen measurement declares, plus the sensor-wide ones. Building
+/*
+ the form does not hand every parameter to the generator: it keeps only the
+   ones the chosen measurement declares, plus the sensor-wide ones. building
    blocks any other way tests a combination no grower can actually produce, and
-   hides parameters that go missing on the real path. */
+   hides parameters that go missing on the real path.
+            */
 function paramsFor(sensorKey, output, overrides) {
   const cfg = api.SENSOR_TYPES[sensorKey];
   const outputMap = api.OUTPUT_PARAMS[sensorKey] || {};
@@ -90,8 +96,10 @@ function paramsFor(sensorKey, output, overrides) {
     }));
 }
 
-/* A parameter offering a list of choices, such as soil texture, has to be
-   exercised on every choice: each one loads a different pair of thresholds. */
+/*
+ a parameter offering a list of choices, such as soil texture, has to be
+   exercised on every choice: each one loads a different pair of thresholds.
+               */
 function choiceSets(sensorKey) {
   const cfg = api.SENSOR_TYPES[sensorKey];
   const sets = [null];
@@ -110,8 +118,10 @@ function choiceSets(sensorKey) {
   return sets;
 }
 
-/* Parameter ranges matter as much as the defaults: a min of 0 in a divisor,
-   or a max that is smaller than a min, only shows up at the extremes. */
+/*
+ parameter ranges matter as much as the defaults: a min of 0 in a divisor,
+   or a max that is smaller than a min, only shows up at the extremes.
+                  */
 function extremeSets(sensorKey) {
   const cfg = api.SENSOR_TYPES[sensorKey];
   const low = {};
@@ -131,10 +141,12 @@ function extremeSets(sensorKey) {
   return any ? [low, high] : [];
 }
 
-/* The same filter refreshViz() applies in the form: a display option is only
+/*
+ the same filter refreshViz() applies in the form: a display option is only
    offered if the measurement allows it AND it is switched on in the
-   viz_options sheet. Testing anything else would test combinations no one can
-   actually choose. */
+   viz_options sheet. testing anything else would test combinations no one can
+   actually choose.
+     */
 function vizFor(sensorKey, output) {
   const map = api.OUTPUT_VIZ[sensorKey] || {};
   let allowed = map[output];
@@ -143,16 +155,20 @@ function vizFor(sensorKey, output) {
   return api.VIZ_OPTIONS.filter((v) => allowed.includes(v.value)).map((v) => v.value);
 }
 
-/* Gaps between the spreadsheet and the templates. None of these stop a sketch
+/*
+ gaps between the spreadsheet and the templates. none of these stop a sketch
    compiling, which is exactly why they need reporting: they are the failures
-   that reach a grower looking like working software. */
+   that reach a grower looking like working software.
+           */
 function configWarnings() {
   const known = new Set(api.VIZ_OPTIONS.map((v) => v.value));
   const warnings = [];
 
-  /* Only A0 to A5 are ADC channels on an Uno. analogRead of a digital pin does
+  /*
+ only A0 to A5 are ADC channels on an Uno. analogRead of a digital pin does
      not compile, so switching one on in the ports sheet needs a digital sensor
-     template first, not just a TRUE in a cell. */
+     template first, not just a TRUE in a cell.
+              */
   api.PORTS.filter((p) => !/^A[0-5]$/.test(p)).forEach((p) => {
     warnings.push(
       "port " + p + " is switched on, but it is not an analog channel. The " +
@@ -214,7 +230,7 @@ function slug(text) {
     .slice(0, 60);
 }
 
-/* ---------------------------------------------------------------- cases --- */
+/*  cases --- */
 
 const cases = [];
 
@@ -237,8 +253,10 @@ for (const sensorKey of Object.keys(api.SENSOR_TYPES)) {
         const partner = needsPartner(sensorKey, out) ? "A2" : "";
         const blocks = [block(sensorKey, out, viz, "A1", partner, overrides)];
 
-        /* Wetting front reads a shallow and a deep probe, so the partner has
-           to exist as a block of its own or the sketch is half a sketch. */
+        /*
+ Wetting front reads a shallow and a deep probe, so the partner has
+           to exist as a block of its own or the sketch is half a sketch.
+                          */
         if (/wetting front/i.test(out)) {
           blocks.push(block(sensorKey, "Raw Value (ADC)", "none", "A2", "", overrides));
         }
@@ -250,7 +268,7 @@ for (const sensorKey of Object.keys(api.SENSOR_TYPES)) {
   }
 }
 
-/* Every sensor at once, which is where per-block identifier collisions show. */
+/* every sensor at once, which is where per-block identifier collisions show. */
 const mixed = Object.keys(api.SENSOR_TYPES).map((key, i) => {
   const out = api.SENSOR_TYPES[key].outputs[0].value;
   const vizzes = vizFor(key, out);
@@ -264,7 +282,7 @@ const mixed = Object.keys(api.SENSOR_TYPES).map((key, i) => {
 });
 add("mixed__one_of_each_sensor", mixed);
 
-/* A full board: five sensors, one per analog port. */
+/* a full board: five sensors, one per analog port. */
 const full = PORTS.map((port, i) => {
   const keys = Object.keys(api.SENSOR_TYPES);
   const key = keys[i % keys.length];
@@ -281,9 +299,11 @@ const full = PORTS.map((port, i) => {
 });
 add("full__five_analog_ports", full);
 
-/* Free text that a person could reasonably type, including the sequences that
-   would end the header comment early if they were not neutralised. */
-/* One block on each port the form lists. */
+/*
+ free text that a person could reasonably type, including the sequences that
+   would end the header comment early if they were not neutralised.
+              */
+/* one block on each port the form lists. */
 api.PORTS.forEach((port) => {
   add(
     "port__" + slug(port),
@@ -291,13 +311,19 @@ api.PORTS.forEach((port) => {
   );
 });
 
+/*
+ the comment markers are built from pieces so this file does not itself
+   contain a stray block comment.
+        */
+const CLOSE = "*" + "/";
+const OPEN = "/" + "*";
 add("header__awkward_free_text", [block("DF_robot", "Raw Value (ADC)", "none", "A1", "")], {
-  name: 'Grower "Tester" O\'Brien */ int x = 1; /*',
+  name: 'Grower "Tester" O\'Brien ' + CLOSE + " int x = 1; " + OPEN,
   country: "Cote d'Ivoire </script>",
-  ino_comment: "block 2 */ while(1); /* installed 2026",
+  ino_comment: "block 2 " + CLOSE + " while(1); " + OPEN + " installed 2026",
 });
 
-/* ---------------------------------------------------------------- write --- */
+/*  write --- */
 
 fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(OUT, { recursive: true });
@@ -320,8 +346,10 @@ for (const c of cases) {
   manifest.push({
     name: c.name,
     file,
-    /* Placeholders the templates asked for that no parameter supplied. Each
-       one silently became a zero in this sketch. */
+    /*
+ placeholders the templates asked for that no parameter supplied. each
+       one silently became a zero in this sketch.
+               */
     missingValues: Array.from(new Set(api.RENDER_MISSES)).sort(),
     blocks: c.blocks.map((b) => ({
       sensor: b.sensor,

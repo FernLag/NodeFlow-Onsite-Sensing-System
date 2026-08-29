@@ -1,14 +1,14 @@
 /*
  * arduino_stub.h
  *
- * Enough of the Arduino and AVR environment for a desktop C++ compiler to
- * syntax check a generated sketch. It is not a simulator and it runs nothing.
- * The point is to catch the mistakes that would otherwise surface only when a
+ * enough of the Arduino and AVR environment for a desktop c++ compiler to
+ * syntax check a generated sketch. it is not a simulator and it runs nothing.
+ * the point is to catch the mistakes that would otherwise surface only when a
  * grower presses upload: an unresolved template placeholder, a variable that
  * was never declared, a function called with the wrong types, a brace in the
  * wrong place.
  *
- * Used by tools/verify_sketches.py. Add to it when a template starts using an
+ * used by tools/verify_sketches.py. add to it when a template starts using an
  * Arduino API that is not here yet.
  */
 
@@ -43,8 +43,10 @@ unsigned long micros();
 
 long map(long x, long inMin, long inMax, long outMin, long outMax);
 
-/* constrain, min, max and abs are macros in the real headers, which is what
-   lets them take any numeric type. Keep them macros here for the same reason. */
+/*
+ constrain, min, max and abs are macros in the real headers, which is what
+   lets them take any numeric type. keep them macros here for the same reason.
+                 */
 #define constrain(amt, low, high) \
   ((amt) < (low) ? (low) : ((amt) > (high) ? (high) : (amt)))
 #ifndef min
@@ -152,7 +154,7 @@ static const uint8_t ADSC = 6, ADEN = 7, ADIF = 4;
 #define bit_is_set(sfr, bit) ((sfr) & _BV(bit))
 #define bit_is_clear(sfr, bit) (!((sfr) & _BV(bit)))
 
-/* ---- Arduino's binary literal macros, B00000000 through B11111111 ---- */
+/* ---- arduino's binary literal macros, B00000000 through B11111111 ---- */
 #define B0 0
 #define B1 1
 #define B00 0
