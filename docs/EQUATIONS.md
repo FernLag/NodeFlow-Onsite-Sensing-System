@@ -59,14 +59,24 @@ downwards.
 | Raw Value (%) | `(air_val_max - X) * 100 / (air_val_max - water_val)`, clamped 0 to 100, and 0 if the two calibration points are equal | `(X-min)/(max-min)*100` | algebraically the same once `min` is the air reading and `max` the water reading, but the sheet does not say the span inverts, nor that it clamps, nor what happens uncalibrated |
 | Thresholds | `X > a` gives 0 (very dry), `X > b` gives 50 (dry), otherwise 100 (wet). Expects `a > b` | `x > a → 'Too a' x > b → 'v ab' → 'good'` | sheet is garbled; the code is precise |
 | Wetting Front | deep reading `< threshold` gives the deep depth; else shallow reading `< threshold` gives the shallow depth; else not arrived | `wetting has arrived at XX cm` | prose replaced by the rule |
-| Volumetric Soil Moisture | `(x - WP) * 100 / (FC - WP)`, clamped, where `x = (-1/k) * (ln(X - water_val) - ln(air_val - water_val))` | `1/k*ln(V-water_val)/(air_val-water_val)` | the sheet describes only the intermediate `x`, and differs on two counts: no minus sign, and the division is outside the log rather than inside. **One of the two is wrong** |
+| Volumetric Soil Moisture | `x * 100`, clamped, where `x = (-1/k) * (ln(X - water_val) - ln(air_val - water_val))` | `1/k*ln(V-water_val)/(air_val-water_val)` | the sheet describes only the intermediate `x`, and differs on two counts: no minus sign, and the division is outside the log rather than inside. The code's form is the one that behaves |
 | Vertical Flow Rate | `(deep depth - shallow depth) / hours between the two arrival times`, reset when the soil dries back out | *(blank)* | code fills a gap |
 | Total Available Water | `(x - WP) * 100 / (FC - WP)`, clamped | `soil_moisture-WP*100/(FC-WP)` | **the sheet has a precedence bug.** As written it means `soil_moisture - (WP*100/(FC-WP))`. The code ignores it and does the right thing |
 
-**Two measurements produce identical code.** Volumetric Soil Moisture and Total
-Available Water generate byte-identical sketches. One of them is presumably
-meant to report the volumetric fraction rather than the available-water
-percentage.
+**Both of these used to be broken and are now fixed.** They generated
+byte-identical sketches, and with the shipped defaults both reported 100 % for
+every reading the probe can physically produce: `x` came out between 0.3 and 5
+while `FC` and `WP` are fractions of 0.3 and 0.1, so the `x >= FC` branch always
+won. The window where the output would have varied was 602 to 666 counts, and
+the probe tops out near 593.
+
+They are now different quantities, which is what their names always promised.
+Volumetric Soil Moisture reports `x` as a percentage of soil volume. Total
+Available Water rescales the same `x` against field capacity and wilting point.
+The defaults moved with them: `air_val` from 700, which the probe cannot reach,
+to 590, and `k` from 0.5 to 2.2 with its ceiling raised from 1 to 10, because
+capped at 1 it could not reach a usable range. `k` is a fitted value and still
+needs calibrating per soil.
 
 ## Watermark 200SS through the 200SS-VA3
 
@@ -125,6 +135,50 @@ combined sensor type, but it surprises people.
   with the adapter producing its first output 500 ms after power up. So a
   grower switching on should expect the first sweep to be current and later
   channels to lag by up to five minutes.
+
+## Wiring: with the adapter, or straight to the board
+
+Both are now supported, chosen per sensor with a **Connection** parameter.
+
+**Through the 200SS-VA3.** The adapter does the excitation, the resistance
+measurement and the calibration, and outputs 0.01176 V per centibar. The sketch
+divides. Up to three Watermarks and one temperature probe share a single analog
+port, which is how you fit more than five sensors on the board.
+
+**Direct to the Arduino.** The sketch does the work Irrometer's guide describes:
+a 10 kOhm series resistor, pseudo-AC excitation on two digital pins that swap
+polarity between readings, the measurement taken inside 100 microseconds, and
+the resistance converted with the published three-segment calibration including
+the `tempD` temperature term. Resistance is genuine on this path, so
+`Raw value (Resistance)` finally reports what its name says.
+
+Two constraints, both from the manufacturer documentation:
+
+- **One direct sensor per board.** Wet soil conducts between bare sensors, so
+  two of them read partly through each other and the electrodes corrode.
+  Isolating more than one needs a multiplexer this sketch does not drive. The
+  form refuses to generate a second direct block.
+- **The excitation pins are D2 and D3**, the two the LCD keypad shield leaves
+  free. D4 to D10 belong to the display, D0 and D1 to the serial port.
+
+The one part of the direct path that is **not** from a datasheet is the
+thermistor conversion for a bare 200TS. Irrometer does not publish the
+resistance-to-temperature curve; the datasheet says it is built into their
+reading devices. The sketch uses the beta equation with `therm_r25` and
+`therm_beta` exposed as parameters, defaulted to a generic 10 kOhm NTC. Those
+two numbers are assumptions and are labelled as such in the form. Resistance on
+that path is measured and trustworthy; the temperature derived from it is only
+as good as those constants.
+
+## Ports
+
+The form used to offer D1 to D14 alongside the analog pins, and the
+ports-full warning recommended them. **Every one of them generated a sketch
+that does not compile**, because `analogRead(D2)` is not valid Arduino. Beyond
+that, D4 to D10 are the LCD shield's, D0 and D1 are the serial port, and D14
+does not exist on an Uno. The list is now A1 to A5, and the warning points at
+the VA-3 adapter instead. `tools/verify_sketches.py` compiles one sketch per
+offered port so this cannot come back.
 
 ## Rows that are notes rather than formulas
 

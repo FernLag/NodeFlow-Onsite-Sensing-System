@@ -50,7 +50,8 @@ function loadGenerator() {
   vm.runInContext(
     src +
       "\n;globalThis.__api = { buildIno, SENSOR_TYPES, OUTPUT_PARAMS, OUTPUT_VIZ," +
-      " VIZ_OPTIONS, resolveSensorKey, resolveOutputKey, extraParamsFor, RENDER_MISSES };",
+      " VIZ_OPTIONS, PORTS, resolveSensorKey, resolveOutputKey, extraParamsFor," +
+      " RENDER_MISSES };",
     sandbox,
     { filename: "main.js" },
   );
@@ -61,17 +62,32 @@ const api = loadGenerator();
 
 /* ------------------------------------------------------------- helpers ---- */
 
-const PORTS = ["A1", "A2", "A3", "A4", "A5"];
+/* Every port the form actually offers, read from the config rather than
+   hardcoded. A port that produces a sketch the compiler rejects is exactly
+   the kind of thing a fixed list of five hides. */
+const PORTS = api.PORTS.slice();
 
-function paramsFor(sensorKey, overrides) {
+/* The form does not hand every parameter to the generator: it keeps only the
+   ones the chosen measurement declares, plus the sensor-wide ones. Building
+   blocks any other way tests a combination no grower can actually produce, and
+   hides parameters that go missing on the real path. */
+function paramsFor(sensorKey, output, overrides) {
   const cfg = api.SENSOR_TYPES[sensorKey];
-  return cfg.params.map((p) => ({
-    name: p.name,
-    value:
-      overrides && Object.prototype.hasOwnProperty.call(overrides, p.name)
-        ? overrides[p.name]
-        : p.value,
-  }));
+  const outputMap = api.OUTPUT_PARAMS[sensorKey] || {};
+  const needed = (outputMap[output] || cfg.params.map((p) => p.name)).concat(
+    api.extraParamsFor(output),
+  );
+  const wanted = new Set(needed.map((n) => String(n).trim().toLowerCase()));
+
+  return cfg.params
+    .filter((p) => wanted.has(String(p.name).trim().toLowerCase()))
+    .map((p) => ({
+      name: p.name,
+      value:
+        overrides && Object.prototype.hasOwnProperty.call(overrides, p.name)
+          ? overrides[p.name]
+          : p.value,
+    }));
 }
 
 /* A parameter offering a list of choices, such as soil texture, has to be
@@ -176,7 +192,7 @@ function block(sensorKey, output, viz, port, partnerPort, overrides) {
     output,
     viz,
     partnerPort: partnerPort || "",
-    params: paramsFor(sensorKey, overrides),
+    params: paramsFor(sensorKey, output, overrides),
   };
 }
 
@@ -256,6 +272,14 @@ add("full__five_analog_ports", full);
 
 /* Free text that a person could reasonably type, including the sequences that
    would end the header comment early if they were not neutralised. */
+/* One block on each port the form lists. */
+api.PORTS.forEach((port) => {
+  add(
+    "port__" + slug(port),
+    [block("DF_robot", "Raw Value (ADC)", "raw_lcd", port, "")],
+  );
+});
+
 add("header__awkward_free_text", [block("DF_robot", "Raw Value (ADC)", "none", "A1", "")], {
   name: 'Grower "Tester" O\'Brien */ int x = 1; /*',
   country: "Cote d'Ivoire </script>",

@@ -1,11 +1,11 @@
 # DF_robot.py
 # Sensor: Soil moisture capacitive sensor (such as the DFRobot SEN0308)
 
-air_val = 700  # Air value: raw reading in open air  # min: 0  max: 1023
+air_val = 590  # Air value: raw reading in open air. The DFRobot probe outputs at most 2.9 V, about 593 counts on a 5 V board, so this sits just under 600.  # min: 0  max: 1023
 water_val = 0  # Water value: raw reading submerged in water  # min: 0  max: 1023
 fc = 0.3  # Field capacity: The amount of water that remains in the soil after all the excess water at saturation has been drained.  # min: 0  max: 1
 wp = 0.1  # Wilting point:  When plants take up all the available water for a given soil and it dries out to the point where it cannot supply any water to keep plants from dying  # min: 0  max: 1
-k = 0.5  # k: calibration scaling factor and it is determined by searching for an optimal match between the gravimetric and simulated soil moisture and minimisation of error.  # min: 0  max: 1
+k = 2.2  # k: calibration scaling factor, fitted by matching gravimetric samples to the sensor. The default spreads a typical probe across 0 to about 50 % volumetric water, but it is soil specific and should be calibrated.  # min: 0  max: 10
 air_val_min = 0  # Air value: raw reading in open air  # min: 0  max: 0
 air_val_max = 600  # Air value: raw reading in open air  # min: 0  max: 1023
 a = 450  #   # min: 0  max: 1023

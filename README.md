@@ -30,13 +30,22 @@ tools that help growers manage water at farm scale.
 
 The sketch targets an **Arduino Uno R3** with a **16x2 LCD keypad shield**. The
 shield's buttons sit on a resistor ladder on A0, so A0 is reserved and your
-sensors go on A1 to A5.
+sensors go on A1 to A5. D4 to D10 drive the display and D0 and D1 are the
+serial port, which leaves D2 and D3 for the excitation a direct-wired sensor
+needs.
 
 | Sensor | What you can read from it |
 | --- | --- |
-| Irrometer Watermark 200SS, through a 200SS-VA3 adapter | Soil water tension in kPa, a wet to dry percentage, or three management states based on your soil texture |
-| Irrometer 200TS soil temperature | Temperature, on its own or paired with a Watermark on the same adapter |
+| Irrometer Watermark 200SS | Soil water tension in kPa, a wet to dry percentage, or three management states based on your soil texture. Through a 200SS-VA3 adapter, or wired straight to the board |
+| Irrometer 200TS soil temperature | Temperature, on its own or paired with a Watermark. Through the adapter, or wired direct |
 | DFRobot capacitive probe, wired to an analog pin | Raw counts, or a percentage once you have given it an air reading and a water reading |
+
+Each sensor is told how it is connected. **Through the 200SS-VA3 adapter**, which
+carries up to three Watermarks plus one shared temperature probe on a single
+port and does the calibration itself. Or **wired straight to the Arduino**, where
+the sketch does the excitation and calibration instead, using Irrometer's
+published method. Direct wiring supports one sensor per board: wet soil
+conducts between bare sensors, so two of them read through each other.
 
 The VA-3 adapter carries up to three Watermarks plus one shared temperature
 probe. It outputs 0 to 2.8 V and refreshes each channel every five minutes,

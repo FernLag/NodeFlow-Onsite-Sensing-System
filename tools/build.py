@@ -38,9 +38,11 @@ TEMPLATES_DIR = os.path.join(ROOT, "tools", "templates")
 
 
 def find_excel():
-    """The spreadsheet lives in data/. Older checkouts kept it at the root, so
-    fall back to that before giving up."""
-    for candidate in (os.path.join(ROOT, "data", EXCEL_NAME),
+    """Prefer the edited copy if there is one, so the original master is never
+    written to and can always be diffed against. Older checkouts kept the file
+    at the repository root, so fall back to that before giving up."""
+    for candidate in (os.path.join(ROOT, "data", "sensor_configuration_v2.xlsx"),
+                      os.path.join(ROOT, "data", EXCEL_NAME),
                       os.path.join(ROOT, EXCEL_NAME)):
         if os.path.isfile(candidate):
             return candidate

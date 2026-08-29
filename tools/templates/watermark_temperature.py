@@ -6,6 +6,8 @@ water_val = 0  #   # min: 0  max: 239
 soil_type = Loam  # Soil texture sets the irrigation thresholds. Choosing a type fills in the two tension values below, which you can still adjust.
 thr_low = 23  #   # min: 0  max: 239
 thr_high = 65  #   # min: 0  max: 239
+wiring = 200SS-VA3 adapter  # How the sensor reaches the board. Through the 200SS-VA3 adapter, which does the excitation and calibration itself, or wired straight to the Arduino with a series resistor. Direct wiring supports one Watermark only: two bare sensors in the same soil read through each other and damage their electrodes.
+Rx = 10  # Series resistor between the sensor and ground, used only for direct wiring. Irrometer's reference circuit uses 10 kilohms.  # min: 1  max: 100
 
 # Supported outputs:
 #   - Raw value (Resistance)  # equation: Rx*(Vs-A1)/A1

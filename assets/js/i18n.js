@@ -195,7 +195,9 @@
         "Your configuration is too large to record, so it was not sent. Your file downloaded normally.",
       "msg.portsDuplicate": "Port{s} {ports} used in more than one block. Each port must be unique.",
       "msg.portsFull":
-        "All 5 analog ports (A1-A5) are in use. To add more sensors, use a digital port (D1-D14).",
+        "All five analog ports (A1 to A5) are in use. A 200SS-VA3 adapter carries three Watermarks and a temperature probe on a single port, which is how you fit more sensors on this board.",
+      "msg.oneDirectOnly":
+        "Only one sensor can be wired straight to the Arduino ({ports} are both set to direct). Wet soil conducts between bare sensors, so two of them read partly through each other and the electrodes corrode. Use a 200SS-VA3 adapter for the others.",
       "msg.offline":
         "You are offline. The form still works and your file will download. Research information is sent when you reconnect.",
       "msg.update": "A new version of this page is available.",
@@ -388,7 +390,9 @@
       "msg.portsDuplicate":
         "El puerto {ports} se usa en más de un bloque. Cada puerto debe ser único.",
       "msg.portsFull":
-        "Los 5 puertos analógicos (A1-A5) están en uso. Para agregar más sensores, use un puerto digital (D1-D14).",
+        "Los cinco puertos analógicos (A1 a A5) están en uso. Un adaptador 200SS-VA3 admite tres sensores Watermark y una sonda de temperatura en un solo puerto, que es la forma de conectar más sensores a esta placa.",
+      "msg.oneDirectOnly":
+        "Solo un sensor puede conectarse directamente al Arduino ({ports} están ambos en conexión directa). El suelo húmedo conduce entre sensores desnudos, así que dos de ellos se leen parcialmente entre sí y los electrodos se corroen. Use un adaptador 200SS-VA3 para los demás.",
       "msg.offline":
         "Está sin conexión. El formulario sigue funcionando y su archivo se descargará. La información de investigación se envía cuando vuelva a conectarse.",
       "msg.update": "Hay una versión nueva de esta página.",
@@ -501,6 +505,29 @@
         "Muestra el frente detectado cuando el frente de humedecimiento llega al sensor profundo.",
       wm_state_lcd:
         "Muestra el estado en que parece estar el suelo, para los sensores Watermark.",
+    },
+
+    /* keyed on param_name in the params sheet */
+    params: {
+      wiring: "Conexión",
+      Rx: "Resistencia en serie",
+      soil_temp_c: "Temperatura del suelo",
+      therm_r25: "Resistencia del termistor a 25 C",
+      therm_beta: "Coeficiente beta del termistor",
+      air_val: "Valor en aire",
+      air_val_max: "Valor en aire (máximo)",
+      water_val: "Valor en agua",
+      fc: "Capacidad de campo",
+      wp: "Punto de marchitez",
+      soil_type: "Tipo de suelo",
+      thr_low: "Umbral húmedo (10 % de agotamiento)",
+      thr_high: "Umbral seco (40 % de agotamiento)",
+      a: "Umbral superior",
+      b: "Umbral inferior",
+      shallow: "Profundidad del sensor superficial",
+      deep: "Profundidad del sensor profundo",
+      threshold: "Lectura de llegada del frente",
+      k: "k",
     },
 
     /* keyed on the survey question key */

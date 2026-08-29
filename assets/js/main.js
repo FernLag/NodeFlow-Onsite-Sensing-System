@@ -43,8 +43,8 @@ const SENSOR_TYPES = {
       {
         name: "air_val",
         display: "Air value",
-        label: "Air value: raw reading in open air",
-        value: "700",
+        label: "Air value: raw reading in open air. The DFRobot probe outputs at most 2.9 V, about 593 counts on a 5 V board, so this sits just under 600.",
+        value: "590",
         min: "0",
         max: "1023",
         units: "ADC",
@@ -79,10 +79,10 @@ const SENSOR_TYPES = {
       {
         name: "k",
         display: "k",
-        label: "k: calibration scaling factor and it is determined by searching for an optimal match between the gravimetric and simulated soil moisture and minimisation of error.",
-        value: "0.5",
+        label: "k: calibration scaling factor, fitted by matching gravimetric samples to the sensor. The default spreads a typical probe across 0 to about 50 % volumetric water, but it is soil specific and should be calibrated.",
+        value: "2.2",
         min: "0",
-        max: "1",
+        max: "10",
         units: "",
       },
       {
@@ -152,12 +152,12 @@ const SENSOR_TYPES = {
   },
   Watermark: {
     label: "Irrometer Watermark (200SS)",
-    tip: "This sensor measures electrical resistance inside a granular matrix to determine soil water tension. With this option, you are reading the resistance value (kΩ).",
+    tip: "Electrical resistance of the granular matrix, in kilohms. This is only available when the sensor is wired straight to the Arduino. Through the 200SS-VA3 adapter the resistance never leaves the adapter, so on that wiring the reading shown is tension in kPa instead.",
     outputs: [
       {
         value: "Raw value (Resistance)",
         display: "Raw value (Resistance, in kΩ)",
-        tip: "This sensor measures electrical resistance inside a granular matrix to determine soil water tension. With this option, you are reading the resistance value (kΩ).",
+        tip: "Electrical resistance of the granular matrix, in kilohms. This is only available when the sensor is wired straight to the Arduino. Through the 200SS-VA3 adapter the resistance never leaves the adapter, so on that wiring the reading shown is tension in kPa instead.",
       },
       {
         value: "Raw Value (%)",
@@ -231,16 +231,44 @@ const SENSOR_TYPES = {
         max: "239",
         units: "kPa",
       },
+      {
+        name: "wiring",
+        display: "Connection",
+        label: "How the sensor reaches the board. Through the 200SS-VA3 adapter, which does the excitation and calibration itself, or wired straight to the Arduino with a series resistor. Direct wiring supports one Watermark only: two bare sensors in the same soil read through each other and damage their electrodes.",
+        value: "200SS-VA3 adapter",
+        min: "",
+        max: "",
+        units: "",
+        choices: "200SS-VA3 adapter|Direct to Arduino",
+      },
+      {
+        name: "Rx",
+        display: "Series resistor",
+        label: "Series resistor between the sensor and ground, used only for direct wiring. Irrometer's reference circuit uses 10 kilohms.",
+        value: "10",
+        min: "1",
+        max: "100",
+        units: "kOhm",
+      },
+      {
+        name: "soil_temp_c",
+        display: "Soil temperature",
+        label: "Soil temperature used to compensate the Watermark calibration when wiring direct. Irrometer uses 24 C when no temperature sensor is available.",
+        value: "24",
+        min: "-10",
+        max: "60",
+        units: "C",
+      },
     ],
   },
   Watermark_Temperature: {
     label: "Irrometer Watermark (200SS) combined with Irrometer Soil Temperature Sensor (200TS)",
-    tip: "This sensor measures electrical resistance inside a granular matrix to determine soil water tension. With this option, you are reading the resistance value (kΩ).",
+    tip: "Electrical resistance of the granular matrix, in kilohms. This is only available when the sensor is wired straight to the Arduino. Through the 200SS-VA3 adapter the resistance never leaves the adapter, so on that wiring the reading shown is tension in kPa instead.",
     outputs: [
       {
         value: "Raw value (Resistance)",
         display: "Raw value (Resistance, in kΩ)",
-        tip: "This sensor measures electrical resistance inside a granular matrix to determine soil water tension. With this option, you are reading the resistance value (kΩ).",
+        tip: "Electrical resistance of the granular matrix, in kilohms. This is only available when the sensor is wired straight to the Arduino. Through the 200SS-VA3 adapter the resistance never leaves the adapter, so on that wiring the reading shown is tension in kPa instead.",
       },
       {
         value: "Raw Value (%)",
@@ -315,6 +343,25 @@ const SENSOR_TYPES = {
         max: "239",
         units: "kPa",
       },
+      {
+        name: "wiring",
+        display: "Connection",
+        label: "How the sensor reaches the board. Through the 200SS-VA3 adapter, which does the excitation and calibration itself, or wired straight to the Arduino with a series resistor. Direct wiring supports one Watermark only: two bare sensors in the same soil read through each other and damage their electrodes.",
+        value: "200SS-VA3 adapter",
+        min: "",
+        max: "",
+        units: "",
+        choices: "200SS-VA3 adapter|Direct to Arduino",
+      },
+      {
+        name: "Rx",
+        display: "Series resistor",
+        label: "Series resistor between the sensor and ground, used only for direct wiring. Irrometer's reference circuit uses 10 kilohms.",
+        value: "10",
+        min: "1",
+        max: "100",
+        units: "kOhm",
+      },
     ],
   },
   Temperature: {
@@ -333,30 +380,53 @@ const SENSOR_TYPES = {
       },
     ],
     params: [
+      {
+        name: "wiring",
+        display: "Connection",
+        label: "How the sensor reaches the board. Through the 200SS-VA3 adapter, which does the excitation and calibration itself, or wired straight to the Arduino with a series resistor. Direct wiring supports one Watermark only: two bare sensors in the same soil read through each other and damage their electrodes.",
+        value: "200SS-VA3 adapter",
+        min: "",
+        max: "",
+        units: "",
+        choices: "200SS-VA3 adapter|Direct to Arduino",
+      },
+      {
+        name: "Rx",
+        display: "Series resistor",
+        label: "Series resistor between the sensor and ground, used only for direct wiring. Irrometer's reference circuit uses 10 kilohms.",
+        value: "10",
+        min: "1",
+        max: "100",
+        units: "kOhm",
+      },
+      {
+        name: "therm_r25",
+        display: "Thermistor R at 25 C",
+        label: "Resistance of the 200TS at 25 C, for direct wiring. NOT PUBLISHED BY IRROMETER: the datasheet says the curve is built into their reading devices. The default assumes a generic 10 kilohm NTC and must be checked against your sensor before the reading is trusted.",
+        value: "10000",
+        min: "100",
+        max: "100000",
+        units: "Ohm",
+      },
+      {
+        name: "therm_beta",
+        display: "Thermistor beta",
+        label: "Beta coefficient of the 200TS, for direct wiring. Same caveat as the resistance above: this is a generic NTC value, not an Irrometer figure.",
+        value: "3435",
+        min: "1000",
+        max: "6000",
+        units: "K",
+      },
     ],
   },
 };
 
 const PORT_TIPS = {
-  A1: "Analog pin 1",
-  A2: "Analog pin 2",
-  A3: "Analog pin 3",
-  A4: "Analog pin 4",
-  A5: "Analog pin 5",
-  D1: "Digital pin 1",
-  D2: "Digital pin 2",
-  D3: "Digital pin 3",
-  D4: "Digital pin 4",
-  D5: "Digital pin 5",
-  D6: "Digital pin 6",
-  D7: "Digital pin 7",
-  D8: "Digital pin 8",
-  D9: "Digital pin 9",
-  D10: "Digital pin 10",
-  D11: "Digital pin 11",
-  D12: "Digital pin 12",
-  D13: "Digital pin 13",
-  D14: "Digital pin 14",
+  A1: "Analog pin A1. A0 is taken by the shield's buttons, so sensors start at A1.",
+  A2: "Analog pin A2.",
+  A3: "Analog pin A3.",
+  A4: "Analog pin A4.",
+  A5: "Analog pin A5.",
 };
 
 const PORTS = [
@@ -365,20 +435,6 @@ const PORTS = [
   "A3",
   "A4",
   "A5",
-  "D1",
-  "D2",
-  "D3",
-  "D4",
-  "D5",
-  "D6",
-  "D7",
-  "D8",
-  "D9",
-  "D10",
-  "D11",
-  "D12",
-  "D13",
-  "D14",
 ];
 
 const VIZ_OPTIONS = [
@@ -594,6 +650,54 @@ const float thr_high_{idx} = {thr_high};     /* 40 % depletion, kPa */
   float volts_{idx} = (sensorValue_{idx} / 1023.0) * Vref_{idx};
   float kPa_{idx}   = volts_{idx} / VA3_SCALE_{idx};   /* soil water tension */`,
     },
+    /* Watermark wired straight to the board, no adapter. Resistance is
+       measured with the shared excitation pins and converted with Irrometer's
+       own three-segment calibration. */
+    Watermark_direct: {
+      constants: `/* Sensor {idx}: Watermark 200SS wired direct to {port}.
+   Series resistor to ground on the same pin; excitation on D2 and D3.
+   No adapter, so the sketch does the excitation and calibration itself. */
+const float Rx_{idx}          = {Rx};            /* series resistor, kOhm */
+const float soilTempC_{idx}   = {soil_temp_c};   /* used to compensate */
+const float dry_kPa_{idx}     = {air_val_max};
+const float wet_kPa_{idx}     = {water_val};
+const float thr_low_{idx}     = {thr_low};
+const float thr_high_{idx}    = {thr_high};
+`,
+      read: `  float resK_{idx} = readDirectResistance({readPin}, Rx_{idx});
+  bool  connected_{idx} = resK_{idx} > 0 && (resK_{idx} * 1000.0) < WM_OPEN_OHMS;
+  float kPa_{idx} = connected_{idx}
+                    ? constrain(watermarkCentibars(resK_{idx}, soilTempC_{idx}), 0, 239)
+                    : 0;
+  int   sensorValue_{idx} = (int)(resK_{idx} * 10);   /* kOhm x10, for display */
+  float volts_{idx} = 0;   /* not meaningful on this wiring */`,
+    },
+
+    /* 200TS wired straight to the board. Resistance is honest; the conversion
+       to temperature is not Irrometer's, see the tooltip on the coefficients. */
+    Temperature_direct: {
+      constants: `/* Sensor {idx}: Irrometer 200TS wired direct to {port}.
+   The 200TS is a thermistor. Irrometer does not publish its resistance to
+   temperature curve, so the coefficients below are a generic NTC assumption
+   the grower can correct. Resistance itself is measured, not assumed. */
+const float Rx_{idx}       = {Rx};           /* series resistor, kOhm */
+const float thermR25_{idx} = {therm_r25};    /* ohms at 25 C */
+const float thermBeta_{idx} = {therm_beta};  /* K */
+`,
+      read: `  float resK_{idx} = readDirectResistance({readPin}, Rx_{idx});
+  bool  connected_{idx} = resK_{idx} > 0.05 && resK_{idx} < 500.0;
+  /* Beta equation: 1/T = 1/T0 + (1/B) ln(R/R0), kelvin throughout. */
+  float T_{idx} = 0;
+  if (connected_{idx}) {
+    float ohms_{idx} = resK_{idx} * 1000.0;
+    float invT_{idx} = (1.0 / 298.15) + (1.0 / thermBeta_{idx}) * log(ohms_{idx} / thermR25_{idx});
+    T_{idx} = (1.0 / invT_{idx}) - 273.15;
+  }
+  float tempF_{idx} = T_{idx} * 1.8 + 32.0;
+  int   sensorValue_{idx} = (int)(resK_{idx} * 10);
+  float tempVolts_{idx} = 0;   /* not meaningful on this wiring */`,
+    },
+
     Watermark_Temperature: {
       constants: `/* Sensor {idx}: Watermark + 200TS temperature, both via the 200SS-VA3.
    Watermark channel on {port}, shared temperature channel on {partnerPort}.
@@ -641,25 +745,20 @@ const float thr_high_{idx}  = {thr_high};   /* 40 % depletion, kPa */
       0, 100
     );
   }`,
-      "Total Available Water (volumetric?)": `  if (sensorValue_{idx} <= Vwat_{idx}) {
-    percent = 100;
-  } else if (x <= WP_{idx}) {
-    percent = 0;
-  } else if (x >= FC_{idx}) {
-    percent = 100;
+      /* Volumetric water content in its own right: x is already a fraction of
+         soil volume, so this is simply x as a percentage. Distinct from Total
+         Available Water below, which rescales the same x against the field
+         capacity and wilting point of this soil. The two used to emit
+         identical code, which meant one of them was answering the wrong
+         question. */
+      "Total Available Water (volumetric?)": `  percent = (int)constrain(x * 100.0, 0, 100);`,
+      /* The fraction of the water the soil can actually give a crop:
+         0 % at the wilting point, 100 % at field capacity. Wetter than field
+         capacity still reads 100 %, which is correct: the surplus drains. */
+      "Total Available Water": `  if (FC_{idx} <= WP_{idx}) {
+    percent = 0;                       /* thresholds not set */
   } else {
-    x = (x - WP_{idx}) * 100.0 / (FC_{idx} - WP_{idx});
-    percent = (int)x;
-  }`,
-      "Total Available Water": `  if (sensorValue_{idx} <= Vwat_{idx}) {
-    percent = 100;
-  } else if (x <= WP_{idx}) {
-    percent = 0;
-  } else if (x >= FC_{idx}) {
-    percent = 100;
-  } else {
-    x = (x - WP_{idx}) * 100.0 / (FC_{idx} - WP_{idx});
-    percent = (int)x;
+    percent = (int)constrain((x - WP_{idx}) * 100.0 / (FC_{idx} - WP_{idx}), 0, 100);
   }`,
       "Rate of Change": `  /* dV/dt = a (good or stop irrigating) */
   static unsigned long lastTime_{idx}  = 0;
@@ -672,7 +771,7 @@ const float thr_high_{idx}  = {thr_high};   /* 40 % depletion, kPa */
   lastTime_{idx}  = nowTime_{idx};`,
       "Wetting Front": `  /* Two sensors at different depths. Water has "arrived" at a depth
      once that sensor reads below the threshold. Report the deepest one reached. */
-  int deepReading_{idx} = analogRead({partnerPort});
+  int deepReading_{idx} = readSettled({partnerPort});
   int frontDepth_{idx};
   if      (deepReading_{idx}    < front_thr_{idx}) frontDepth_{idx} = deepDepth_{idx};
   else if (sensorValue_{idx}    < front_thr_{idx}) frontDepth_{idx} = shallowDepth_{idx};
@@ -748,6 +847,28 @@ const float thr_high_{idx}  = {thr_high};   /* 40 % depletion, kPa */
   else if (kPa_{idx} >  thr_low_{idx})  percent = 50;   /* irrigation range   */
   else                                  percent = 100;  /* saturation         */`,
     },
+    Watermark_direct: {
+      "Raw value (Resistance)": `  /* Genuine resistance on this wiring, in kOhm */
+  percent = (int)resK_{idx};`,
+      Tension: `  percent = (int)kPa_{idx};`,
+      "Transformed Raw Value": `  {
+    float wmSpan_{idx} = dry_kPa_{idx} - wet_kPa_{idx};
+    percent = (wmSpan_{idx} != 0)
+      ? (int)constrain((dry_kPa_{idx} - kPa_{idx}) * 100.0 / wmSpan_{idx}, 0, 100)
+      : 0;
+  }`,
+      "Management thresholds": `  if      (kPa_{idx} >= thr_high_{idx}) percent = 0;
+  else if (kPa_{idx} >  thr_low_{idx})  percent = 50;
+  else                                  percent = 100;`,
+    },
+
+    Temperature_direct: {
+      "Temperature F": `  percent = (int)tempF_{idx};`,
+      "Temperature C": `  percent = (int)T_{idx};`,
+      "Raw value (Temperature)": `  percent = (int)T_{idx};`,
+      "Raw Value": `  percent = (int)resK_{idx};   /* resistance, kOhm */`,
+    },
+
     Watermark_Temperature: {
       "Temperature F": `  /* deg F = 20 + 48.48 x (V - 0.49) */
   percent = (int)tempF_{idx};`,
@@ -1032,6 +1153,86 @@ bool va3ChannelPresent(uint8_t pin) {
   return readSettled(pin) < VA3_MAX_COUNTS;   /* passive - no pull-up, ever */
 }
 
+/* ---------------------------------------------------------------------
+   Direct wiring, no adapter.
+
+   A bare WATERMARK is a variable resistor. Irrometer's reference circuit puts
+   it in a divider with a known series resistor and reads the midpoint. Two
+   rules from their developer guide are not optional:
+
+     - excitation must alternate polarity. A steady DC voltage builds charge on
+       the electrodes, which offsets the reading and eats the sensor. Two
+       digital pins take turns being source and ground, and the two readings
+       are averaged.
+     - excitation must be brief. No more than 50 ms, with the measurement taken
+       within about 100 microseconds of it starting.
+
+   ONE bare sensor only. Wet soil conducts between sensors, so two of them
+   share a path and the board ends up reading between the wrong electrodes.
+   Isolating more than one needs a multiplexer, which this sketch does not
+   drive. The form refuses to generate more than one direct block.
+   --------------------------------------------------------------------- */
+
+const int WM_EXC_A = 2;    /* free on the LCD keypad shield */
+const int WM_EXC_B = 3;
+const long WM_OPEN_OHMS  = 40000L;   /* above this: nothing connected */
+const long WM_SHORT_OHMS = 200L;     /* below this: shorted leads */
+
+float readDirectResistance(uint8_t pin, float rxKOhm) {
+  pinMode(WM_EXC_A, OUTPUT);
+  pinMode(WM_EXC_B, OUTPUT);
+
+  /* Direction 1: A drives, B is ground. */
+  digitalWrite(WM_EXC_B, LOW);
+  digitalWrite(WM_EXC_A, HIGH);
+  delayMicroseconds(90);
+  int v1 = analogRead(pin);
+  digitalWrite(WM_EXC_A, LOW);
+
+  delay(10);
+
+  /* Direction 2: B drives, A is ground. Reverses the charge left by the first
+     reading so the sensor ends the cycle neutral. */
+  digitalWrite(WM_EXC_A, LOW);
+  digitalWrite(WM_EXC_B, HIGH);
+  delayMicroseconds(90);
+  int v2 = analogRead(pin);
+  digitalWrite(WM_EXC_B, LOW);
+
+  /* Leave both pins low so nothing sits energised between readings. */
+  pinMode(WM_EXC_A, INPUT);
+  pinMode(WM_EXC_B, INPUT);
+
+  float supply = 5.0;
+  float volts1 = (v1 / 1023.0) * supply;
+  float volts2 = (v2 / 1023.0) * supply;
+  if (volts1 <= 0.001 || volts2 >= supply - 0.001) return -1.0;
+
+  float rA = rxKOhm * (supply - volts1) / volts1;
+  float rB = rxKOhm * volts2 / (supply - volts2);
+  return (rA + rB) / 2.0;
+}
+
+/* Irrometer's published three-segment calibration. resK is kilohms, TC is
+   soil temperature in Celsius. Returns centibars, which are kPa. */
+float watermarkCentibars(float resK, float TC) {
+  float tempD = 1.00 + 0.018 * (TC - 24.00);
+  float ohms = resK * 1000.0;
+  if (ohms >= WM_OPEN_OHMS || ohms <= 0) return 255.0;   /* open circuit */
+  if (ohms <= WM_SHORT_OHMS) return 0.0;                 /* shorted */
+  if (ohms > 8000.0) {
+    return (-2.246 - 5.239 * resK * tempD
+            - 0.06756 * resK * resK * tempD * tempD);
+  }
+  if (ohms > 1000.0) {
+    return (-3.213 * resK - 4.093) / (1.0 - 0.009733 * resK - 0.01205 * TC);
+  }
+  if (ohms > 550.0) {
+    return (resK * 23.156 - 12.736) * tempD;
+  }
+  return 0.0;                                            /* saturated */
+}
+
 bool portHasSensor(uint8_t pin) {
   /* A floating pin holds whatever charge it last saw (leakage is tiny), so a
      simple pull-up-vs-float comparison passes even with nothing attached, and
@@ -1298,6 +1499,13 @@ const SOIL_THRESHOLDS = {
    gets seven of them. It names what the probe measures rather than who makes
    it: a grower knows they installed a capacitive sensor, not that the part
    number is a DFRobot. Keep new entries to seven characters. */
+/* Seven characters, the room line 1 leaves after the port. */
+const SENSOR_ABBREV_DIRECT = {
+  Watermark: "WM-WIRE",
+  Watermark_Temperature: "WM-WIRE",
+  Temperature: "TS-WIRE",
+};
+
 const SENSOR_ABBREV = {
   DF_robot: "CAPSENS",
   Watermark: "WM200SS",
@@ -1307,6 +1515,15 @@ const SENSOR_ABBREV = {
 
 /* Watermark management thresholds use agronomic states; the capacitive probe
    keeps the plain wet/dry wording. percent is always "higher = wetter". */
+/* True when this block says it is wired straight to the Arduino rather than
+   through the 200SS-VA3. */
+function isDirectWiring(block) {
+  const p = (block.params || []).find(
+    (prm) => normalizeParamName(prm.name) === "wiring",
+  );
+  return !!p && /direct/i.test(String(p.value));
+}
+
 function stateLinesFor(sensorKey) {
   if (sensorKey === "Watermark" || sensorKey === "Watermark_Temperature") {
     return `  if      (percent == 0)  lcd.print(F("Dry plant stress"));
@@ -1367,6 +1584,15 @@ function buildIno(blocks, surveyAnswers = {}) {
        Watermark port, so label the display with the port it actually came
        from. Tension still reports the Watermark port, which is correct. */
     const sensorKey = resolveSensorKey(b.sensor);
+    /* A block wired straight to the board uses a different template entirely:
+       it has to do the excitation and calibration the adapter would have done.
+       The choice is a parameter rather than a separate sensor type, so the
+       grower picks their sensor first and says how it is connected second. */
+    const wiredDirect = isDirectWiring(b);
+    const templateKey =
+      wiredDirect && TEMPLATES.sensors[sensorKey + "_direct"]
+        ? sensorKey + "_direct"
+        : sensorKey;
     const outKey = resolveOutputKey(b.output);
     const isTempReading =
       outKey === "Temperature F" ||
@@ -1376,8 +1602,22 @@ function buildIno(blocks, surveyAnswers = {}) {
     const labelPort = isTempReading && b.partnerPort ? b.partnerPort : b.port;
     vars.port = labelPort;
     /* LCD line 1: port, short sensor name, then the value. */
-    vars.label = `${labelPort} ${SENSOR_ABBREV[sensorKey] || "SENSOR"}`;
+    vars.label = `${labelPort} ${(wiredDirect ? SENSOR_ABBREV_DIRECT[sensorKey] : SENSOR_ABBREV[sensorKey]) || SENSOR_ABBREV[sensorKey] || "SENSOR"}`;
     vars.stateLines = stateLinesFor(sensorKey);
+
+    /* The sensor's constants block declares every parameter the sensor has,
+       while the form only sends the ones the chosen measurement needs. Seed
+       from the spreadsheet defaults first so an unused constant carries a
+       sensible value rather than a zero, then let the grower's entries win.
+       Zero is the worst possible filler here: it is what divide-by-zero
+       guards look for, and it reads as a real calibration value. */
+    const defaults = SENSOR_TYPES[sensorKey]?.params || [];
+    defaults.forEach((p) => {
+      vars[p.name] =
+        p.value !== "" && p.value !== null && p.value !== undefined
+          ? p.value
+          : "0";
+    });
 
     b.params.forEach((p) => {
       vars[p.name] =
@@ -1388,7 +1628,7 @@ function buildIno(blocks, surveyAnswers = {}) {
 
     loopBody += `  /* Sensor ${idx}: ${b.sensor} on ${b.port}, showing ${b.output} */\n`;
 
-    const sensorTpl = lookupTemplate(TEMPLATES.sensors, sensorKey);
+    const sensorTpl = lookupTemplate(TEMPLATES.sensors, templateKey);
     if (sensorTpl) {
       constants += render(sensorTpl.constants, vars) + "\n";
       loopBody += render(sensorTpl.read, vars) + "\n";
@@ -1397,7 +1637,7 @@ function buildIno(blocks, surveyAnswers = {}) {
       loopBody += `  bool connected_${idx} = portHasSensor(${b.port});\n`;
     }
 
-    const sensorOutputs = lookupTemplate(TEMPLATES.outputs, sensorKey) || {};
+    const sensorOutputs = lookupTemplate(TEMPLATES.outputs, templateKey) || {};
     const outputTpl = lookupTemplate(sensorOutputs, b.output);
     loopBody += outputTpl
       ? render(outputTpl, vars) + "\n"
@@ -1407,14 +1647,15 @@ function buildIno(blocks, surveyAnswers = {}) {
        probe is present, or a floating partner pin feeds garbage into them. */
     const resolvedOut = resolveOutputKey(b.output);
     const needsPartnerProbe =
-      resolvedOut === "Wetting Front" ||
+      !wiredDirect &&
+      (resolvedOut === "Wetting Front" ||
       (sensorKey === "Watermark_Temperature" &&
         [
           "Tension",
           "Temperature F",
           "Temperature C",
           "Raw value (Temperature)",
-        ].includes(resolvedOut));
+        ].includes(resolvedOut)));
     if (needsPartnerProbe) {
       /* The presence test has to match the probe on the partner port. A
          Watermark's partner hangs off the VA-3, whose output stays below
@@ -1816,15 +2057,30 @@ function refreshViz(bid) {
 /* The Volumetric / TAW equations contain 1/k, but the sheet's in_a..in_e
    columns are full before k. Require it in code so the field appears and the
    value reaches the sketch. (Adding k to a free in_ column also works.) */
+/* Parameters that belong to the whole sensor rather than to one measurement.
+   The spreadsheet lists inputs per measurement in in_a..in_e, which is right
+   for calibration values but wrong for these: how the sensor is wired, and the
+   constants that wiring needs, apply to every measurement it offers. Without
+   this they were filtered out of the block before it reached the generator,
+   and the templates silently received zeros. */
+const SENSOR_WIDE_PARAMS = [
+  "wiring",
+  "Rx",
+  "soil_temp_c",
+  "therm_r25",
+  "therm_beta",
+];
+
 function extraParamsFor(outputVal) {
   const key = resolveOutputKey(outputVal);
+  const extra = SENSOR_WIDE_PARAMS.slice();
   if (
     key === "Total Available Water (volumetric?)" ||
     key === "Total Available Water"
   ) {
-    return ["k"];
+    extra.push("k");
   }
-  return [];
+  return extra;
 }
 
 function normalizeParamName(name) {
@@ -2104,7 +2360,7 @@ function addParamRow(
         ${tooltipText ? tipBadge(tooltipText) : ""}
       </div>
       <input type="text" id="pname-${rid}" value="${escapeHtml(nameVal)}" required readonly style="display:none">
-      <div class="param-display-name" id="plabel-${rid}">${escapeHtml(shownName)}</div>
+      <div class="param-display-name" id="plabel-${rid}">${escapeHtml(tData("params", nameVal, shownName))}</div>
     </div>
     <div class="field value-unit-field">
       <div class="value-unit-labels">
@@ -2189,10 +2445,7 @@ function checkDuplicatePorts() {
     messages.push(
       t("msg.portsDuplicate", { s: dupes.length > 1 ? "s" : "", ports: dupes.join(", ") }),
     );
-  if (analogCount >= 5)
-    messages.push(
-      t("msg.portsFull"),
-    );
+  if (analogCount >= 5) messages.push(t("msg.portsFull"));
   const warn = document.getElementById("port-warning");
   if (messages.length) {
     warn.innerHTML = messages.map((m) => `⚠ ${m}`).join("<br>");
@@ -2412,6 +2665,17 @@ function handleGenerate() {
       );
       return;
     }
+  }
+
+  /* Wet soil conducts between bare sensors, so two of them read partly through
+     each other and the electrodes corrode. Isolating more than one needs a
+     multiplexer the sketch does not drive, so the form stops at one. */
+  const directBlocks = _pendingBlocks.filter(isDirectWiring);
+  if (directBlocks.length > 1) {
+    showFormError(
+      t("msg.oneDirectOnly", { ports: directBlocks.map((b) => b.port).join(", ") }),
+    );
+    return;
   }
 
   const deepPorts = _pendingBlocks

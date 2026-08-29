@@ -20,3 +20,8 @@ __pycache__/
 
 # macOS
 .DS_Store
+
+# Manufacturer datasheets and reference screenshots. Kept locally, not
+# published: they are third-party documents and add megabytes to the repo.
+# docs/EQUATIONS.md records what was read out of them.
+documentation/
