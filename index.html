@@ -3,245 +3,520 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="styles.css" />
-    <title>NodeFlow On-site Sensing System Code Generator</title>
-    <link rel="icon" type="image/png" href="/NodeFlow_image.png" />
+
+    <title>
+      NodeFlow (On-site) Arduino Code Generator for Soil Sensors
+    </title>
+    <meta
+      name="description"
+      content="Fill in which soil sensors you have and which Arduino ports they use, and download a ready-to-upload .ino sketch. Supports Watermark 200SS tension, Irrometer 200TS temperature and DFRobot capacitive probes. No coding, no account, works offline."
+    />
+    <link
+      rel="canonical"
+      href="https://fernlag.github.io/NodeFlow-Onsite-Sensing-System/"
+    />
+    <meta name="theme-color" content="#7c9532" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'"
+    />
+
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:title"
+      content="NodeFlow (On-site) Arduino Code Generator for Soil Sensors"
+    />
+    <meta
+      property="og:description"
+      content="Describe your sensors and ports, download a ready-to-upload Arduino sketch. Built for growers, no programming needed."
+    />
+    <meta
+      property="og:url"
+      content="https://fernlag.github.io/NodeFlow-Onsite-Sensing-System/"
+    />
+    <meta
+      property="og:image"
+      content="https://fernlag.github.io/NodeFlow-Onsite-Sensing-System/assets/img/og-image.png"
+    />
+    <meta
+      property="og:image:alt"
+      content="NodeFlow On-site code generator, showing a 16 by 2 LCD reading A2 WM200SS 34 kPa"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="NodeFlow (On-site) Sensing System" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" href="favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png" />
+    <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png" />
+    <link rel="manifest" href="site.webmanifest" />
+    <link rel="stylesheet" href="assets/css/styles.css" />
   </head>
   <body>
-    <div class="container">
-      <div class="header">
-        <h1>
-          NodeFlow<sub class="nf-sub">(On-site)</sub> Sensing System Code
-          Generator
-        </h1>
-        <div class="info-box" id="info-box">
-          <button
-            class="info-box-title"
-            onclick="toggleInfoBox()"
-            aria-expanded="true"
-          >
-            <span>Summary &amp; Instructions</span>
-            <span class="info-box-chevron" id="info-box-chevron">&#9662;</span>
-          </button>
-          <div class="info-box-body" id="info-box-body">
-            <p>
-              This website allows you to generate the code the
-              <strong>NodeFlow<sub class="nf-sub">(On-site)</sub></strong>
-              Sensing System uses to read the sensors that you will plug into
-              it, and generate the information you are interested in.
+    <a class="skip-link" href="#build">Skip to the code generator</a>
+
+    <header class="site-bar">
+      <a class="brand" href="index.html">
+        <img
+          src="assets/img/nodeflow-logo.png"
+          alt="NodeFlow logo: a water drop over a fan of soil layers with three sensor nodes"
+          width="40"
+          height="40"
+        />
+        <span class="brand-text">
+          <span class="brand-name">NodeFlow</span>
+          <span class="brand-sub">(On-site) Sensing System</span>
+        </span>
+      </a>
+      <nav class="site-nav" aria-label="Main">
+        <a href="#how">How it works</a>
+        <a href="#hardware">Supported hardware</a>
+        <a href="#build" class="site-nav-cta">Build my code</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <!-- ---------- Hero: the primary action sits above the fold ---------- -->
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-inner">
+          <div class="hero-copy">
+            <p class="eyebrow">Arduino sketch generator</p>
+            <h1 id="hero-title">
+              Tell us what you plugged in.<br />
+              Download the code that reads it.
+            </h1>
+            <p class="hero-lede">
+              Pick your sensors, say which port each one is in, choose what you
+              want on the screen. The page writes the Arduino sketch in your
+              browser and downloads it as a
+              <code>.ino</code> file you can open and upload. No programming, no
+              account, nothing sent to a server to build it.
             </p>
-            <p>
-              Please read the full instructions in the
-              <strong>NodeFlow<sub class="nf-sub">(On-site)</sub></strong>
-              guidelines (to add as a hyperlink) and videos (to add ad a
-              hyperlink) on how to use the device.
-            </p>
-            <p>
-              To generate the code for your
-              <strong>NodeFlow<sub class="nf-sub">(On-site)</sub></strong>
-              device, you will need to know:
-            </p>
-            <ul class="info-list">
-              <li>What sensors you want to connect</li>
-              <li>
-                How you will connect these sensors to the Arduino ports, i.e. to
-                which port each sensor will be connected to.
-                <em
-                  >N.B. you can only connect one type of sensor to each
-                  port.</em
-                >
-              </li>
-              <li>
-                For each sensor, what variable should appear on your LCD screen
-              </li>
-              <li>The visualization format for each of these variables</li>
+            <div class="hero-actions">
+              <a class="btn btn-primary" href="#build">Build my code</a>
+              <a class="btn btn-quiet" href="#how">See what it does first</a>
+            </div>
+            <ul class="hero-facts">
+              <li><span>3</span> sensor families supported</li>
+              <li><span>7</span> measurements to choose from</li>
+              <li><span>0</span> lines of code you have to write</li>
             </ul>
-            <p class="offline-note">
-              <strong>Working offline?</strong> This tool works without an
-              internet connection, but you must open it online at least once
-              first so it can load. After that, you can fill out the form and
-              download your code with no connection, any tracking information
-              will be sent automatically the next time you're online.
-              <br /><br />
-              Clearing your browser's cache or site data for this page removes
-              the offline copy, along with your saved details and any
-              information still waiting to be sent. If that happens, just open
-              this page again while online to restore it.
+          </div>
+
+          <!-- The device's own 16x2 display is the visual anchor of the site -->
+          <div class="hero-device" aria-hidden="true">
+            <div class="lcd">
+              <div class="lcd-screen">
+                <span class="lcd-line">A2 WM200SS  34kPa</span>
+                <span class="lcd-line">[####------] WET</span>
+              </div>
+              <div class="lcd-keys">
+                <span></span><span></span><span></span><span></span
+                ><span></span>
+              </div>
+            </div>
+            <p class="hero-device-note">
+              What your generated sketch puts on the shield: port, sensor, value
+              on the top line, state on the bottom.
             </p>
           </div>
         </div>
-        <span class="req-note">
-          Fields marked <span class="req">*</span> are required
-        </span>
-      </div>
+      </section>
 
-      <div id="saved-banner" class="saved-banner"></div>
-      <div id="saved-configs" class="saved-configs"></div>
-      <div id="sensors-list"></div>
-      <div id="port-warning" class="port-warning"></div>
-      <button class="add-block-btn" onclick="addBlock()">
-        + Add another "Sensor-Arduino port connection specifications"
-      </button>
-      <button class="gen-btn" onclick="handleGenerate()">
-        Generate the code for my NodeFlow<sub class="nf-sub">(On-site)</sub>
-        Sensing System
-      </button>
+      <noscript>
+        <p class="noscript-note">
+          This generator builds your Arduino file inside the browser, so it
+          needs JavaScript switched on. Everything still happens on your own
+          machine: turning JavaScript on does not send your work anywhere.
+        </p>
+      </noscript>
 
-      <div class="cost-estimate">
-        Do you want to estimate the cost of your system?
-        <a href="#" onclick="return false;" class="cost-link">Click here.</a>
-      </div>
-
-      <div class="success-banner" id="success-banner">
-        <span>&#10003;</span>
-        <span>
-          The code has successfully downloaded. You can also visualize it below:
-        </span>
-      </div>
-      <div class="preview-wrap" id="preview-wrap">
-        <div class="preview-head">
-          <span>Code preview</span>
-          <button class="copy-btn" onclick="copyPreview()">Copy</button>
+      <!-- ---------- How it works ---------- -->
+      <section id="how" class="band" aria-labelledby="how-title">
+        <div class="band-inner">
+          <h2 id="how-title">How it works</h2>
+          <ol class="steps">
+            <li>
+              <span class="step-num">1</span>
+              <h3>Describe one sensor per block</h3>
+              <p>
+                Choose the sensor, the port it is wired into (A1 to A5, since A0
+                is taken by the shield's buttons), the measurement you want, and
+                how it should look on the display.
+              </p>
+            </li>
+            <li>
+              <span class="step-num">2</span>
+              <h3>Fill in the numbers for your field</h3>
+              <p>
+                Calibration values, soil texture, sensor depths. Each field
+                carries the range it accepts and a note explaining where the
+                number comes from. Defaults are filled in, but a default is a
+                guess about your soil, not a measurement of it.
+              </p>
+            </li>
+            <li>
+              <span class="step-num">3</span>
+              <h3>Download and upload</h3>
+              <p>
+                Press generate and the finished <code>.ino</code> lands in your
+                downloads folder. Open it in the Arduino IDE, pick your Uno,
+                press upload. The readings appear on the shield straight away.
+              </p>
+            </li>
+          </ol>
         </div>
-        <pre class="preview-code" id="preview-code"></pre>
-      </div>
-      <div class="logo-row">
-        <div class="logo-item">
-          <img src="NodeFlow_image.png" alt="NodeFlow" class="logo" />
-          <span class="logo-caption">NodeFlow</span>
+      </section>
+
+      <!-- ---------- Supported hardware ---------- -->
+      <section id="hardware" class="band band-alt" aria-labelledby="hw-title">
+        <div class="band-inner">
+          <h2 id="hw-title">What it supports</h2>
+          <p class="band-lede">
+            The generated sketch targets an Arduino Uno R3 with a 16&times;2 LCD
+            keypad shield. The buttons sit on a resistor ladder on A0, so A0 is
+            reserved and sensors use A1 to A5.
+          </p>
+          <div class="hw-list">
+            <article class="hw-item">
+              <h3>Irrometer Watermark 200SS</h3>
+              <p>
+                Soil water tension through a 200SS-VA3 adapter. Tension in kPa,
+                a wet-to-dry percentage, or three management states derived from
+                thresholds for your soil texture. The adapter carries up to
+                three Watermarks and one shared temperature probe, outputs 0 to
+                2.8&nbsp;V, and refreshes each channel every five minutes.
+              </p>
+            </article>
+            <article class="hw-item">
+              <h3>Irrometer 200TS temperature</h3>
+              <p>
+                Soil temperature, either on its own or paired with a Watermark
+                on the same adapter. Reported in degrees Fahrenheit from the
+                adapter's voltage curve.
+              </p>
+            </article>
+            <article class="hw-item">
+              <h3>DFRobot capacitive probe</h3>
+              <p>
+                A low-cost moisture probe wired straight to an analog pin. Raw
+                counts, or a percentage once you have given it an air reading
+                and a water reading.
+              </p>
+            </article>
+          </div>
+          <p class="hw-note">
+            Percentages always read higher when the soil is wetter. The one
+            exception is the raw reading, which reports whatever the sensor
+            actually put on the pin.
+          </p>
         </div>
-        <img src="UCANR_image.png" alt="UC ANR Logo " class="logo" />
-        <img src="ucsc_image.png" alt="UCSC Logo" class="logo" />
+      </section>
+
+      <!-- ---------- The generator ---------- -->
+      <section id="build" class="build" aria-labelledby="build-title">
+        <div class="build-inner">
+          <div class="build-head">
+            <h2 id="build-title">Build your code</h2>
+            <p class="req-note">
+              Fields marked <span class="req">*</span> are required
+            </p>
+          </div>
+
+          <div class="info-box" id="info-box">
+            <button
+              class="info-box-title"
+              type="button"
+              onclick="toggleInfoBox()"
+              aria-expanded="true"
+              aria-controls="info-box-body"
+            >
+              <span>Summary &amp; instructions</span>
+              <span class="info-box-chevron" id="info-box-chevron" aria-hidden="true">&#9662;</span>
+            </button>
+            <div class="info-box-body" id="info-box-body">
+              <p>
+                This page generates the code the
+                <strong>NodeFlow<sub class="nf-sub">(On-site)</sub></strong>
+                Sensing System runs to read the sensors you plug into it and
+                produce the information you care about.
+              </p>
+              <p>
+                Full instructions are in the
+                <strong>NodeFlow<sub class="nf-sub">(On-site)</sub></strong>
+                guidelines and videos (links to be added).
+              </p>
+              <p>To generate your code, you will need to know:</p>
+              <ul class="info-list">
+                <li>What sensors you want to connect</li>
+                <li>
+                  Which Arduino port each sensor goes into.
+                  <em>Only one sensor per port.</em>
+                </li>
+                <li>For each sensor, what should appear on the LCD screen</li>
+                <li>How each of those values should be displayed</li>
+              </ul>
+              <p class="offline-note">
+                <strong>Working offline?</strong> This tool runs without an
+                internet connection, but you have to open it online at least
+                once so it can load. After that you can fill in the form and
+                download your code with no connection. Any research information
+                is sent the next time you are online.
+                <br /><br />
+                Clearing your browser's cache or site data for this page removes
+                the offline copy along with your saved details and anything
+                still waiting to be sent. Open the page again while online to
+                restore it.
+              </p>
+            </div>
+          </div>
+
+          <div
+            id="saved-banner"
+            class="saved-banner"
+            role="status"
+            aria-live="polite"
+          ></div>
+          <div id="saved-configs" class="saved-configs"></div>
+
+          <div id="sensors-list"></div>
+
+          <div
+            id="port-warning"
+            class="port-warning"
+            role="alert"
+            aria-live="assertive"
+          ></div>
+
+          <button class="add-block-btn" type="button" onclick="addBlock()">
+            <span aria-hidden="true">+</span> Add another sensor and port
+          </button>
+
+          <div
+            id="form-error"
+            class="form-error"
+            role="alert"
+            aria-live="assertive"
+          ></div>
+
+          <button
+            class="gen-btn"
+            type="button"
+            id="gen-btn"
+            onclick="handleGenerate()"
+          >
+            <span class="gen-btn-label">
+              Generate the code for my NodeFlow<sub class="nf-sub">(On-site)</sub>
+              Sensing System
+            </span>
+            <span class="btn-spinner" aria-hidden="true"></span>
+          </button>
+
+          <p class="cost-estimate">
+            Want to estimate what your system costs to build?
+            <button type="button" class="cost-link" disabled>
+              Cost estimator, coming soon
+            </button>
+          </p>
+
+          <div
+            class="success-banner"
+            id="success-banner"
+            role="status"
+            aria-live="polite"
+          >
+            <span class="success-mark" aria-hidden="true">&#10003;</span>
+            <span>
+              Your code downloaded as
+              <strong id="success-filename">your file</strong>. You can read it
+              below, or see
+              <a href="thank-you.html">what to do next</a>.
+            </span>
+          </div>
+
+          <div class="preview-wrap" id="preview-wrap">
+            <div class="preview-head">
+              <span>Code preview</span>
+              <button class="copy-btn" type="button" onclick="copyPreview()">
+                Copy
+              </button>
+            </div>
+            <pre class="preview-code" id="preview-code" tabindex="0"></pre>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-foot">
+      <div class="foot-inner">
+        <div class="foot-brand">
+          <img
+            src="assets/img/nodeflow-logo.png"
+            alt="NodeFlow logo"
+            width="34"
+            height="34"
+          />
+          <p>
+            <strong>NodeFlow<sub class="nf-sub">(On-site)</sub></strong><br />
+            Do-it-yourself, low-cost, open-source tools for farm-scale water
+            management.
+          </p>
+        </div>
+
+        <nav class="foot-links" aria-label="Site">
+          <h2>This site</h2>
+          <a href="index.html">Code generator</a>
+          <a href="#how">How it works</a>
+          <a href="thank-you.html">After you download</a>
+        </nav>
+
+        <nav class="foot-links" aria-label="Legal">
+          <h2>Legal</h2>
+          <a href="privacy.html">Privacy policy</a>
+          <a href="terms.html">Terms of use</a>
+          <a href="assets/docs/consent.pdf">Research consent form (PDF)</a>
+        </nav>
+
+        <div class="foot-links foot-contact">
+          <h2>Contact</h2>
+          <p class="contact-slot">Contact details coming soon.</p>
+        </div>
+      </div>
+
+      <div class="foot-partners">
+        <img
+          src="assets/img/ucanr-logo.png"
+          alt="University of California, Agriculture and Natural Resources"
+          class="partner-logo"
+          width="320"
+          height="45"
+          loading="lazy"
+        />
+        <img
+          src="assets/img/ucsc-logo.png"
+          alt="University of California, Santa Cruz"
+          class="partner-logo"
+          width="240"
+          height="66"
+          loading="lazy"
+        />
+      </div>
+
+      <div class="foot-legal">
+        <p>
+          A research and outreach project of UC Agriculture and Natural
+          Resources and UC Santa Cruz. The generated code is provided as is,
+          without warranty; you are responsible for checking it against your own
+          equipment before relying on it for irrigation decisions. See the
+          <a href="terms.html">terms of use</a>.
+        </p>
+        <p class="foot-copy">&copy; <span id="foot-year">2026</span> The NodeFlow project.</p>
+      </div>
+    </footer>
+
+    <!-- Sticky action bar for small screens -->
+    <div class="sticky-cta" id="sticky-cta" hidden>
+      <span class="sticky-cta-text">Ready when you are</span>
+      <button type="button" class="sticky-cta-btn" onclick="handleGenerate()">
+        Generate my code
+      </button>
+    </div>
+
+    <!-- Consent banner -->
+    <div
+      class="consent-bar"
+      id="consent-bar"
+      role="dialog"
+      aria-modal="false"
+      aria-labelledby="consent-bar-title"
+      hidden
+    >
+      <div class="consent-bar-inner">
+        <div>
+          <h2 id="consent-bar-title">Anonymous usage counting</h2>
+          <p>
+            This site sets no advertising cookies and embeds no third-party
+            trackers. We would like to count page visits so we know the tool is
+            reaching people. It records no personal information and no cookie is
+            stored for it. Your answer is kept in this browser only.
+          </p>
+        </div>
+        <div class="consent-bar-btns">
+          <button type="button" class="btn btn-primary" id="consent-yes">
+            Yes, count my visit
+          </button>
+          <button type="button" class="btn btn-quiet" id="consent-no">
+            No thanks
+          </button>
+          <a class="consent-bar-link" href="privacy.html">Privacy policy</a>
+        </div>
       </div>
     </div>
 
+    <!-- Research submission modal -->
     <div id="survey-overlay" class="survey-overlay">
-      <div class="survey-modal">
+      <div
+        class="survey-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="survey-title"
+      >
         <div class="survey-modal-head">
-          <span class="survey-title">Before you download</span>
-          <button class="survey-close" onclick="closeSurvey()" title="Cancel">
-            &#x2715;
+          <h2 class="survey-title" id="survey-title">Before you download</h2>
+          <button
+            class="survey-close"
+            type="button"
+            onclick="closeSurvey()"
+            aria-label="Cancel and close this dialog"
+          >
+            <span aria-hidden="true">&#x2715;</span>
           </button>
         </div>
         <div class="survey-modal-body" id="survey-body"></div>
         <div class="survey-modal-foot">
           <label class="consent-label">
-            <input
-              type="checkbox"
-              id="consent-checkbox"
-              onchange="
-                document.getElementById('confirm-btn').disabled = !this.checked
-              "
-            />
+            <input type="checkbox" id="consent-checkbox" />
             <span>
               I have read the
               <a
-                href="consent.pdf"
+                href="assets/docs/consent.pdf"
                 target="_blank"
-                rel="noopener"
+                rel="noopener noreferrer"
                 class="consent-link"
-                >consent form</a
+                >consent form (PDF, opens in a new tab)</a
               >
               and agree to my information being collected by NodeFlow for
               research purposes.
             </span>
           </label>
           <div class="survey-foot-btns">
-            <button class="survey-cancel-btn" onclick="closeSurvey()">
+            <button
+              class="survey-cancel-btn"
+              type="button"
+              onclick="closeSurvey()"
+            >
               Cancel
             </button>
             <button
               class="survey-confirm-btn"
               id="confirm-btn"
+              type="button"
               onclick="confirmSurvey()"
               disabled
             >
-              Confirm + download
+              <span class="gen-btn-label">Confirm and download</span>
+              <span class="btn-spinner" aria-hidden="true"></span>
             </button>
           </div>
         </div>
       </div>
     </div>
 
-    <script src="main.js"></script>
-    <script>
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () => {
-          navigator.serviceWorker
-            .register("sw.js")
-            .then((reg) => {
-              /* When we come back online, ask the SW to flush queued submissions */
-              const flush = () => {
-                if (navigator.serviceWorker.controller) {
-                  navigator.serviceWorker.controller.postMessage("flush-queue");
-                }
-                if (reg.sync) {
-                  reg.sync.register("flush-queue").catch(() => {});
-                }
-              };
-              window.addEventListener("online", flush);
-              if (navigator.onLine) flush();
-
-              /* Detect a new version waiting to activate */
-              function showUpdateBar(worker) {
-                let bar = document.getElementById("update-bar");
-                if (bar) return;
-                bar = document.createElement("div");
-                bar.id = "update-bar";
-                bar.innerHTML =
-                  "<span>A new version is available.</span>" +
-                  '<button id="update-btn">Refresh</button>';
-                document.body.appendChild(bar);
-                document.getElementById("update-btn").onclick = () => {
-                  worker.postMessage("skip-waiting");
-                };
-              }
-
-              if (reg.waiting) showUpdateBar(reg.waiting);
-
-              reg.addEventListener("updatefound", () => {
-                const nw = reg.installing;
-                if (!nw) return;
-                nw.addEventListener("statechange", () => {
-                  if (
-                    nw.state === "installed" &&
-                    navigator.serviceWorker.controller
-                  ) {
-                    showUpdateBar(nw);
-                  }
-                });
-              });
-            })
-            .catch(() => {});
-
-          /* Reload once the new SW takes control */
-          let refreshing = false;
-          navigator.serviceWorker.addEventListener("controllerchange", () => {
-            if (refreshing) return;
-            refreshing = true;
-            window.location.reload();
-          });
-        });
-      }
-
-      /* Small offline indicator */
-      function updateOnlineStatus() {
-        let bar = document.getElementById("offline-bar");
-        if (!navigator.onLine) {
-          if (!bar) {
-            bar = document.createElement("div");
-            bar.id = "offline-bar";
-            bar.textContent =
-              "You're offline — the form still works and your file will download. Tracking data will send when you reconnect.";
-            document.body.appendChild(bar);
-          }
-        } else if (bar) {
-          bar.remove();
-        }
-      }
-      window.addEventListener("online", updateOnlineStatus);
-      window.addEventListener("offline", updateOnlineStatus);
-      updateOnlineStatus();
-    </script>
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/site.js"></script>
   </body>
 </html>

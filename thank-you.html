@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>After You Download | NodeFlow (On-site) Sensing System</title>
+    <meta name="description" content="Your Arduino sketch is downloaded. How to open it, pick the board and port, upload it, read the LCD, and fix the things that usually go wrong." />
+    <link rel="canonical" href="https://fernlag.github.io/NodeFlow-Onsite-Sensing-System/thank-you.html" />
+    <meta name="theme-color" content="#7c9532" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="After you download | NodeFlow (On-site)" />
+    <meta property="og:description" content="Your Arduino sketch is downloaded. How to open it, pick the board and port, upload it, read the LCD, and fix the things that usually go wrong." />
+    <meta property="og:image" content="https://fernlag.github.io/NodeFlow-Onsite-Sensing-System/assets/img/og-image.png" />
+    <meta property="og:image:alt" content="NodeFlow On-site code generator, showing a 16 by 2 LCD reading A2 WM200SS 34 kPa" />
+    <meta property="og:site_name" content="NodeFlow (On-site) Sensing System" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" href="favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png" />
+    <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png" />
+    <link rel="manifest" href="site.webmanifest" />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to the main content</a>
+
+    <header class="site-bar">
+      <a class="brand" href="index.html">
+        <img
+          src="assets/img/nodeflow-logo.png"
+          alt="NodeFlow logo: a water drop over a fan of soil layers with three sensor nodes"
+          width="40"
+          height="40"
+        />
+        <span class="brand-text">
+          <span class="brand-name">NodeFlow</span>
+          <span class="brand-sub">(On-site) Sensing System</span>
+        </span>
+      </a>
+      <nav class="site-nav" aria-label="Main">
+        <a href="index.html#how">How it works</a>
+        <a href="index.html#hardware">Supported hardware</a>
+        <a href="index.html#build" class="site-nav-cta">Build my code</a>
+      </nav>
+    </header>
+
+    <main id="main" class="page">
+      <div class="page-inner">
+        <p class="crumb"><a href="index.html">Code generator</a> <span aria-hidden="true">/</span> After you download</p>
+        <h1>Your file is downloaded. Here is what to do with it.</h1>
+        <p class="page-lede">
+          Thank you. Your configuration helps us see how the system is really
+          used. The rest of this page walks the file onto the board.
+        </p>
+
+        <div class="prose">
+          <ol class="steps steps-stacked">
+            <li>
+              <span class="step-num">1</span>
+              <h2>Open the file</h2>
+              <p>
+                Find the <code>.ino</code> file in your downloads folder and
+                open it with the Arduino IDE. The IDE will offer to move it into
+                a folder of the same name. Say yes; that is how Arduino sketches
+                are stored.
+              </p>
+            </li>
+            <li>
+              <span class="step-num">2</span>
+              <h2>Choose the board and the port</h2>
+              <p>
+                Plug the Arduino into your computer with a USB cable. In the
+                IDE, set <strong>Tools &rsaquo; Board</strong> to
+                <em>Arduino Uno</em>, then set
+                <strong>Tools &rsaquo; Port</strong> to the port that appeared
+                when you plugged it in. If no port appeared, try a different USB
+                cable: many cables carry power but no data.
+              </p>
+            </li>
+            <li>
+              <span class="step-num">3</span>
+              <h2>Upload</h2>
+              <p>
+                Press the upload arrow. The sketch only uses
+                <code>LiquidCrystal</code>, which ships with the IDE, so there
+                is nothing to install. When the IDE says
+                <em>Done uploading</em>, the display starts showing readings.
+              </p>
+            </li>
+            <li>
+              <span class="step-num">4</span>
+              <h2>Read the screen</h2>
+              <p>
+                The top line shows the port, the short sensor name and the
+                value, like <code>A2 WM200SS 34 kPa</code>. The bottom line
+                shows the bar, state or warning you chose. Press the shield's
+                left and right buttons to step through your sensors. The
+                backlight goes out after five minutes without a button press;
+                any button wakes it.
+              </p>
+            </li>
+          </ol>
+
+          <h2>If something looks wrong</h2>
+          <dl class="faq">
+            <dt>The screen is blank or shows blocks</dt>
+            <dd>
+              Turn the contrast potentiometer on the LCD shield. A fresh shield
+              is often set to full contrast, which shows solid blocks, or to
+              none, which shows nothing.
+            </dd>
+
+            <dt>A port reads <code>No Sensor</code></dt>
+            <dd>
+              Nothing is detected on that pin. Check the wiring at both ends. On
+              a Watermark going through the 200SS-VA3 adapter, remember the
+              adapter refreshes each channel every five minutes and holds the
+              previous value in between, so give it time after powering up.
+            </dd>
+
+            <dt>The percentage looks backwards</dt>
+            <dd>
+              Higher percentages always mean wetter soil, in every measurement
+              except the raw reading, which reports the sensor faithfully. If a
+              capacitive probe reads backwards, your air and water calibration
+              values are probably swapped. Generate a raw-value sketch, note the
+              reading in open air and in water, then put those two numbers back
+              into the form.
+            </dd>
+
+            <dt>A battery warning appears</dt>
+            <dd>
+              The sketch measures the supply against the chip's internal 1.1&nbsp;V
+              reference. It only works on battery power through the barrel jack.
+              On USB power, including a USB power bank, the reading is not
+              meaningful and the warning can be ignored.
+            </dd>
+
+            <dt>The numbers do not match my soil</dt>
+            <dd>
+              Calibration values and soil-texture thresholds are your field's,
+              not ours. The defaults are a starting point. Change them in the
+              form and generate the file again.
+            </dd>
+          </dl>
+
+          <h2>Coming back later</h2>
+          <p>
+            Your configuration is saved in this browser. Open the generator
+            again and load it from the list at the top of the form, adjust what
+            changed, and download a new file. Nothing is overwritten: tick the
+            date-stamp option if you want each download kept separately.
+          </p>
+        </div>
+
+        <p class="page-actions">
+          <a class="btn btn-primary" href="index.html#build">Generate another file</a>
+          <a class="btn btn-quiet" href="index.html#hardware">Supported hardware</a>
+        </p>
+      </div>
+    </main>
+
+    <footer class="site-foot">
+      <div class="foot-inner">
+        <div class="foot-brand">
+          <img src="assets/img/nodeflow-logo.png" alt="NodeFlow logo" width="34" height="34" />
+          <p>
+            <strong>NodeFlow<sub class="nf-sub">(On-site)</sub></strong><br />
+            Do-it-yourself, low-cost, open-source tools for farm-scale water
+            management.
+          </p>
+        </div>
+
+        <nav class="foot-links" aria-label="Site">
+          <h2>This site</h2>
+          <a href="index.html">Code generator</a>
+          <a href="index.html#how">How it works</a>
+          <a href="thank-you.html">After you download</a>
+        </nav>
+
+        <nav class="foot-links" aria-label="Legal">
+          <h2>Legal</h2>
+          <a href="privacy.html">Privacy policy</a>
+          <a href="terms.html">Terms of use</a>
+          <a href="assets/docs/consent.pdf">Research consent form (PDF)</a>
+        </nav>
+
+        <div class="foot-links foot-contact">
+          <h2>Contact</h2>
+          <p class="contact-slot">Contact details coming soon.</p>
+        </div>
+      </div>
+
+      <div class="foot-partners">
+        <img src="assets/img/ucanr-logo.png" alt="University of California, Agriculture and Natural Resources" class="partner-logo" width="320" height="45" loading="lazy" />
+        <img src="assets/img/ucsc-logo.png" alt="University of California, Santa Cruz" class="partner-logo" width="240" height="66" loading="lazy" />
+      </div>
+
+      <div class="foot-legal">
+        <p>
+          A research and outreach project of UC Agriculture and Natural
+          Resources and UC Santa Cruz. The generated code is provided as is,
+          without warranty; you are responsible for checking it against your own
+          equipment before relying on it for irrigation decisions. See the
+          <a href="terms.html">terms of use</a>.
+        </p>
+        <p class="foot-copy">&copy; <span id="foot-year">2026</span> The NodeFlow project.</p>
+      </div>
+    </footer>
+
+    <div class="consent-bar" id="consent-bar" role="dialog" aria-modal="false" aria-labelledby="consent-bar-title" hidden>
+      <div class="consent-bar-inner">
+        <div>
+          <h2 id="consent-bar-title">Anonymous usage counting</h2>
+          <p>
+            This site sets no advertising cookies and embeds no third-party
+            trackers. We would like to count page visits so we know the tool is
+            reaching people. It records no personal information and no cookie is
+            stored for it. Your answer is kept in this browser only.
+          </p>
+        </div>
+        <div class="consent-bar-btns">
+          <button type="button" class="btn btn-primary" id="consent-yes">Yes, count my visit</button>
+          <button type="button" class="btn btn-quiet" id="consent-no">No thanks</button>
+          <a class="consent-bar-link" href="privacy.html">Privacy policy</a>
+        </div>
+      </div>
+    </div>
+
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/site.js"></script>
+  </body>
+</html>
