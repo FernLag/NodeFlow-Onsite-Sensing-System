@@ -53,7 +53,7 @@ const SENSOR_TYPES = {
         name: "water_val",
         display: "Water value",
         label: "Water value: the raw reading with the probe standing in water. Typically around 280 on a 5 V board. Measure it, do not assume it.",
-        value: "280",
+        value: "0",
         min: "0",
         max: "1023",
         units: "ADC",

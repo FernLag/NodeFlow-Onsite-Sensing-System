@@ -81,6 +81,7 @@ program. You will not write a single line of code.
         not notice the board when you plug it in, the cable is the first thing
         to suspect.
   \item A computer running Windows, macOS or Linux.
+  \item Power. USB is enough on a bench. For a field, read section~\ref{sec:power}.
 \end{itemize}
 
 \subsection{How long it takes}
@@ -200,6 +201,127 @@ than one, use a 200SS-VA3 adapter.
 \textbf{The combined Watermark and temperature option needs the adapter.} It
 exists because the adapter is what joins the two sensors together. The form
 does not offer direct wiring for it.
+\end{caution}
+
+\section{Powering the board}
+\label{sec:power}
+
+On a bench the USB cable powers everything. In a field it does not, so this
+section is about what to use instead.
+
+\subsection{How much current the system draws}
+
+\begin{center}
+\begin{tabular}{lr}
+\hline
+\textbf{Part} & \textbf{Roughly} \\
+\hline
+Arduino Uno, board alone & 45 mA \\
+Display backlight & 25 mA \\
+Display logic & 2 mA \\
+200SS-VA3 adapter & 1.5 mA \\
+Capacitive probe & 5 mA \\
+\hline
+\textbf{Typical total, backlight on} & \textbf{75 mA} \\
+\textbf{Typical total, backlight off} & \textbf{50 mA} \\
+\hline
+\end{tabular}
+\end{center}
+
+Only the adapter figure comes from a datasheet. The rest are typical values for
+this hardware and vary between boards and shields. Measure yours if runtime
+matters: put a multimeter in series with the battery and read the current with
+the backlight on and off.
+
+\begin{note}
+The backlight is a third of the load. That is why the screen goes dark after
+five minutes without a button press, and why any button brings it straight
+back. Leaving it on shortens a battery by roughly a third.
+\end{note}
+
+\subsection{Two ways to get power in}
+
+\textbf{The barrel socket} is the round connector. It expects 7 to 12 volts and
+goes through a regulator on the board that turns the surplus into heat. At 9
+volts in and 5 volts out, roughly four tenths of the battery's energy is wasted
+warming the regulator. It works, and it is what the low battery warning
+watches.
+
+\textbf{The USB socket} expects exactly 5 volts and skips the regulator, so
+nothing is wasted. It is the efficient option, but the low battery warning
+cannot see anything through it.
+
+\subsection{The options}
+
+\begin{center}
+\begin{tabular}{llll}
+\hline
+\textbf{Battery} & \textbf{Where} & \textbf{Capacity} & \textbf{Rough runtime} \\
+\hline
+9 V alkaline (PP3) & barrel & 550 mAh & 7 to 11 hours \\
+6 AA alkaline & barrel & 2500 mAh & 30 to 50 hours \\
+8 AA alkaline & barrel & 2500 mAh & 30 to 50 hours \\
+USB power bank & USB & 10000 mAh & 5 to 8 days \\
+12 V sealed lead acid & barrel & 7000 mAh & 3 to 6 weeks \\
+\hline
+\end{tabular}
+\end{center}
+
+Runtimes assume the backlight is mostly off. Halve them if it stays on.
+
+\subsubsection*{9 volt alkaline}
+
+The obvious choice, and the worst one. A PP3 holds very little energy for its
+size, and the regulator throws away nearly half of what it does hold. Fine for
+an afternoon of testing. Do not plan a season around it.
+
+\subsubsection*{AA cells in a holder}
+
+Six AA cells give about 9 volts, which suits the barrel socket. This is the
+best simple choice for a few days of logging: AA cells hold four or five times
+the energy of a PP3 and cost less.
+
+Eight cells give 12 volts, which lasts no longer in practice, because the extra
+three volts are turned into heat rather than reading time.
+
+\begin{caution}
+Four AA cells give 6 volts, which is below what the barrel socket needs. The
+board will run unevenly or not at all. Use six.
+\end{caution}
+
+\subsubsection*{USB power bank}
+
+The most energy for the money, and no regulator waste. Two things to know:
+
+\begin{itemize}[leftmargin=*]
+  \item Many power banks switch themselves off when the load is small, and 50
+        mA is small. If yours does this, look for one sold as suitable for low
+        power devices, or one with a switch that keeps it awake.
+  \item \textbf{The low battery warning does not work on USB power.} The board
+        cannot tell the difference between a full bank and one that is about to
+        cut out. Do not rely on the warning when running this way.
+\end{itemize}
+
+\subsubsection*{Sealed lead acid, with or without solar}
+
+For something left in a field. A 12 volt 7 Ah battery runs the system for weeks
+and takes a small solar panel and charge controller happily.
+
+Because the regulator wastes the difference between 12 volts and 5, a separate
+switching regulator set to 5 volts, feeding the 5V pin rather than the barrel
+socket, roughly doubles the runtime. That is a wiring change rather than
+something the code knows about.
+
+\subsection{The low battery warning}
+
+The board measures its own supply against a fixed reference inside the chip.
+When a battery on the barrel socket runs down far enough that the regulator can
+no longer hold 5 volts, the screen shows a warning on the second line.
+
+\begin{caution}
+This only works on battery power through the barrel socket. On USB, including
+a USB power bank, the supply stays at 5 volts until the moment it disappears,
+so no warning can be given. This is a limit of the hardware, not of the code.
 \end{caution}
 
 \section{Using the form}
@@ -382,10 +504,12 @@ are not waterproof.
         Your air and water calibration numbers are probably the wrong way
         round. See section~\ref{sec:calibration}.
   \item[A battery warning appears while on USB]
-        Ignore it. The battery check measures the supply against a reference
-        inside the chip, which only means something when the board is running
-        from a battery through the round barrel socket. On USB power, including
-        a USB power bank, it cannot tell.
+        Ignore it. The check only means something on battery power through the
+        barrel socket. See section~\ref{sec:power}.
+  \item[The board keeps switching off in the field]
+        If it runs from a USB power bank, the bank is probably shutting down
+        because the load is too small for it to notice. See
+        section~\ref{sec:power}.
   \item[The numbers do not match my soil]
         The calibration values and the soil thresholds belong to your field,
         not to us. Change them in the form and generate the file again.
