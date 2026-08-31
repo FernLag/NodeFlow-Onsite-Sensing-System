@@ -3,13 +3,72 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="styles.css" />
-    <title>NodeFlow On-site Sensing System Code Generator</title>
-    <link rel="icon" type="image/png" href="/NodeFlow_image.png" />
+
+    <title>NodeFlow (On-site) Sensing System Code Generator</title>
+    <meta
+      name="description"
+      content="Fill in which soil sensors you have and which Arduino ports they use, and download a ready-to-upload .ino sketch. Supports Watermark 200SS tension, Irrometer 200TS temperature and DFRobot capacitive probes. No coding, no account, works offline."
+    />
+    <link
+      rel="canonical"
+      href="https://fernlag.github.io/NodeFlow-Onsite-Sensing-System/"
+    />
+    <meta name="theme-color" content="#7c9532" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://script.google.com; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'"
+    />
+
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:title"
+      content="NodeFlow (On-site) Sensing System Code Generator"
+    />
+    <meta
+      property="og:description"
+      content="Describe your sensors and ports, download a ready-to-upload Arduino sketch. Built for growers, no programming needed."
+    />
+    <meta
+      property="og:url"
+      content="https://fernlag.github.io/NodeFlow-Onsite-Sensing-System/"
+    />
+    <meta
+      property="og:image"
+      content="https://fernlag.github.io/NodeFlow-Onsite-Sensing-System/assets/img/og-image.png"
+    />
+    <meta
+      property="og:image:alt"
+      content="NodeFlow On-site code generator, showing a 16 by 2 LCD reading A2 WM200SS 34 kPa"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="NodeFlow (On-site) Sensing System" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" href="favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png" />
+    <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png" />
+    <link rel="manifest" href="site.webmanifest" />
+    <link rel="stylesheet" href="assets/css/styles.css" />
   </head>
   <body>
+    <a class="skip-link" href="#sensors-list" data-i18n="page.skip">Skip to the form</a>
+
+    <button type="button" class="lang-toggle" id="lang-toggle"
+            data-i18n="lang.switch" data-i18n-attr="aria-label:lang.switchLabel">Español</button>
+
     <div class="container">
       <div class="header">
+        <img
+          src="assets/img/nodeflow-logo.png"
+          alt="NodeFlow logo: a water drop over a fan of soil layers with three sensor nodes"
+          data-i18n-attr="alt:logo.alt"
+          class="header-logo"
+          width="62"
+          height="62"
+        />
         <h1>
           NodeFlow<sub class="nf-sub">(On-site)</sub> Sensing System Code
           Generator
@@ -17,231 +76,316 @@
         <div class="info-box" id="info-box">
           <button
             class="info-box-title"
+            type="button"
             onclick="toggleInfoBox()"
             aria-expanded="true"
+            aria-controls="info-box-body"
           >
-            <span>Summary &amp; Instructions</span>
-            <span class="info-box-chevron" id="info-box-chevron">&#9662;</span>
+            <span data-i18n="info.title">Summary &amp; Instructions</span>
+            <span class="info-box-chevron" id="info-box-chevron" aria-hidden="true">&#9662;</span>
           </button>
           <div class="info-box-body" id="info-box-body">
-            <p>
+            <p data-i18n="info.p1">
               This website allows you to generate the code the
-              <strong>NodeFlow<sub class="nf-sub">(On-site)</sub></strong>
-              Sensing System uses to read the sensors that you will plug into
-              it, and generate the information you are interested in.
+              NodeFlow (On-site) Sensing System uses to read the sensors that
+              you will plug into it, and generate the information you are
+              interested in.
             </p>
-            <p>
-              Please read the full instructions in the
-              <strong>NodeFlow<sub class="nf-sub">(On-site)</sub></strong>
-              guidelines (to add as a hyperlink) and videos (to add ad a
-              hyperlink) on how to use the device.
+            <p class="guide-line">
+              <span data-i18n="info.guideIntro"
+                >The full instructions, from installing the Arduino software to
+                reading the screen, are in the user guide.</span
+              >
+              <a
+                id="guide-link"
+                class="guide-link"
+                href="assets/docs/nodeflow-user-guide.pdf"
+                target="_blank"
+                rel="noopener"
+                hidden
+                data-i18n="info.guideLink"
+                >Open the user guide (PDF)</a
+              >
+              <span id="guide-pending" data-i18n="info.guidePending"
+                >The printable guide is being prepared.</span
+              >
+              <span class="guide-es-note" data-i18n-lang="es" data-i18n="info.guideSpanishSoon" hidden
+                >The guide is in English for now. A Spanish translation is on
+                its way.</span
+              >
             </p>
-            <p>
-              To generate the code for your
-              <strong>NodeFlow<sub class="nf-sub">(On-site)</sub></strong>
-              device, you will need to know:
+            <p data-i18n="info.p2">
+              Videos on how to use the device are still to be added.
+            </p>
+            <p data-i18n="info.p3">
+              To generate the code for your NodeFlow (On-site) device, you will
+              need to know:
             </p>
             <ul class="info-list">
-              <li>What sensors you want to connect</li>
+              <li data-i18n="info.li1">What sensors you want to connect</li>
               <li>
-                How you will connect these sensors to the Arduino ports, i.e. to
-                which port each sensor will be connected to.
-                <em
+                <span data-i18n="info.li2">
+                  How you will connect these sensors to the Arduino ports, i.e.
+                  to which port each sensor will be connected to.
+                </span>
+                <em data-i18n="info.li2em"
                   >N.B. you can only connect one type of sensor to each
                   port.</em
                 >
               </li>
-              <li>
+              <li data-i18n="info.li3">
                 For each sensor, what variable should appear on your LCD screen
               </li>
-              <li>The visualization format for each of these variables</li>
+              <li data-i18n="info.li4">
+                The visualization format for each of these variables
+              </li>
             </ul>
             <p class="offline-note">
-              <strong>Working offline?</strong> This tool works without an
-              internet connection, but you must open it online at least once
-              first so it can load. After that, you can fill out the form and
-              download your code with no connection, any tracking information
-              will be sent automatically the next time you're online.
+              <strong data-i18n="info.offlineTitle">Working offline?</strong>
+              <span data-i18n="info.offline">
+                This tool works without an internet connection, but you must
+                open it online at least once first so it can load.
+              </span>
               <br /><br />
-              Clearing your browser's cache or site data for this page removes
-              the offline copy, along with your saved details and any
-              information still waiting to be sent. If that happens, just open
-              this page again while online to restore it.
+              <span data-i18n="info.offline2">
+                Clearing your browser's cache or site data for this page removes
+                the offline copy.
+              </span>
             </p>
           </div>
         </div>
-        <span class="req-note">
-          Fields marked <span class="req">*</span> are required
+
+        <span class="req-note" data-i18n="form.requiredNote">
+          Fields marked * are required
         </span>
       </div>
 
-      <div id="saved-banner" class="saved-banner"></div>
+      <noscript>
+        <p class="noscript-note" data-i18n="form.noscript">
+          This generator builds your Arduino file inside the browser, so it
+          needs JavaScript switched on.
+        </p>
+      </noscript>
+
+      <div
+        id="saved-banner"
+        class="saved-banner"
+        role="status"
+        aria-live="polite"
+      ></div>
       <div id="saved-configs" class="saved-configs"></div>
-      <div id="sensors-list"></div>
-      <div id="port-warning" class="port-warning"></div>
-      <button class="add-block-btn" onclick="addBlock()">
-        + Add another "Sensor-Arduino port connection specifications"
-      </button>
-      <button class="gen-btn" onclick="handleGenerate()">
-        Generate the code for my NodeFlow<sub class="nf-sub">(On-site)</sub>
-        Sensing System
+      <div id="sensors-list" tabindex="-1"></div>
+      <div
+        id="port-warning"
+        class="port-warning"
+        role="alert"
+        aria-live="assertive"
+      ></div>
+
+      <button class="add-block-btn" type="button" onclick="addBlock()">
+        <span data-i18n="form.addBlock">+ Add another sensor and port</span>
       </button>
 
-      <div class="cost-estimate">
-        Do you want to estimate the cost of your system?
-        <a href="#" onclick="return false;" class="cost-link">Click here.</a>
-      </div>
+      <div
+        id="form-error"
+        class="form-error"
+        role="alert"
+        aria-live="assertive"
+      ></div>
 
-      <div class="success-banner" id="success-banner">
-        <span>&#10003;</span>
+      <button
+        class="gen-btn"
+        type="button"
+        id="gen-btn"
+        onclick="handleGenerate()"
+      >
+        <span class="gen-btn-label" data-i18n="form.generate">
+          Generate the code for my NodeFlow (On-site) Sensing System
+        </span>
+        <span class="btn-spinner" aria-hidden="true"></span>
+      </button>
+
+      <p class="cost-estimate">
+        <span data-i18n="form.costQuestion">Do you want to estimate the cost of your system?</span>
+        <button type="button" class="cost-link" disabled data-i18n="form.costSoon">
+          Cost estimator, coming soon
+        </button>
+      </p>
+
+      <div
+        class="success-banner"
+        id="success-banner"
+        role="status"
+        aria-live="polite"
+      >
+        <span class="success-mark" aria-hidden="true">&#10003;</span>
         <span>
-          The code has successfully downloaded. You can also visualize it below:
+          <span data-i18n="result.downloaded">The code has successfully downloaded as</span>
+          <strong id="success-filename">your file</strong>.
+          <span data-i18n="result.viewBelow">You can visualize it below, or read</span>
+          <a href="thank-you.html" data-i18n="result.whatNext">what to do next</a>.
         </span>
       </div>
+
       <div class="preview-wrap" id="preview-wrap">
         <div class="preview-head">
-          <span>Code preview</span>
-          <button class="copy-btn" onclick="copyPreview()">Copy</button>
+          <span data-i18n="result.preview">Code preview</span>
+          <button class="copy-btn" type="button" onclick="copyPreview()" data-i18n="result.copy">
+            Copy
+          </button>
         </div>
-        <pre class="preview-code" id="preview-code"></pre>
+        <pre class="preview-code" id="preview-code" tabindex="0"></pre>
       </div>
+
       <div class="logo-row">
         <div class="logo-item">
-          <img src="NodeFlow_image.png" alt="NodeFlow" class="logo" />
+          <img
+            src="assets/img/nodeflow-logo.png"
+            alt="NodeFlow"
+            class="logo"
+            width="52"
+            height="52"
+            loading="lazy"
+          />
           <span class="logo-caption">NodeFlow</span>
         </div>
-        <img src="UCANR_image.png" alt="UC ANR Logo " class="logo" />
-        <img src="ucsc_image.png" alt="UCSC Logo" class="logo" />
+        <img
+          src="assets/img/ucanr-logo.png"
+          alt="University of California, Agriculture and Natural Resources"
+          class="logo"
+          width="320"
+          height="45"
+          loading="lazy"
+        />
+        <img
+          src="assets/img/ucsc-logo.png"
+          alt="University of California, Santa Cruz"
+          class="logo"
+          width="240"
+          height="66"
+          loading="lazy"
+        />
+      </div>
+
+      <footer class="site-footer">
+        <nav aria-label="Legal and contact">
+          <a href="privacy.html" data-i18n="foot.privacy">Privacy policy</a>
+          <a href="terms.html" data-i18n="foot.terms">Terms of use</a>
+          <a href="assets/docs/consent.pdf" data-i18n="foot.consentForm">Research consent form (PDF)</a>
+          <a href="thank-you.html" data-i18n="foot.afterDownload">After you download</a>
+        </nav>
+        <p class="footer-legal" data-i18n="foot.legal">
+          A research and outreach project of UC Agriculture and Natural
+          Resources and UC Santa Cruz.
+        </p>
+        <p class="contact-slot" data-i18n="foot.contactSoon">Contact details coming soon.</p>
+        <p class="footer-copy">
+          &copy; <span id="foot-year">2026</span> <span data-i18n="foot.copyright">The NodeFlow project.</span>
+        </p>
+      </footer>
+    </div>
+
+    <!-- Sticky action bar for small screens -->
+    <div class="sticky-cta" id="sticky-cta" hidden>
+      <span class="sticky-cta-text" data-i18n="form.ready">Ready when you are</span>
+      <button type="button" class="sticky-cta-btn" onclick="handleGenerate()" data-i18n="form.generate">
+        Generate my code
+      </button>
+    </div>
+
+    <!-- Consent banner -->
+    <div
+      class="consent-bar"
+      id="consent-bar"
+      role="dialog"
+      aria-modal="false"
+      aria-labelledby="consent-bar-title"
+      hidden
+    >
+      <div class="consent-bar-inner">
+        <div>
+          <h2 id="consent-bar-title" data-i18n="consent.title">Anonymous usage counting</h2>
+          <p data-i18n="consent.body">
+            This site sets no advertising cookies and embeds no third-party
+            trackers.
+          </p>
+        </div>
+        <div class="consent-bar-btns">
+          <button type="button" class="btn btn-primary" id="consent-yes" data-i18n="consent.yes">
+            Yes, count my visit
+          </button>
+          <button type="button" class="btn btn-quiet" id="consent-no" data-i18n="consent.no">
+            No thanks
+          </button>
+          <a class="consent-bar-link" href="privacy.html" data-i18n="consent.privacy">Privacy policy</a>
+        </div>
       </div>
     </div>
 
+    <!-- Research submission dialog -->
     <div id="survey-overlay" class="survey-overlay">
-      <div class="survey-modal">
+      <div
+        class="survey-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="survey-title"
+      >
         <div class="survey-modal-head">
-          <span class="survey-title">Before you download</span>
-          <button class="survey-close" onclick="closeSurvey()" title="Cancel">
-            &#x2715;
+          <h2 class="survey-title" id="survey-title" data-i18n="dialog.title">Before you download</h2>
+          <button
+            class="survey-close"
+            type="button"
+            onclick="closeSurvey()"
+            data-i18n-attr="aria-label:dialog.close"
+          >
+            <span aria-hidden="true">&#x2715;</span>
           </button>
         </div>
         <div class="survey-modal-body" id="survey-body"></div>
         <div class="survey-modal-foot">
           <label class="consent-label">
-            <input
-              type="checkbox"
-              id="consent-checkbox"
-              onchange="
-                document.getElementById('confirm-btn').disabled = !this.checked
-              "
-            />
+            <input type="checkbox" id="consent-checkbox" />
             <span>
-              I have read the
+              <span data-i18n="dialog.consent1">I have read the</span>
               <a
-                href="consent.pdf"
+                href="assets/docs/consent.pdf"
                 target="_blank"
-                rel="noopener"
+                rel="noopener noreferrer"
                 class="consent-link"
-                >consent form</a
+                data-i18n="dialog.consentLink"
+                >consent form (PDF, opens in a new tab)</a
               >
-              and agree to my information being collected by NodeFlow for
-              research purposes.
+              <span data-i18n="dialog.consent2">and agree to my information
+              being collected by NodeFlow for research purposes.</span>
             </span>
           </label>
           <div class="survey-foot-btns">
-            <button class="survey-cancel-btn" onclick="closeSurvey()">
+            <button
+              class="survey-cancel-btn"
+              type="button"
+              onclick="closeSurvey()"
+              data-i18n="dialog.cancel"
+            >
               Cancel
             </button>
             <button
               class="survey-confirm-btn"
               id="confirm-btn"
+              type="button"
               onclick="confirmSurvey()"
               disabled
             >
-              Confirm + download
+              <span class="gen-btn-label" data-i18n="dialog.confirm">Confirm + download</span>
+              <span class="btn-spinner" aria-hidden="true"></span>
             </button>
           </div>
         </div>
       </div>
     </div>
 
-    <script src="main.js"></script>
-    <script>
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () => {
-          navigator.serviceWorker
-            .register("sw.js")
-            .then((reg) => {
-              /* When we come back online, ask the SW to flush queued submissions */
-              const flush = () => {
-                if (navigator.serviceWorker.controller) {
-                  navigator.serviceWorker.controller.postMessage("flush-queue");
-                }
-                if (reg.sync) {
-                  reg.sync.register("flush-queue").catch(() => {});
-                }
-              };
-              window.addEventListener("online", flush);
-              if (navigator.onLine) flush();
-
-              /* Detect a new version waiting to activate */
-              function showUpdateBar(worker) {
-                let bar = document.getElementById("update-bar");
-                if (bar) return;
-                bar = document.createElement("div");
-                bar.id = "update-bar";
-                bar.innerHTML =
-                  "<span>A new version is available.</span>" +
-                  '<button id="update-btn">Refresh</button>';
-                document.body.appendChild(bar);
-                document.getElementById("update-btn").onclick = () => {
-                  worker.postMessage("skip-waiting");
-                };
-              }
-
-              if (reg.waiting) showUpdateBar(reg.waiting);
-
-              reg.addEventListener("updatefound", () => {
-                const nw = reg.installing;
-                if (!nw) return;
-                nw.addEventListener("statechange", () => {
-                  if (
-                    nw.state === "installed" &&
-                    navigator.serviceWorker.controller
-                  ) {
-                    showUpdateBar(nw);
-                  }
-                });
-              });
-            })
-            .catch(() => {});
-
-          /* Reload once the new SW takes control */
-          let refreshing = false;
-          navigator.serviceWorker.addEventListener("controllerchange", () => {
-            if (refreshing) return;
-            refreshing = true;
-            window.location.reload();
-          });
-        });
-      }
-
-      /* Small offline indicator */
-      function updateOnlineStatus() {
-        let bar = document.getElementById("offline-bar");
-        if (!navigator.onLine) {
-          if (!bar) {
-            bar = document.createElement("div");
-            bar.id = "offline-bar";
-            bar.textContent =
-              "You're offline — the form still works and your file will download. Tracking data will send when you reconnect.";
-            document.body.appendChild(bar);
-          }
-        } else if (bar) {
-          bar.remove();
-        }
-      }
-      window.addEventListener("online", updateOnlineStatus);
-      window.addEventListener("offline", updateOnlineStatus);
-      updateOnlineStatus();
-    </script>
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/i18n.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/site.js"></script>
   </body>
 </html>

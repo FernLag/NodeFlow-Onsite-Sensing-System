@@ -1,0 +1,8 @@
+# NodeFlow (On-site) Sensing System code generator
+# Everything here is public documentation and a client-side tool.
+
+User-agent: *
+Allow: /
+Disallow: /404.html
+
+Sitemap: https://fernlag.github.io/NodeFlow-Onsite-Sensing-System/sitemap.xml

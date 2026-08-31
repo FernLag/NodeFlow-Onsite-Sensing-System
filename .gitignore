@@ -1,7 +1,31 @@
-sensor_configuration.xlsx
+# The master spreadsheet in data/ IS versioned: it is the source of truth that
+# tools/build.py reads, and without it nobody else can rebuild the form.
+# A stray copy left at the repository root is not.
+/sensor_configuration.xlsx
+
+# Excel lock files
 ~$*.xlsx
 ~$*.xls
+
+# Python
 *.pyc
 __pycache__/
+
+# Secrets. Nothing in this repository should ever need one, but keep the
+# guard in place: see docs/SECURITY.md.
 .env
+.env.*
+*.pem
+*.key
+
+# macOS
 .DS_Store
+
+# Manufacturer datasheets and reference screenshots. Kept locally, not
+# published: they are third-party documents and add megabytes to the repo.
+# docs/EQUATIONS.md records what was read out of them.
+documentation/
+
+# user guide source. only the built pdf is published, at
+# assets/docs/nodeflow-user-guide.pdf, which the generator links to.
+docs/guidelines/
