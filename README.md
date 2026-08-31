@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/img/og-image.png" alt="NodeFlow On-site code generator, showing a 16 by 2 LCD reading A2 WM200SS 34 kPa" width="820">
+  <img src="assets/img/og-card.png" alt="The NodeFlow (On-site) Sensing System logo and name" width="820">
 </p>
 
 <h1 align="center">NodeFlow (On-site) Sensing System</h1>
