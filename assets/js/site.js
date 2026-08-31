@@ -40,6 +40,27 @@
     });
   }
 
+  /* the user guide is a pdf built from latex, so it may not be there yet.
+     show the link only when the file actually answers. a dead link in the
+     instructions is worse than no link at all. */
+  function revealGuideLink() {
+    var link = byId("guide-link");
+    var pending = byId("guide-pending");
+    if (!link) return;
+
+    fetch(link.getAttribute("href"), { method: "HEAD" })
+      .then(function (r) {
+        var type = r.headers.get("content-type") || "";
+        if (r.ok && type.indexOf("html") === -1) {
+          link.hidden = false;
+          if (pending) pending.hidden = true;
+        }
+      })
+      .catch(function () {
+        /* offline, or not published yet. the pending line stays. */
+      });
+  }
+
   /*  footer year */
   function renderYear() {
     var y = byId("foot-year");
@@ -278,6 +299,7 @@
   /*  go */
   renderContact();
   renderYear();
+  revealGuideLink();
   initConsent();
   initStickyCta();
   initSurveyConsent();

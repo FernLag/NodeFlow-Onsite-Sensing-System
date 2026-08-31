@@ -2026,3 +2026,22 @@ body.is-offline .consent-bar {
     font-size: 12px;
   }
 }
+
+/* the user guide link inside the summary box */
+
+.guide-link {
+  display: inline-block;
+  font-weight: 600;
+  color: var(--olive-dark);
+  text-underline-offset: 2px;
+}
+
+.guide-link[hidden],
+#guide-pending[hidden] {
+  display: none;
+}
+
+#guide-pending {
+  color: var(--text-faint);
+  font-style: italic;
+}

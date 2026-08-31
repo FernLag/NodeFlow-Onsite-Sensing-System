@@ -11,7 +11,7 @@
 
 importScripts("assets/js/config.js");
 
-const CACHE_NAME = "nodeflow-cache-v14";
+const CACHE_NAME = "nodeflow-cache-v15";
 
 const CFG = self.NODEFLOW_CONFIG || {};
 const LIMITS = Object.assign(
@@ -41,6 +41,7 @@ const APP_SHELL = [
   "./assets/img/favicon-16.png",
   "./assets/img/apple-touch-icon.png",
   "./assets/docs/consent.pdf",
+  "./assets/docs/nodeflow-user-guide.pdf",
 ];
 
 const DB_NAME = "nodeflow-queue";

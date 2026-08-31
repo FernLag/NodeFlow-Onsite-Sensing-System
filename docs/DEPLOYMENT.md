@@ -46,6 +46,21 @@ These three are placeholders and must be replaced.
    current files while developing.
 6. Commit and push to the default branch.
 
+## The user guide
+
+`docs/guidelines/nodeflow-user-guide.tex` is the grower-facing guide. The
+generator links to it from the Summary and Instructions box, at
+`assets/docs/nodeflow-user-guide.pdf`.
+
+The link is hidden until that file exists. The page asks the server for it and
+only shows the link if something other than an error comes back, so shipping
+without the PDF costs you a link rather than giving growers a dead one. Build
+the PDF and copy it into `assets/docs/` and the link appears by itself.
+
+Rebuild it whenever the guide's facts change: the pin assignments, the five
+minute adapter interval, the one sensor limit on direct wiring, or the
+calibration readings.
+
 ## When adding a page
 
 - Copy the head block from an existing page. It carries the title, the

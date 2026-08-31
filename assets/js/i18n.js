@@ -45,8 +45,11 @@
       "info.title": "Summary & Instructions",
       "info.p1":
         "This website allows you to generate the code the NodeFlow (On-site) Sensing System uses to read the sensors that you will plug into it, and generate the information you are interested in.",
-      "info.p2":
-        "Please read the full instructions in the NodeFlow (On-site) guidelines and videos on how to use the device.",
+      "info.p2": "Videos on how to use the device are still to be added.",
+      "info.guideIntro":
+        "The full instructions, from installing the Arduino software to reading the screen, are in the user guide.",
+      "info.guideLink": "Open the user guide (PDF)",
+      "info.guidePending": "The printable guide is being prepared.",
       "info.p3": "To generate the code for your NodeFlow (On-site) device, you will need to know:",
       "info.li1": "What sensors you want to connect",
       "info.li2":
@@ -237,8 +240,11 @@
       "info.title": "Resumen e instrucciones",
       "info.p1":
         "Este sitio web le permite generar el código que el sistema de sensores NodeFlow (in situ) utiliza para leer los sensores que usted conecte y obtener la información que le interesa.",
-      "info.p2":
-        "Lea las instrucciones completas en las guías y los videos de NodeFlow (in situ) sobre cómo usar el dispositivo.",
+      "info.p2": "Los videos sobre cómo usar el dispositivo aún están por agregarse.",
+      "info.guideIntro":
+        "Las instrucciones completas, desde instalar el programa de Arduino hasta leer la pantalla, están en la guía del usuario.",
+      "info.guideLink": "Abrir la guía del usuario (PDF)",
+      "info.guidePending": "La guía imprimible se está preparando.",
       "info.p3": "Para generar el código de su dispositivo NodeFlow (in situ), necesita saber:",
       "info.li1": "Qué sensores desea conectar",
       "info.li2":
