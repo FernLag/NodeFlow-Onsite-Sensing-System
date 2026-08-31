@@ -235,8 +235,10 @@ tools/verify_sketches.py  compiles every sketch the form can produce
 tools/generate_all_sketches.js   builds those sketches
 tools/arduino_stub.h      stands in for the arduino headers
 server/apps-script/       the submission endpoint
-docs/                     security, deployment, equations, this file, guidelines
+docs/                     security, deployment, equations, this file
 documentation/            manufacturer datasheets, gitignored, local only
+docs/guidelines/          user guide latex source, gitignored, local only
+assets/docs/*.pdf         the published guide and consent form
 ```
 
 ## If you only read one thing

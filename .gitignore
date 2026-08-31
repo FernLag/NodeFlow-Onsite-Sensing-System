@@ -25,3 +25,7 @@ __pycache__/
 # published: they are third-party documents and add megabytes to the repo.
 # docs/EQUATIONS.md records what was read out of them.
 documentation/
+
+# user guide source. only the built pdf is published, at
+# assets/docs/nodeflow-user-guide.pdf, which the generator links to.
+docs/guidelines/

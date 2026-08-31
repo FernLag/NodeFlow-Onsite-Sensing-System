@@ -50,6 +50,8 @@
         "The full instructions, from installing the Arduino software to reading the screen, are in the user guide.",
       "info.guideLink": "Open the user guide (PDF)",
       "info.guidePending": "The printable guide is being prepared.",
+      "info.guideSpanishSoon":
+        "The guide is in English for now. A Spanish translation is on its way.",
       "info.p3": "To generate the code for your NodeFlow (On-site) device, you will need to know:",
       "info.li1": "What sensors you want to connect",
       "info.li2":
@@ -245,6 +247,8 @@
         "Las instrucciones completas, desde instalar el programa de Arduino hasta leer la pantalla, están en la guía del usuario.",
       "info.guideLink": "Abrir la guía del usuario (PDF)",
       "info.guidePending": "La guía imprimible se está preparando.",
+      "info.guideSpanishSoon":
+        "Por ahora la guía está en inglés. La versión en español estará disponible próximamente.",
       "info.p3": "Para generar el código de su dispositivo NodeFlow (in situ), necesita saber:",
       "info.li1": "Qué sensores desea conectar",
       "info.li2":
@@ -605,6 +609,12 @@
             el.setAttribute(bits[0].trim(), t(bits[1].trim()));
           }
         });
+    });
+
+    /* elements that belong to one language only, such as a note telling a
+       spanish reader the guide is still in english. */
+    scope.querySelectorAll("[data-i18n-lang]").forEach(function (el) {
+      el.hidden = el.getAttribute("data-i18n-lang") !== current;
     });
 
     document.documentElement.lang = current;

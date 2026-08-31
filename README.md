@@ -200,7 +200,9 @@ where the spreadsheet and the code disagree, is in
 start with [`docs/HANDOVER.md`](docs/HANDOVER.md).
 
 The grower-facing guide, from installing the Arduino IDE to readings on the
-display, is `docs/guidelines/nodeflow-user-guide.tex`.
+display, is published as `assets/docs/nodeflow-user-guide.pdf` and linked from
+the Summary and Instructions box on the generator. Its LaTeX source is kept
+outside the repository; ask the project team if you need to edit it.
 
 ### Languages
 

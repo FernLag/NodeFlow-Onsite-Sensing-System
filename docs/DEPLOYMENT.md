@@ -48,9 +48,10 @@ These three are placeholders and must be replaced.
 
 ## The user guide
 
-`docs/guidelines/nodeflow-user-guide.tex` is the grower-facing guide. The
-generator links to it from the Summary and Instructions box, at
-`assets/docs/nodeflow-user-guide.pdf`.
+The grower-facing guide is published as
+`assets/docs/nodeflow-user-guide.pdf` and linked from the Summary and
+Instructions box. Its LaTeX source is kept outside the repository, so only the
+built PDF is version controlled.
 
 The link is hidden until that file exists. The page asks the server for it and
 only shows the link if something other than an error comes back, so shipping
