@@ -103,6 +103,16 @@ ports sheet keeps D1 to D13 documented but switched off through its `active`
 column. Turning one on is not enough to make it work: it needs a digital sensor
 template first, and the verifier says so if it finds one active.
 
+**The `equation` column in the spreadsheet is reference material only.** It is
+never read by `build.py`, never compiled, and never reaches the generated
+sketch. The arithmetic lives in `TEMPLATES.outputs` in `main.js`, written by
+hand. Change a formula in that column and nothing happens. To change the
+behaviour, change the template.
+
+The column and the code can therefore disagree without anything complaining,
+and in places they do. `docs/EQUATIONS.md` records every difference and which
+side to trust.
+
 **`percent` is one shared global in the generated sketch.** Every sensor block
 writes to it and then immediately displays it, so blocks must stay in that
 order inside `loop()`. If you ever reorder the generated code, this is what
@@ -187,8 +197,35 @@ cites the manufacturer documentation per constant.
 The short version: **the spreadsheet's equation column documents Irrometer's
 bare-sensor wiring, and the code implements the VA-3 adapter.** Both are
 correct; they describe different hardware. That single fact explains most of
-the apparent disagreements. The column is reference material and is not
-executed by anything.
+the apparent disagreements.
+
+Worth saying plainly, because it catches people: **nothing executes that
+column.** `build.py` reads the sensor names, parameters, tooltips, ports and
+display options out of the spreadsheet. It has never read the equation column.
+Editing a formula there changes documentation, not behaviour.
+
+If you ever want the column to drive the code, two things have to happen first.
+The names in it need declaring somewhere, because they currently mix values the
+grower types, constants fixed by the hardware, and values the sketch works out
+for itself, with no way to tell them apart. And two cells need correcting: the
+available-water formula groups its terms wrongly, and the volumetric one
+differs from the code on a sign and on where the division sits.
+
+## Renaming the Google Sheet
+
+Two different names, and only one of them used to matter.
+
+**The spreadsheet file** in Drive can be renamed freely. The script is bound to
+it by id, not by title.
+
+**The tab along the bottom** is matched by name, `submissions`. Renaming that
+used to be quietly destructive: `getSheetByName` returned nothing, the script
+created a fresh empty tab with the old name and wrote there, and the real data
+sat in a tab that had stopped growing. `findSheet()` now looks for a tab whose
+header row is ours before it creates anything, so either name can be changed.
+
+That applies to `server/apps-script/Code.gs`, which is **not the script
+currently deployed**. Check what the live one does before renaming anything.
 
 ## The security posture
 
