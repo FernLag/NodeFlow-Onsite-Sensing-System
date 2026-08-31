@@ -1,19 +1,14 @@
-% nodeflow (on-site) user guide
-% build with:  pdflatex nodeflow-user-guide.tex   (run twice for the contents)
-% no packages beyond a standard texlive install are needed.
-
 \documentclass[11pt,a4paper]{article}
+
+% deliberately minimal. only geometry, xcolor and hyperref are needed, and all
+% three ship with every latex distribution including basictex. the boxes and
+% the screen mock-up below are built from core latex so nothing has to be
+% installed with tlmgr before this will build.
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[margin=2.4cm]{geometry}
-\usepackage{parskip}
-\usepackage{enumitem}
-\usepackage{graphicx}
 \usepackage{xcolor}
-\usepackage{tcolorbox}
-\usepackage{titlesec}
-\usepackage{fancyhdr}
 \usepackage[hidelinks]{hyperref}
 
 \definecolor{leaf}{HTML}{64791F}
@@ -22,19 +17,23 @@
 \definecolor{paper}{HTML}{F3F1DF}
 \definecolor{warn}{HTML}{A33B1F}
 
-\titleformat{\section}{\Large\bfseries\color{ink}}{\thesection}{0.6em}{}
-\titleformat{\subsection}{\large\bfseries\color{olive}}{\thesubsection}{0.6em}{}
+% paragraphs separated by space rather than indented
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.7\baselineskip}
 
-\pagestyle{fancy}
-\fancyhf{}
-\lhead{\small NodeFlow (On-site) user guide}
-\rhead{\small\thepage}
-\renewcommand{\headrulewidth}{0.4pt}
+% a boxed note, built from core latex
+\newsavebox{\nfbox}
+\newenvironment{note}
+  {\par\medskip\noindent
+   \begin{lrbox}{\nfbox}\begin{minipage}{0.94\linewidth}\vspace{2pt}}
+  {\vspace{2pt}\end{minipage}\end{lrbox}%
+   \fcolorbox{leaf}{paper}{\usebox{\nfbox}}\par\medskip}
 
-\newtcolorbox{note}[1][]{colback=paper,colframe=leaf,boxrule=1pt,
-  left=8pt,right=8pt,top=6pt,bottom=6pt,#1}
-\newtcolorbox{caution}[1][]{colback=white,colframe=warn,boxrule=1pt,
-  left=8pt,right=8pt,top=6pt,bottom=6pt,#1}
+\newenvironment{caution}
+  {\par\medskip\noindent
+   \begin{lrbox}{\nfbox}\begin{minipage}{0.94\linewidth}\vspace{2pt}}
+  {\vspace{2pt}\end{minipage}\end{lrbox}%
+   \fcolorbox{warn}{white}{\usebox{\nfbox}}\par\medskip}
 
 \newcommand{\nf}{NodeFlow\textsubscript{(On-site)}}
 \newcommand{\screen}[2]{%
@@ -61,6 +60,7 @@ UC Agriculture and Natural Resources and UC Santa Cruz\par}
 {\small Version 1, August 2026\par}
 \end{titlepage}
 
+\pagestyle{plain}
 \tableofcontents
 \newpage
 
@@ -72,7 +72,7 @@ program. You will not write a single line of code.
 
 \subsection{What you need}
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
   \item An Arduino Uno R3 board.
   \item A 16 by 2 LCD keypad shield, the display that presses onto the board.
   \item At least one sensor. The system reads three kinds, listed in
@@ -95,7 +95,7 @@ minutes.
 The Arduino IDE is the free program that copies your file onto the board. You
 install it once.
 
-\begin{enumerate}[leftmargin=*]
+\begin{enumerate}
   \item Open \url{https://www.arduino.cc/en/software} in a web browser.
   \item Download the version for your operating system. On Windows choose the
         installer rather than the app from the Microsoft Store, because the
@@ -119,7 +119,7 @@ board should come on.
 
 In the Arduino IDE:
 
-\begin{enumerate}[leftmargin=*]
+\begin{enumerate}
   \item Open the \textbf{Tools} menu.
   \item Point at \textbf{Board} and choose \textbf{Arduino Uno}.
   \item Point at \textbf{Port}. You should see an entry that appeared when you
@@ -140,7 +140,7 @@ cable that only carries power is by far the most common cause.
 
 The display shield covers most of the board. What it leaves you is:
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
   \item \textbf{A1 to A5} for sensors. Five ports.
   \item \textbf{A0} is taken by the buttons on the shield. Do not use it.
   \item \textbf{D2 and D3} are used when a sensor is wired without an adapter,
@@ -167,7 +167,7 @@ A high number means dry soil.
 
 There are two ways to connect it, and they are genuinely different:
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
   \item \textbf{Through a 200SS-VA3 adapter.} The adapter does the difficult
         electrical work and hands the board a simple voltage. One adapter
         carries up to three Watermarks and one temperature probe on a single
@@ -293,7 +293,7 @@ board will run unevenly or not at all. Use six.
 
 The most energy for the money, and no regulator waste. Two things to know:
 
-\begin{itemize}[leftmargin=*]
+\begin{itemize}
   \item Many power banks switch themselves off when the load is small, and 50
         mA is small. If yours does this, look for one sold as suitable for low
         power devices, or one with a switch that keeps it awake.
@@ -346,7 +346,7 @@ one port. Use the \textbf{Add another} button if you have more than one sensor.
 
 For each block you answer four questions:
 
-\begin{enumerate}[leftmargin=*]
+\begin{enumerate}
   \item \textbf{Sensor type.} Which sensor this is.
   \item \textbf{Port.} Which port you plugged it into.
   \item \textbf{What you want to see on the screen.} The measurement, described
@@ -390,7 +390,7 @@ The file downloads to wherever your browser puts downloads. It ends in
 
 \section{Putting the file on the board}
 
-\begin{enumerate}[leftmargin=*]
+\begin{enumerate}
   \item Find the downloaded file and open it. The Arduino IDE starts.
   \item The IDE offers to move the file into a folder of the same name. Say
         yes. That is simply how Arduino files are stored.
@@ -443,7 +443,7 @@ raw value.
 \section{The measurements you can choose}
 \label{sec:measurements}
 
-\begin{description}[leftmargin=1cm,style=nextline]
+\begin{description}
   \item[Raw value] Exactly what the sensor put on the pin, with nothing done to
         it. Useful for calibration and for checking a sensor is alive.
   \item[Raw value as a percentage] The raw reading placed on a scale between
@@ -471,7 +471,7 @@ A capacitive probe needs two numbers before a percentage means anything: what
 it reads in air, and what it reads in water. They differ between probes, so
 measure yours.
 
-\begin{enumerate}[leftmargin=*]
+\begin{enumerate}
   \item In the form, choose \textbf{Raw value} as the measurement for that
         sensor, and \textbf{Raw value} as the display. Generate the file and
         upload it.
@@ -491,7 +491,7 @@ are not waterproof.
 
 \section{When something looks wrong}
 
-\begin{description}[leftmargin=1cm,style=nextline]
+\begin{description}
   \item[The screen is blank, or shows a row of solid blocks]
         Turn the small screw on the shield, which is the contrast control. A
         new shield is often set to one extreme or the other.

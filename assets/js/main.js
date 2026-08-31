@@ -31,7 +31,7 @@ const SENSOR_TYPES = {
       {
         value: "Vertical Flow Rate",
         display: "Vertical Flow Rate",
-        tip: "",
+        tip: "The downward movement of water infiltrating through the soil.",
       },
       {
         value: "Total Available Water",

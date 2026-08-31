@@ -3,10 +3,27 @@
 `nodeflow-user-guide.tex` is the grower-facing guide, from installing the
 Arduino IDE through to readings on the display.
 
-## Building it
+## Installing LaTeX first
 
-Needs a LaTeX install. On macOS that is MacTeX, on Debian or Ubuntu
-`texlive-latex-recommended` plus `texlive-latex-extra`.
+`pdflatex` does not come with macOS. If you get `command not found`, install it:
+
+```sh
+brew install --cask basictex          # about 100 MB
+```
+
+Then open a new terminal so the tools are on your PATH, or run
+`eval "$(/usr/libexec/path_helper)"` in the one you have.
+
+BasicTeX is the small distribution. If you would rather not think about it
+again, `brew install --cask mactex-no-gui` installs everything, at about 4 GB.
+
+Debian or Ubuntu: `sudo apt install texlive-latex-recommended`.
+
+This document deliberately uses only `geometry`, `xcolor` and `hyperref`, which
+every distribution ships, so nothing has to be added with `tlmgr` afterwards.
+Keep it that way if you edit it.
+
+## Building it
 
 ```sh
 cd docs/guidelines
