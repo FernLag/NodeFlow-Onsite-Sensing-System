@@ -26,7 +26,19 @@
  * secret store, and the repository is public.
  */
 
-/** empty means: the spreadsheet this script is bound to. */
+/**
+ * two different names, and only one of them matters here.
+ *
+ * the SPREADSHEET is the file in google drive. renaming that file changes
+ * nothing: this script is bound to it by id, not by title, so call it whatever
+ * you like. leave SHEET_ID empty to use the file this script lives in, or put
+ * an id here to write to a different file.
+ *
+ * the SHEET is the tab along the bottom. renaming the tab used to send new
+ * rows to a freshly created empty tab while the old one sat there looking
+ * abandoned. findSheet() below now recognises the tab by its header row, so
+ * renaming that is safe too.
+ */
 var SHEET_ID = "";
 var SHEET_NAME = "submissions";
 
@@ -172,16 +184,36 @@ function rateLimited(email) {
   }
 }
 
+/**
+ * find the tab to write to. by name first, then by looking for one whose
+ * header row is ours, so a renamed tab keeps receiving rows instead of being
+ * quietly replaced by a new empty one. only creates a tab when the file really
+ * has nowhere to put the data.
+ */
+function findSheet(book) {
+  var byName = book.getSheetByName(SHEET_NAME);
+  if (byName) return byName;
+
+  var expected = FIELDS.concat(["received_at"]).join("|");
+  var sheets = book.getSheets();
+  for (var i = 0; i < sheets.length; i++) {
+    var s = sheets[i];
+    if (s.getLastRow() < 1 || s.getLastColumn() < FIELDS.length) continue;
+    var header = s.getRange(1, 1, 1, FIELDS.length + 1).getValues()[0].join("|");
+    if (header === expected) return s;
+  }
+
+  var created = book.insertSheet(SHEET_NAME);
+  created.appendRow(FIELDS.concat(["received_at"]));
+  return created;
+}
+
 function append(row) {
   var book = SHEET_ID
     ? SpreadsheetApp.openById(SHEET_ID)
     : SpreadsheetApp.getActiveSpreadsheet();
 
-  var sheet = book.getSheetByName(SHEET_NAME);
-  if (!sheet) {
-    sheet = book.insertSheet(SHEET_NAME);
-    sheet.appendRow(FIELDS.concat(["received_at"]));
-  }
+  var sheet = findSheet(book);
 
   var values = FIELDS.map(function (key) {
     return neutralize(row[key]);
