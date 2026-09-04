@@ -47,17 +47,36 @@
     <meta name="twitter:card" content="summary_large_image" />
 
     <link rel="icon" href="favicon.ico" sizes="any" />
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="assets/img/favicon-32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="assets/img/favicon-16.png"
+    />
     <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png" />
     <link rel="manifest" href="site.webmanifest" />
     <link rel="stylesheet" href="assets/css/styles.css" />
   </head>
   <body>
-    <a class="skip-link" href="#sensors-list" data-i18n="page.skip">Skip to the form</a>
+    <a class="skip-link" href="#sensors-list" data-i18n="page.skip"
+      >Skip to the form</a
+    >
 
-    <button type="button" class="lang-toggle" id="lang-toggle"
-            data-i18n="lang.switch" data-i18n-attr="aria-label:lang.switchLabel">Español</button>
+    <button
+      type="button"
+      class="lang-toggle"
+      id="lang-toggle"
+      data-i18n="lang.switch"
+      data-i18n-attr="aria-label:lang.switchLabel"
+    >
+      Español
+    </button>
 
     <div class="container">
       <div class="header">
@@ -82,14 +101,18 @@
             aria-controls="info-box-body"
           >
             <span data-i18n="info.title">Summary &amp; Instructions</span>
-            <span class="info-box-chevron" id="info-box-chevron" aria-hidden="true">&#9662;</span>
+            <span
+              class="info-box-chevron"
+              id="info-box-chevron"
+              aria-hidden="true"
+              >&#9662;</span
+            >
           </button>
           <div class="info-box-body" id="info-box-body">
             <p data-i18n="info.p1">
-              This website allows you to generate the code the
-              NodeFlow (On-site) Sensing System uses to read the sensors that
-              you will plug into it, and generate the information you are
-              interested in.
+              This website allows you to generate the code the NodeFlow
+              (On-site) Sensing System uses to read the sensors that you will
+              plug in, and generate the information you are interested in.
             </p>
             <p class="guide-line">
               <span data-i18n="info.guideIntro"
@@ -109,7 +132,11 @@
               <span id="guide-pending" data-i18n="info.guidePending"
                 >The printable guide is being prepared.</span
               >
-              <span class="guide-es-note" data-i18n-lang="es" data-i18n="info.guideSpanishSoon" hidden
+              <span
+                class="guide-es-note"
+                data-i18n-lang="es"
+                data-i18n="info.guideSpanishSoon"
+                hidden
                 >The guide is in English for now. A Spanish translation is on
                 its way.</span
               >
@@ -206,8 +233,15 @@
       </button>
 
       <p class="cost-estimate">
-        <span data-i18n="form.costQuestion">Do you want to estimate the cost of your system?</span>
-        <button type="button" class="cost-link" disabled data-i18n="form.costSoon">
+        <span data-i18n="form.costQuestion"
+          >Do you want to estimate the cost of your system?</span
+        >
+        <button
+          type="button"
+          class="cost-link"
+          disabled
+          data-i18n="form.costSoon"
+        >
           Cost estimator, coming soon
         </button>
       </p>
@@ -220,17 +254,28 @@
       >
         <span class="success-mark" aria-hidden="true">&#10003;</span>
         <span>
-          <span data-i18n="result.downloaded">The code has successfully downloaded as</span>
+          <span data-i18n="result.downloaded"
+            >The code has successfully downloaded as</span
+          >
           <strong id="success-filename">your file</strong>.
-          <span data-i18n="result.viewBelow">You can visualize it below, or read</span>
-          <a href="thank-you.html" data-i18n="result.whatNext">what to do next</a>.
+          <span data-i18n="result.viewBelow"
+            >You can visualize it below, or read</span
+          >
+          <a href="thank-you.html" data-i18n="result.whatNext"
+            >what to do next</a
+          >.
         </span>
       </div>
 
       <div class="preview-wrap" id="preview-wrap">
         <div class="preview-head">
           <span data-i18n="result.preview">Code preview</span>
-          <button class="copy-btn" type="button" onclick="copyPreview()" data-i18n="result.copy">
+          <button
+            class="copy-btn"
+            type="button"
+            onclick="copyPreview()"
+            data-i18n="result.copy"
+          >
             Copy
           </button>
         </div>
@@ -271,24 +316,38 @@
         <nav aria-label="Legal and contact">
           <a href="privacy.html" data-i18n="foot.privacy">Privacy policy</a>
           <a href="terms.html" data-i18n="foot.terms">Terms of use</a>
-          <a href="assets/docs/consent.pdf" data-i18n="foot.consentForm">Research consent form (PDF)</a>
-          <a href="thank-you.html" data-i18n="foot.afterDownload">After you download</a>
+          <a href="assets/docs/consent.pdf" data-i18n="foot.consentForm"
+            >Research consent form (PDF)</a
+          >
+          <a href="thank-you.html" data-i18n="foot.afterDownload"
+            >After you download</a
+          >
         </nav>
         <p class="footer-legal" data-i18n="foot.legal">
           A research and outreach project of UC Agriculture and Natural
           Resources and UC Santa Cruz.
         </p>
-        <p class="contact-slot" data-i18n="foot.contactSoon">Contact details coming soon.</p>
+        <p class="contact-slot" data-i18n="foot.contactSoon">
+          Contact details coming soon.
+        </p>
         <p class="footer-copy">
-          &copy; <span id="foot-year">2026</span> <span data-i18n="foot.copyright">The NodeFlow project.</span>
+          &copy; <span id="foot-year">2026</span>
+          <span data-i18n="foot.copyright">The NodeFlow project.</span>
         </p>
       </footer>
     </div>
 
     <!-- Sticky action bar for small screens -->
     <div class="sticky-cta" id="sticky-cta" hidden>
-      <span class="sticky-cta-text" data-i18n="form.ready">Ready when you are</span>
-      <button type="button" class="sticky-cta-btn" onclick="handleGenerate()" data-i18n="form.generate">
+      <span class="sticky-cta-text" data-i18n="form.ready"
+        >Ready when you are</span
+      >
+      <button
+        type="button"
+        class="sticky-cta-btn"
+        onclick="handleGenerate()"
+        data-i18n="form.generate"
+      >
         Generate my code
       </button>
     </div>
@@ -304,20 +363,37 @@
     >
       <div class="consent-bar-inner">
         <div>
-          <h2 id="consent-bar-title" data-i18n="consent.title">Anonymous usage counting</h2>
+          <h2 id="consent-bar-title" data-i18n="consent.title">
+            Anonymous usage counting
+          </h2>
           <p data-i18n="consent.body">
             This site sets no advertising cookies and embeds no third-party
             trackers.
           </p>
         </div>
         <div class="consent-bar-btns">
-          <button type="button" class="btn btn-primary" id="consent-yes" data-i18n="consent.yes">
+          <button
+            type="button"
+            class="btn btn-primary"
+            id="consent-yes"
+            data-i18n="consent.yes"
+          >
             Yes, count my visit
           </button>
-          <button type="button" class="btn btn-quiet" id="consent-no" data-i18n="consent.no">
+          <button
+            type="button"
+            class="btn btn-quiet"
+            id="consent-no"
+            data-i18n="consent.no"
+          >
             No thanks
           </button>
-          <a class="consent-bar-link" href="privacy.html" data-i18n="consent.privacy">Privacy policy</a>
+          <a
+            class="consent-bar-link"
+            href="privacy.html"
+            data-i18n="consent.privacy"
+            >Privacy policy</a
+          >
         </div>
       </div>
     </div>
@@ -331,7 +407,9 @@
         aria-labelledby="survey-title"
       >
         <div class="survey-modal-head">
-          <h2 class="survey-title" id="survey-title" data-i18n="dialog.title">Before you download</h2>
+          <h2 class="survey-title" id="survey-title" data-i18n="dialog.title">
+            Before you download
+          </h2>
           <button
             class="survey-close"
             type="button"
@@ -355,8 +433,10 @@
                 data-i18n="dialog.consentLink"
                 >consent form (PDF, opens in a new tab)</a
               >
-              <span data-i18n="dialog.consent2">and agree to my information
-              being collected by NodeFlow for research purposes.</span>
+              <span data-i18n="dialog.consent2"
+                >and agree to my information being collected by NodeFlow for
+                research purposes.</span
+              >
             </span>
           </label>
           <div class="survey-foot-btns">
@@ -375,7 +455,9 @@
               onclick="confirmSurvey()"
               disabled
             >
-              <span class="gen-btn-label" data-i18n="dialog.confirm">Confirm + download</span>
+              <span class="gen-btn-label" data-i18n="dialog.confirm"
+                >Confirm + download</span
+              >
               <span class="btn-spinner" aria-hidden="true"></span>
             </button>
           </div>
